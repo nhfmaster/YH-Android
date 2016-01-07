@@ -1,6 +1,6 @@
 package com.intfocus.yh_android.util;
 
-
+import java.security.MessageDigest;
 import java.io.Serializable;
 import java.net.URLEncoder;
 
@@ -15,11 +15,12 @@ import android.os.Environment;
 public class URLs implements Serializable {
 	
 	
-	public final static String HOST = "http://yonghui.idata.mobi";
-	public final static String HOST1 = "http://10.0.3.2:4567";
+	public final static String HOST1 = "http://yonghui.idata.mobi";
+	public final static String HOST = "http://10.0.3.2:4567";
 
 	//login
-	public final static String Login  = String.format("%s/mobile/login", HOST1);
+	public final static String UILogin  = String.format("%s/mobile/login", HOST1);
+	public final static String ApiLogin = "/api/v1/%@/%@/%@/authentication";
 
 
 	public final static String STORAGE_BASE     = Environment.getExternalStorageDirectory().getAbsolutePath() 
@@ -48,4 +49,38 @@ public class URLs implements Serializable {
 			return path;
 		return "http://" + URLEncoder.encode(path);
 	}	
+	
+	/**
+     * MD5¼ÓÂë¡£32Î»
+     * @param inStr
+     * @return
+     */
+    public static String MD5(String inStr) {
+        MessageDigest md5 = null;
+        try {
+            md5 = MessageDigest.getInstance("MD5");
+        } catch (Exception e) {
+            System.out.println(e.toString());
+            e.printStackTrace();
+            return "";
+        }
+        char[] charArray = inStr.toCharArray();
+        byte[] byteArray = new byte[charArray.length];
+ 
+        for (int i = 0; i < charArray.length; i++)
+            byteArray[i] = (byte) charArray[i];
+ 
+        byte[] md5Bytes = md5.digest(byteArray);
+ 
+        StringBuffer hexValue = new StringBuffer();
+ 
+        for (int i = 0; i < md5Bytes.length; i++) {
+            int val = ((int) md5Bytes[i]) & 0xff;
+            if (val < 16)
+                hexValue.append("0");
+            hexValue.append(Integer.toHexString(val));
+        }
+ 
+        return hexValue.toString();
+    }
 }

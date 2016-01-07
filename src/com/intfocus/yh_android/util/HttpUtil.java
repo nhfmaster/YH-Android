@@ -25,8 +25,7 @@ import org.apache.commons.httpclient.util.URIUtil;
  * @author libin
  * @version 1.0.0
  */
-public class HttpUtil
-{
+public class HttpUtil {
       /** 
        * 执行一个HTTP GET请求，返回请求响应的HTML 
        * 
@@ -83,30 +82,25 @@ public class HttpUtil
        * @param pretty    是否美化 
        * @return 返回请求响应的HTML 
        */
-      public static String httpPost ( String url, Map<String, String> params, String charset, boolean pretty )
-      {
+      public static String httpPost (String url, HttpMethodParams params, boolean pretty ) {
+    	    String charset = "UTF-8";
             StringBuffer response = new StringBuffer();
             HttpClient client = new HttpClient();
             HttpMethod method = new PostMethod(url);
             //设置Http Post数据 
-            if ( params != null )
-            {
-                  HttpMethodParams p = new HttpMethodParams();
-                  for ( Map.Entry<String, String> entry : params.entrySet() )
-                  {
-                        p.setParameter(entry.getKey(), entry.getValue());
-                  }
-                  method.setParams(p);
+            if ( params != null ) {
+//                  HttpMethodParams p = new HttpMethodParams();
+//                  for ( Map.Entry<String, String> entry : params.entrySet() ) {
+//                        p.setParameter(entry.getKey(), entry.getValue());
+//                  }
+                  method.setParams(params);
             }
-            try
-            {
+            try {
                   client.executeMethod(method);
-                  if ( method.getStatusCode() == HttpStatus.SC_OK )
-                  {
+                  if ( method.getStatusCode() == HttpStatus.SC_OK ) {
                         BufferedReader reader = new BufferedReader(new InputStreamReader(method.getResponseBodyAsStream(), charset));
                         String line;
-                        while ( ( line = reader.readLine() ) != null )
-                        {
+                        while ( ( line = reader.readLine() ) != null ) {
                               if ( pretty )
                                     response.append(line).append(System.getProperty("line.separator"));
                               else
@@ -115,11 +109,9 @@ public class HttpUtil
                         reader.close();
                   }
             }
-            catch ( IOException e )
-            {
+            catch ( IOException e ) {
             }
-            finally
-            {
+            finally {
                   method.releaseConnection();
             }
             return response.toString();
