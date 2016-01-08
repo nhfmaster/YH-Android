@@ -19,8 +19,8 @@ public class URLs implements Serializable {
 	public final static String HOST = "http://10.0.3.2:4567";
 
 	//login
-	public final static String UILogin  = String.format("%s/mobile/login", HOST1);
-	public final static String ApiLogin = "/api/v1/%@/%@/%@/authentication";
+	public final static String UILogin  = String.format("%s/mobile/login", HOST);
+	public final static String ApiLogin = "%s/api/v1/%s/%s/%s/authentication";
 
 
 	public final static String STORAGE_BASE     = Environment.getExternalStorageDirectory().getAbsolutePath() 

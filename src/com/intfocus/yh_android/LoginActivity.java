@@ -2,6 +2,7 @@ package com.intfocus.yh_android;
 
 import org.OpenUDID.*;
 
+import com.intfocus.yh_android.util.ApiUtil;
 import com.intfocus.yh_android.util.URLs;
 
 import android.util.Log;
@@ -106,9 +107,14 @@ public class LoginActivity extends Activity {
 	private Object getHtmlObject(){
 		Object insertObj = new Object() {
 			public String login(final String username, String password) {
-				password = URLs.MD5(password);
-				String msg = String.format("%s-%s", username, password);
-				Toast.makeText(LoginActivity.this, OpenUDID_manager.getOpenUDID(), Toast.LENGTH_SHORT).show();
+				try {
+					password = URLs.MD5(password);
+					String msg = String.format("%s-%s", username, password);
+					Toast.makeText(LoginActivity.this, msg, Toast.LENGTH_SHORT).show();
+					ApiUtil.authentication(username, password);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 				return "";
 			}
 			public String HtmlcallJava(){

@@ -1,29 +1,41 @@
 package com.intfocus.yh_android.util;
 
 import org.OpenUDID.*;
+import org.apache.http.HttpResponse;
+import org.apache.http.util.EntityUtils;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import android.util.Log;
+
 import com.intfocus.yh_android.util.HttpUtil;
 import com.intfocus.yh_android.util.URLs;
 
-import org.apache.commons.httpclient.params.HttpMethodParams;
 
 
 public class ApiUtil {
 
 	// {device: {name, platform, os, os_version, uuid}}
 	public static void authentication(String username, String password) {
-		String urlString = String.format(URLs.ApiLogin, "android", username, password);
-		Map<String, String> device = new HashMap();
-		device.put("name", "hell");
-		device.put("platform", "android");
-		device.put("os", "hell");
-		device.put("os_version", "hell");
-		device.put("uuid", OpenUDID_manager.getOpenUDID());
-		HttpMethodParams params = new HttpMethodParams();
-		params.setParameter("device", device);
-		HttpUtil.httpPost(urlString, params, false);
+		String urlString = String.format(URLs.ApiLogin, URLs.HOST, "android", username, password);
+
+		
+		try {
+    		Map<String, String> device = new HashMap();
+    		device.put("name", android.os.Build.MODEL);
+    		device.put("platform", "android");
+    		device.put("os", android.os.Build.MODEL);
+    		device.put("os_version", android.os.Build.MODEL);
+    		device.put("uuid", OpenUDID_manager.getOpenUDID());
+    		Map<String, Map<String, String>> params = new HashMap();
+    		params.put("device", device);
+    		
+			HttpResponse httpResponse = HttpUtil.httpPost(urlString, params, false);
+			Log.i("HttpResponse", EntityUtils.toString(httpResponse.getEntity()));
+			httpResponse.getAllHeaders();
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
 	}
 }
