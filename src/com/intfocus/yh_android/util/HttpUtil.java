@@ -129,13 +129,16 @@ public class HttpUtil {
                   method.setHeader("Accept", "application/json");
                   method.setHeader("Content-type", "application/json");
 				} catch (JSONException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
             }
             try {
-                ResponseHandler responseHandler = new BasicResponseHandler();
-                String responseBody = client.execute(method, responseHandler);
+                //ResponseHandler responseHandler = new BasicResponseHandler();
+                response = client.execute(method);
+                ResponseHandler<String> handler = new BasicResponseHandler();
+                String responseBody = handler.handleResponse(response);
+                int code = response.getStatusLine().getStatusCode();
+                Log.i("StatusCode", String.format("%d", code));
                 Log.i("responseBody", responseBody);
             }
             catch ( IOException e ) {
