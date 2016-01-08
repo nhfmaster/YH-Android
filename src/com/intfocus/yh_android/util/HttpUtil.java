@@ -95,9 +95,10 @@ public class HttpUtil {
        * @param charset 字符集 
        * @param pretty    是否美化 
        * @return 返回请求响应的HTML 
+     * @throws JSONException 
        */
       //@throws UnsupportedEncodingException 
-      public static HttpResponse httpPost (String urlString, Map params, boolean pretty ) throws UnsupportedEncodingException {
+      public static Map<int, String> httpPost(String urlString, Map params, boolean pretty ) throws UnsupportedEncodingException, JSONException {
     	    Log.i("HttpMethod", urlString);
             DefaultHttpClient client = new DefaultHttpClient();
             HttpPost method = new HttpPost(urlString);
@@ -138,8 +139,13 @@ public class HttpUtil {
                 ResponseHandler<String> handler = new BasicResponseHandler();
                 String responseBody = handler.handleResponse(response);
                 int code = response.getStatusLine().getStatusCode();
+                
                 Log.i("StatusCode", String.format("%d", code));
                 Log.i("responseBody", responseBody);
+                JSONObject jsonObject = new JSONObject(responseBody);
+                Log.i("UserInfo", jsonObject.getString("user_name"));
+                Log.i("UserInfo", jsonObject.getString("group_name"));
+                Log.i("UserInfo", jsonObject.getString("role_name"));
             }
             catch ( IOException e ) {
             }

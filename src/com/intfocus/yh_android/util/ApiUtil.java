@@ -31,9 +31,7 @@ public class ApiUtil {
     		Map<String, Map<String, String>> params = new HashMap();
     		params.put("device", device);
     		
-			HttpResponse httpResponse = HttpUtil.httpPost(urlString, params, false);
-			Log.i("HttpResponse", EntityUtils.toString(httpResponse.getEntity()));
-			httpResponse.getAllHeaders();
+			Map<Int, String> respnse = HttpUtil.httpPost(urlString, params, false);
 		} catch(Exception e) {
 			e.printStackTrace();
 		}

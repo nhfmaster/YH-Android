@@ -16,27 +16,27 @@ public class URLs implements Serializable {
 	
 	
 	public final static String HOST1 = "http://yonghui.idata.mobi";
-	public final static String HOST = "http://10.0.3.2:4567";
+	public final static String HOST  = "http://10.0.3.2:4567";
 
 	//login
 	public final static String UILogin  = String.format("%s/mobile/login", HOST);
 	public final static String ApiLogin = "%s/api/v1/%s/%s/%s/authentication";
 
 
-	public final static String STORAGE_BASE     = Environment.getExternalStorageDirectory().getAbsolutePath() 
-			+ "/solife.consume/";
-	public final static String STORAGE_GRAVATAR = STORAGE_BASE + "gravatar";
-	public final static String STORAGE_APK      = STORAGE_BASE + "apk";
-	public final static String STORAGE_IMAGES   = STORAGE_BASE + "images";
+	public final static String STORAGE_BASE              = Environment.getExternalStorageDirectory().getAbsolutePath();
+
+	public final static String USER_CONFIG_FILENAME      = "user.plist";
+	public final static String CONFIG_DIRNAME            = "Configs";
+	public final static String SETTINGS_CONFIG_FILENAME  = "Setting.plist";
+	public final static String TABINDEX_CONFIG_FILENAME  = "PageTabIndex.plist";
+	public final static String GESTURE_PASSWORD_FILENAME = "GesturePassword.plist";
+	public final static String HTML_DIRNAME              = "HTML";
+	public final static String ASSETS1_DIRNAME           = "Assets";
+	public final static String SHARED_DIRNAME            = "Shared";
+
+	public final static String CACHED_HEADER_FILENAME    = "cachedHeader.plist";
 	
-	public final static int URL_OBJ_TYPE_OTHER = 0x000;
-	public final static int URL_OBJ_TYPE_NEWS = 0x001;
-	public final static int URL_OBJ_TYPE_SOFTWARE = 0x002;
-	public final static int URL_OBJ_TYPE_QUESTION = 0x003;
-	public final static int URL_OBJ_TYPE_ZONE = 0x004;
-	public final static int URL_OBJ_TYPE_BLOG = 0x005;
-	public final static int URL_OBJ_TYPE_TWEET = 0x006;
-	public final static int URL_OBJ_TYPE_QUESTION_TAG = 0x007;
+
 	
 	
 	/**

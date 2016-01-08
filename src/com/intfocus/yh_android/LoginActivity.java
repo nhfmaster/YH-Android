@@ -3,6 +3,7 @@ package com.intfocus.yh_android;
 import org.OpenUDID.*;
 
 import com.intfocus.yh_android.util.ApiUtil;
+import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.URLs;
 
 import android.util.Log;
@@ -55,6 +56,9 @@ public class LoginActivity extends Activity {
 	        Log.d("SERIAL",android.os.Build.MANUFACTURER);
 	        Log.d("SERIAL",android.os.Build.SERIAL);
 	        Log.d("USER",android.os.Build.USER);
+	        
+	        String dir = FileUtil.dirPath("hello");
+	        Log.d("dirPath", dir);
 	        
 		} catch (NameNotFoundException e) {
 			// TODO Auto-generated catch block
