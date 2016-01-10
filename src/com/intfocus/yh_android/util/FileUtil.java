@@ -3,6 +3,7 @@ package com.intfocus.yh_android.util;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -23,10 +24,23 @@ public class FileUtil {
 	
 
 	public static String userspace() {
-		String spacename = String.format("user-%s", 1);
-		String namespace = String.format("%s/%s", URLs.STORAGE_BASE, spacename);
+		String nameSpace = "";
 		
-		return namespace;
+		try {
+	        String userConfigPath = String.format("%s/%s", URLs.STORAGE_BASE, URLs.USER_CONFIG_FILENAME);
+	        JSONObject json = FileUtil.readConfigFile(userConfigPath);
+	        
+			nameSpace = String.format("%s/user-%d", URLs.STORAGE_BASE, json.getInt("user_id"));
+			
+			File folder = new File(nameSpace);
+			if(!folder.exists() && !folder.isDirectory()) {
+				folder.mkdir();
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		return nameSpace;
 	}
 	
 	/**
@@ -37,10 +51,10 @@ public class FileUtil {
 	 *  @return 沙盒中的绝对路径
 	 */
 	public static String dirPath(String dirName) {
-		String pathname = String.format("%s/%s", FileUtil.userspace(), dirName);
+		String pathName = String.format("%s/%s", FileUtil.userspace(), dirName);
 		
 		try {
-			File folder = new File(pathname);
+			File folder = new File(pathName);
 			if(!folder.exists() && !folder.isDirectory()) {
 				folder.mkdir();
 			}
@@ -48,7 +62,13 @@ public class FileUtil {
 			e.printStackTrace();
 		}
 		
-		return pathname;
+		return pathName;
+	}
+	
+	public static String dirPath(String dirName, String fileName) {
+		String pathName = FileUtil.dirPath(dirName);
+		
+		return String.format("%s/%s", pathName, fileName);
 	}
 	
 	public static JSONObject readConfigFile(String pathname) {
@@ -74,5 +94,14 @@ public class FileUtil {
 	      e.printStackTrace();
 	    }
        return jsonObject;
+	}
+	
+	public static void writeJSON(String pathName, String jsonBody) throws IOException {
+		File file = new File(pathName);
+		if(!file.exists()) { file.createNewFile(); }
+		 
+		FileOutputStream out=new FileOutputStream(file,true);        
+		out.write(jsonBody.toString().getBytes("utf-8"));
+		out.close();
 	}
 }

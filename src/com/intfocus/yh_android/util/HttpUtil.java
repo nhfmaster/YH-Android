@@ -98,17 +98,16 @@ public class HttpUtil {
      * @throws JSONException 
        */
       //@throws UnsupportedEncodingException 
-      public static Map<int, String> httpPost(String urlString, Map params, boolean pretty ) throws UnsupportedEncodingException, JSONException {
+      public static Map<String, String> httpPost(String urlString, Map params, boolean pretty ) throws UnsupportedEncodingException, JSONException {
     	    Log.i("HttpMethod", urlString);
             DefaultHttpClient client = new DefaultHttpClient();
             HttpPost method = new HttpPost(urlString);
      
-          
+            Map<String, String> ret = new HashMap();
     	    HttpResponse response = null;
             if ( params != null ) {
               	try {
             	  Iterator iter = params.entrySet().iterator();
-
                   JSONObject holder = new JSONObject();
                   
                   while(iter.hasNext()) {
@@ -139,18 +138,21 @@ public class HttpUtil {
                 ResponseHandler<String> handler = new BasicResponseHandler();
                 String responseBody = handler.handleResponse(response);
                 int code = response.getStatusLine().getStatusCode();
+                ret.put("code", String.format("%d", code));
+                ret.put("body", responseBody);
                 
                 Log.i("StatusCode", String.format("%d", code));
                 Log.i("responseBody", responseBody);
-                JSONObject jsonObject = new JSONObject(responseBody);
-                Log.i("UserInfo", jsonObject.getString("user_name"));
-                Log.i("UserInfo", jsonObject.getString("group_name"));
-                Log.i("UserInfo", jsonObject.getString("role_name"));
+//                JSONObject jsonObject = new JSONObject(responseBody);
+//                Log.i("UserInfo", jsonObject.getString("user_name"));
+//                Log.i("UserInfo", jsonObject.getString("group_name"));
+//                Log.i("UserInfo", jsonObject.getString("role_name"));
             }
             catch ( IOException e ) {
+            	e.printStackTrace();
             }
             finally {
             }
-            return response;
+            return ret;
       }
 }
