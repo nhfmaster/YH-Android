@@ -1,21 +1,12 @@
 package com.intfocus.yh_android.util;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import android.util.Log;
 
-import org.OpenUDID.OpenUDID_manager;
 import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethod;   
-import org.apache.commons.httpclient.HttpStatus;   
-import org.apache.commons.httpclient.URIException;   
-import org.apache.commons.httpclient.methods.GetMethod;   
-import org.apache.commons.httpclient.methods.PostMethod;   
-import org.apache.commons.httpclient.params.HttpMethodParams;   
+import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.URIException;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.util.URIUtil;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ResponseHandler;
@@ -26,14 +17,20 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.util.Log;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 
 /**
  * 
  * 
  * <p>Title:HttpTookitEnhance</p>
- * <p>Description: httpclientÄ£ÄâhttpÇëÇó£¬½â¾ö·µ»ØÄÚÈİÂÒÂëÎÊÌâ</p>
+ * <p>Description: httpclientæ¨¡æ‹Ÿhttpè¯·æ±‚ï¼Œè§£å†³è¿”å›å†…å®¹ä¹±ç é—®é¢˜</p>
  * <p>Copyright: Copyright (c) 2010</p>
  * <p>Company: </p>
  * @author libin
@@ -41,13 +38,13 @@ import android.util.Log;
  */
 public class HttpUtil {
       /** 
-       * Ö´ĞĞÒ»¸öHTTP GETÇëÇó£¬·µ»ØÇëÇóÏìÓ¦µÄHTML 
+       * Ö´æ‰§è¡Œä¸€ä¸ªHTTP GETè¯·æ±‚ï¼Œè¿”å›è¯·æ±‚å“åº”çš„HTML
        * 
-       * @param url                 ÇëÇóµÄURLµØÖ· 
-       * @param queryString ÇëÇóµÄ²éÑ¯²ÎÊı,¿ÉÒÔÎªnull 
-       * @param charset         ×Ö·û¼¯ 
-       * @param pretty            ÊÇ·ñÃÀ»¯ 
-       * @return ·µ»ØÇëÇóÏìÓ¦µÄHTML 
+       * @param url                 è¯·æ±‚çš„URLåœ°å€
+       * @param queryString         è¯·æ±‚çš„æŸ¥è¯¢å‚æ•°,å¯ä»¥ä¸ºnull
+       * @param charset             å­—ç¬¦é›†
+       * @param pretty              æ˜¯å¦ç¾åŒ–
+       * @return                    è¿”å›è¯·æ±‚å“åº”çš„HTML
        */
       public static String httpGet ( String url, String queryString, String charset, boolean pretty )
       {
@@ -57,11 +54,10 @@ public class HttpUtil {
             try
             {
                   if ( queryString != null && !queryString.equals("") )
-                        //¶ÔgetÇëÇó²ÎÊı×öÁËhttpÇëÇóÄ¬ÈÏ±àÂë£¬ºÃÏñÃ»ÓĞÈÎºÎÎÊÌâ£¬ºº×Ö±àÂëºó£¬¾Í³ÉÎª%Ê½ÑùµÄ×Ö·û´® 
+                        //å¯¹getè¯·æ±‚å‚æ•°åšäº†httpè¯·æ±‚é»˜è®¤ç¼–ç ï¼Œå¥½åƒæ²¡æœ‰ä»»ä½•é—®é¢˜ï¼Œæ±‰å­—ç¼–ç åï¼Œå°±æˆä¸º%å¼æ ·çš„å­—ç¬¦ä¸²
                         method.setQueryString(URIUtil.encodeQuery(queryString));
                   client.executeMethod(method);
-                  if ( method.getStatusCode() == HttpStatus.SC_OK )
-                  {
+                  if ( method.getStatusCode() == HttpStatus.SC_OK ) {
                         BufferedReader reader = new BufferedReader(new InputStreamReader(method.getResponseBodyAsStream(), charset));
                         String line;
                         while ( ( line = reader.readLine() ) != null )
@@ -88,13 +84,13 @@ public class HttpUtil {
       }
 
       /** 
-       * Ö´ĞĞÒ»¸öHTTP POSTÇëÇó£¬·µ»ØÇëÇóÏìÓ¦µÄHTML 
+       * Ö´æ‰§è¡Œä¸€ä¸ªHTTP POSTè¯·æ±‚ï¼Œè¿”å›è¯·æ±‚å“åº”çš„HTML
        * 
-       * @param url         ÇëÇóµÄURLµØÖ· 
-       * @param params    ÇëÇóµÄ²éÑ¯²ÎÊı,¿ÉÒÔÎªnull 
-       * @param charset ×Ö·û¼¯ 
-       * @param pretty    ÊÇ·ñÃÀ»¯ 
-       * @return ·µ»ØÇëÇóÏìÓ¦µÄHTML 
+       * @param url         è¯·æ±‚çš„URLåœ°å€
+       * @param params      è¯·æ±‚çš„æŸ¥è¯¢å‚æ•°,å¯ä»¥ä¸ºnull
+       * @param charset     å­—ç¬¦é›†
+       * @param pretty      æ˜¯å¦ç¾åŒ–
+       * @return            è¿”å›è¯·æ±‚å“åº”çš„HTML
      * @throws JSONException 
        */
       //@throws UnsupportedEncodingException 

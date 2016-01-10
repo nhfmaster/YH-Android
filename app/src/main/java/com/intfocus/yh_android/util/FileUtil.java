@@ -42,13 +42,13 @@ public class FileUtil {
 		
 		return nameSpace;
 	}
-	
+
 	/**
-	 *  ´«µİÄ¿Â¼ÃûÈ¡µÃÉ³ºĞÖĞµÄ¾ø¶ÔÂ·¾¶(Ò»¼¶),²»´æÔÚÔò´´½¨£¬ÇëÉ÷ÓÃ£¡
+	 *  ä¼ é€’ç›®å½•åå–å¾—æ²™ç›’ä¸­çš„ç»å¯¹è·¯å¾„(ä¸€çº§),ä¸å­˜åœ¨åˆ™åˆ›å»ºï¼Œè¯·æ…ç”¨ï¼
 	 *
-	 *  @param dirName  Ä¿Â¼Ãû³Æ£¬²»´æÔÚÔò´´½¨
+	 *  @param dirName  ç›®å½•åç§°ï¼Œä¸å­˜åœ¨åˆ™åˆ›å»º
 	 *
-	 *  @return É³ºĞÖĞµÄ¾ø¶ÔÂ·¾¶
+	 *  @return æ²™ç›’ä¸­çš„ç»å¯¹è·¯å¾„
 	 */
 	public static String dirPath(String dirName) {
 		String pathName = String.format("%s/%s", FileUtil.userspace(), dirName);

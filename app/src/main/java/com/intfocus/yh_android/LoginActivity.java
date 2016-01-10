@@ -39,9 +39,9 @@ public class LoginActivity extends Activity {
         PackageInfo info;
 		try {
 			info = manager.getPackageInfo(this.getPackageName(), 0);
-	        String packageName = info.packageName;  //°üÃû
-	        int versionCode = info.versionCode;  //°æ±¾ºÅ
-	        String versionName = info.versionName;   //°æ±¾Ãû
+	        String packageName = info.packageName;  //åŒ…å
+	        int versionCode = info.versionCode;  //ç‰ˆæœ¬å·
+	        String versionName = info.versionName;   //ç‰ˆæœ¬å
 	        Log.d("PM", packageName);
 	        Log.d("PM", versionName);
 	        Log.d("DEVICE",android.os.Build.MODEL);

@@ -7,7 +7,7 @@ import java.net.URLEncoder;
 import android.os.Environment;
 
 /**
- * apiÁ´½Ó£¬ºê
+ * apié“¾æ¥ï¼Œå®
  * @author jay
  * @version 1.0
  * @created 2016-01-06
@@ -40,7 +40,7 @@ public class URLs implements Serializable {
 	
 	
 	/**
-	 * ¶ÔURL½øĞĞ¸ñÊ½´¦Àí
+	 * å¯¹URLè¿›è¡Œæ ¼å¼å¤„ç†
 	 * @param path
 	 * @return
 	 */
@@ -51,7 +51,7 @@ public class URLs implements Serializable {
 	}	
 	
 	/**
-     * MD5¼ÓÂë¡£32Î»
+     * MD5åŠ ç ã€‚32ä½
      * @param inStr
      * @return
      */
