@@ -1,7 +1,6 @@
 package com.intfocus.yh_android;
 
 import android.annotation.SuppressLint;
-import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -19,7 +18,6 @@ import android.widget.Toast;
 
 import com.intfocus.yh_android.util.ApiUtil;
 import com.intfocus.yh_android.util.FileUtil;
-import com.intfocus.yh_android.util.MainActivity;
 import com.intfocus.yh_android.util.URLs;
 
 import org.OpenUDID.OpenUDID_manager;
@@ -34,11 +32,6 @@ public class LoginActivity extends Activity {
 
         setContentView(R.layout.activity_login);
         mWebView = (WebView) findViewById(R.id.login_webview);
-
-        ActionBar actionBar = getActionBar();
-        if (actionBar != null) {    /* 隐藏ActionBar */
-            actionBar.hide();
-        }
 
         OpenUDID_manager.sync(getApplicationContext());
         

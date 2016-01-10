@@ -1,9 +1,7 @@
-package com.intfocus.yh_android.util;
+package com.intfocus.yh_android;
 
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-
-import com.intfocus.yh_android.R;
 
 public class MainActivity extends ActionBarActivity {
 

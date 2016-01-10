@@ -36,8 +36,9 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".util.MainActivity"
-            android:label="@string/title_activity_main"></activity>
+            android:name=".MainActivity"
+            android:label="@string/title_activity_main"
+            android:theme="@style/AppTheme" />
     </application>
 
 </manifest>
