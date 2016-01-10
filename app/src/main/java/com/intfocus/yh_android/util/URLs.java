@@ -1,10 +1,10 @@
 package com.intfocus.yh_android.util;
 
-import java.security.MessageDigest;
+import android.os.Environment;
+
 import java.io.Serializable;
 import java.net.URLEncoder;
-
-import android.os.Environment;
+import java.security.MessageDigest;
 
 /**
  * api链接，宏
@@ -19,8 +19,8 @@ public class URLs implements Serializable {
 	public final static String HOST  = "http://10.0.3.2:4567";
 
 	//login
-	public final static String UILogin  = String.format("%s/mobile/login", HOST);
-	public final static String ApiLogin = "%s/api/v1/%s/%s/%s/authentication";
+    public final static String UILogin = String.format("%s/mobile/login", HOST1);
+    public final static String ApiLogin = "%s/api/v1/%s/%s/%s/authentication";
 
 
 	public final static String STORAGE_BASE              = Environment.getExternalStorageDirectory().getAbsolutePath();
