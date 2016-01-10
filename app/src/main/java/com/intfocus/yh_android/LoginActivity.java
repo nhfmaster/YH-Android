@@ -31,7 +31,7 @@ public class LoginActivity extends Activity {
 		super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_login);
-        mWebView = (WebView) findViewById(R.id.login_webview);
+        mWebView = (WebView) findViewById(R.id.webview);
 
         OpenUDID_manager.sync(getApplicationContext());
         
