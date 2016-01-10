@@ -19,14 +19,76 @@
 
     </RelativeLayout>
 
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/toolBar"
         android:layout_width="match_parent"
         android:layout_height="55dp"
         android:layout_alignParentBottom="true"
-        android:background="@color/white">
+        android:background="@color/white"
+        android:orientation="horizontal">
 
-    </RelativeLayout>
+        <LinearLayout style="@style/toolBarTab">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="25dp"
+                android:src="@mipmap/tab_kpi" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:text="仪表盘" />
+
+        </LinearLayout>
+
+        <LinearLayout style="@style/toolBarTab">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="25dp"
+                android:src="@mipmap/tab_analysis" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:text="分析" />
+
+        </LinearLayout>
+
+        <LinearLayout style="@style/toolBarTab">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="25dp"
+                android:src="@mipmap/tab_app" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:text="应用" />
+
+        </LinearLayout>
+
+        <LinearLayout style="@style/toolBarTab">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="25dp"
+                android:src="@mipmap/tab_message" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:text="消息" />
+
+        </LinearLayout>
+
+
+    </LinearLayout>
 
     <WebView
         android:id="@+id/webview"
