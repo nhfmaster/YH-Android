@@ -39,12 +39,13 @@
 
     <style name="ButtonBarButton" />
 
-    <style name="toolBarTab">
+    <style name="ToolBarTab">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_weight">1</item>
         <item name="android:layout_gravity">center_vertical</item>
-        <item name="android:orientation">vertical</item>
+        <item name="src_height">20dp</item>
     </style>
+
 
 </resources>

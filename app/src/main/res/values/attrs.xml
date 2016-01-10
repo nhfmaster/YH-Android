@@ -11,4 +11,12 @@
         <attr name="metaButtonBarButtonStyle" format="reference" />
     </declare-styleable>
 
+    <declare-styleable name="TabView">
+        <attr name="text" format="string" />
+        <attr name="active" format="boolean" />
+        <attr name="src" format="reference" />
+        <attr name="active_src" format="reference" />
+        <attr name="src_height" format="dimension" />
+    </declare-styleable>
+
 </resources>
