@@ -3,8 +3,7 @@
     package="com.intfocus.yh_android"
     android:versionCode="1"
     android:versionName="0.0.3" >
-    
-    
+
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
@@ -13,21 +12,20 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.VIBRATE" />
-    
+
     <application
         android:allowBackup="true"
         android:icon="@drawable/app_icon"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
-        
-		<service android:name="org.OpenUDID.OpenUDID_service">
-			 <intent-filter>
-				<action android:name="org.openudid.GETUDID" />
-			</intent-filter>
-		</service>
-		
+        <service android:name="org.OpenUDID.OpenUDID_service">
+            <intent-filter>
+                <action android:name="org.openudid.GETUDID" />
+            </intent-filter>
+        </service>
+
         <activity
-            android:name="com.intfocus.yh_android.LoginActivity"
+            android:name=".LoginActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"
             android:theme="@style/FullscreenTheme" >
@@ -37,7 +35,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".util.MainActivity"
+            android:label="@string/title_activity_main"></activity>
     </application>
-    
-    
+
 </manifest>
