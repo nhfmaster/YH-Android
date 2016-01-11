@@ -20,11 +20,7 @@
 
         <ImageView
             android:id="@+id/setting"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="15dp"
+            style="@style/ActionRightButton"
             android:src="@mipmap/setting" />
 
     </RelativeLayout>
@@ -67,7 +63,7 @@
 
     </LinearLayout>
 
-    <WebView
+    <com.intfocus.yh_android.WebView
         android:id="@+id/webview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

@@ -4,9 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.Toast;
 
 import com.intfocus.yh_android.util.FileUtil;
@@ -56,18 +53,8 @@ public class MainActivity extends Activity {
         user = FileUtil.readConfigFile(userConfigPath);
 
         mWebView = (WebView) findViewById(R.id.webview);
-        WebSettings webSettings = mWebView.getSettings();
-        webSettings.setJavaScriptEnabled(true);
-        webSettings.setDefaultTextEncodingName("utf-8");
-        mWebView.setWebViewClient(new WebViewClient() {
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                // TODO Auto-generated method stub
-                //返回值是true的时候控制去WebView打开，为false调用系统浏览器或第三方浏览器
-                view.loadUrl(url);
-                return true;
-            }
-        });
+        mWebView.initialize();
+
         findViewById(R.id.setting).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -111,6 +98,9 @@ public class MainActivity extends Activity {
         try {
             String urlString = String.format(URLs.ANALYSE_PATH, user.getString("role_id"));
             mWebView.loadUrl(String.format("%s%s", URLs.HOST, urlString));
+            /* 临时用的跳转接口 FIXME */
+            Intent intent = new Intent(this, SubjectActivity.class);
+            startActivity(intent);
         } catch (JSONException e) {
             e.printStackTrace();
             Toast.makeText(MainActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
