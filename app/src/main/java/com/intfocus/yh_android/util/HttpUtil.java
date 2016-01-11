@@ -116,28 +116,25 @@ public class HttpUtil {
                   method.setEntity(se);
                   method.setHeader("Accept", "application/json");
                   method.setHeader("Content-type", "application/json");
+                  method.setHeader("User-Agent", "Mozilla/5.0 (Linux; U; Android 4.3; en-us; HTC One - 4.3 - API 18 - 1080x1920 Build/JLS36G) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30");
 				} catch (JSONException e) {
 					e.printStackTrace();
 				}
             }
             try {
-                //ResponseHandler responseHandler = new BasicResponseHandler();
                 response = client.execute(method);
-                ResponseHandler<String> handler = new BasicResponseHandler();
-                String responseBody = handler.handleResponse(response);
                 int code = response.getStatusLine().getStatusCode();
                 ret.put("code", String.format("%d", code));
+
+                ResponseHandler<String> handler = new BasicResponseHandler();
+                String responseBody = handler.handleResponse(response);
                 ret.put("body", responseBody);
-                
-                Log.i("StatusCode", String.format("%d", code));
-                Log.i("responseBody", responseBody);
-//                JSONObject jsonObject = new JSONObject(responseBody);
-//                Log.i("UserInfo", jsonObject.getString("user_name"));
-//                Log.i("UserInfo", jsonObject.getString("group_name"));
-//                Log.i("UserInfo", jsonObject.getString("role_name"));
             }
-            catch ( IOException e ) {
+            catch (IOException e) {
             	e.printStackTrace();
+
+                ret.put("code", "401");
+                ret.put("body", "{\"info\": \"用户名或密码错误\"}");
             }
             finally {
             }
