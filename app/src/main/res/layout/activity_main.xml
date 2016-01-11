@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -19,14 +20,43 @@
 
     </RelativeLayout>
 
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/toolBar"
         android:layout_width="match_parent"
         android:layout_height="55dp"
         android:layout_alignParentBottom="true"
-        android:background="@color/white">
+        android:background="@color/white"
+        android:orientation="horizontal">
 
-    </RelativeLayout>
+        <com.intfocus.yh_android.TabView
+            android:id="@+id/tab_kpi"
+            style="@style/ToolBarTab"
+            app:active_src="@mipmap/tab_kpi_s"
+            app:src="@mipmap/tab_kpi"
+            app:text="仪表盘" />
+
+        <com.intfocus.yh_android.TabView
+            android:id="@+id/tab_analysis"
+            style="@style/ToolBarTab"
+            app:active_src="@mipmap/tab_analysis_s"
+            app:src="@mipmap/tab_analysis"
+            app:text="分析" />
+
+        <com.intfocus.yh_android.TabView
+            android:id="@+id/tab_app"
+            style="@style/ToolBarTab"
+            app:active_src="@mipmap/tab_app_s"
+            app:src="@mipmap/tab_app"
+            app:text="应用" />
+
+        <com.intfocus.yh_android.TabView
+            android:id="@+id/tab_message"
+            style="@style/ToolBarTab"
+            app:active_src="@mipmap/tab_message_s"
+            app:src="@mipmap/tab_message"
+            app:text="消息" />
+
+    </LinearLayout>
 
     <WebView
         android:id="@+id/webview"
