@@ -15,12 +15,30 @@ import java.security.MessageDigest;
 public class URLs implements Serializable {
 	
 	
-	public final static String HOST1 = "http://yonghui.idata.mobi";
-	public final static String HOST  = "http://10.0.3.2:4567";
+	public final static String HOST = "http://yonghui.idata.mobi";
+	public final static String HOST1  = "http://10.0.3.2:4567";
 
 	//login
-    public final static String UILogin = String.format("%s/mobile/login", HOST1);
-    public final static String ApiLogin = "%s/api/v1/%s/%s/%s/authentication";
+    public final static String LOGIN_PATH              = String.format("%s/mobile/login", HOST);
+    public final static String API_USER_PATH           = "%s/api/v1/%s/%s/%s/authentication";
+
+
+    public final static String API_DATA_PATH           = "/api/v1/group/%s/report/%s/attachment";
+    public final static String API_COMMENT_PATH        = "/api/v1/user/%s/id/%s/type/%s";
+    public final static String API_SCREEN_LOCK_PATH    = "/api/v1/user_device/%s/screen_lock";
+    public final static String API_DEVICE_STATE_PATH   =  "/api/v1/user_device/%s/state";
+    public final static String API_RESET_PASSWORD_PATH =  "/api/v1/update/%s/password";
+
+    public final static String KPI_PATH                = "/mobile/role/%s/group/%s/kpi";
+    public final static String MESSAGE_PATH            = "/mobile/role/%s/user/%s/message";
+    public final static String APPLICATION_PATH        = "/mobile/role/%s/app";
+    public final static String ANALYSE_PATH            = "/mobile/role/%s/analyse";
+    public final static String COMMENT_PATH            = "/mobile/id/%s/type/%s/comment";
+    public final static String RESET_PASSWORD_PATH     = "/mobile/update_user_password";
+
+    public final static String FONTS_PATH              = "/mobile/assets/fonts.zip";
+
+    public final static String REPORT_DATA_FILENAME    = "template_data_group_%s_report_%s.js";
 
 
 	public final static String STORAGE_BASE              = Environment.getExternalStorageDirectory().getAbsolutePath();

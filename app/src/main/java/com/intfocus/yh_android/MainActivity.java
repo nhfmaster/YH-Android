@@ -2,10 +2,18 @@ package com.intfocus.yh_android;
 
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Toast;
+
+import com.intfocus.yh_android.util.FileUtil;
+import com.intfocus.yh_android.util.URLs;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class MainActivity extends ActionBarActivity {
 
@@ -15,6 +23,8 @@ public class MainActivity extends ActionBarActivity {
     private TabView mTabAPP;
     private TabView mTabMessage;
     private TabView mCurrentTab;
+
+    private JSONObject user;
     private View.OnClickListener mTabChangeListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -41,6 +51,9 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        String userConfigPath = String.format("%s/%s", FileUtil.basePath(), URLs.USER_CONFIG_FILENAME);
+        user = FileUtil.readConfigFile(userConfigPath);
 
         mWebView = (WebView) findViewById(R.id.webview);
         WebSettings webSettings = mWebView.getSettings();
@@ -77,20 +90,44 @@ public class MainActivity extends ActionBarActivity {
 
     private void switchToKPI() {
         /* 跳转到仪表盘界面 */
-        mWebView.loadUrl("http://www.baidu.com");
+        try {
+            String urlString = String.format(URLs.KPI_PATH, user.getString("role_id"), user.getString("group_id"));
+            mWebView.loadUrl(String.format("%s%s", URLs.HOST, urlString));
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Toast.makeText(MainActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void switchToAnalysis() {
         /* 跳转到分析界面 */
-        mWebView.loadUrl("http://www.163.com");
+        try {
+            String urlString = String.format(URLs.ANALYSE_PATH, user.getString("role_id"));
+            mWebView.loadUrl(String.format("%s%s", URLs.HOST, urlString));
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Toast.makeText(MainActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void switchToAPP() {
-        /* 跳转到应用界面 */
+        try {
+            String urlString = String.format(URLs.APPLICATION_PATH, user.getString("role_id"));
+            mWebView.loadUrl(String.format("%s%s", URLs.HOST, urlString));
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Toast.makeText(MainActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void switchToMessage() {
-        /* 跳转到消息界面 */
+        try {
+            String urlString = String.format(URLs.MESSAGE_PATH, user.getString("role_id"), user.getString("user_id"));
+            mWebView.loadUrl(String.format("%s%s", URLs.HOST, urlString));
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Toast.makeText(MainActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
 }
