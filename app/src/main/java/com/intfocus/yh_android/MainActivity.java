@@ -1,8 +1,8 @@
 package com.intfocus.yh_android;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -15,7 +15,7 @@ import com.intfocus.yh_android.util.URLs;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends Activity {
 
     private WebView mWebView;
     private TabView mTabKPI;
@@ -66,6 +66,13 @@ public class MainActivity extends ActionBarActivity {
                 //返回值是true的时候控制去WebView打开，为false调用系统浏览器或第三方浏览器
                 view.loadUrl(url);
                 return true;
+            }
+        });
+        findViewById(R.id.setting).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, SettingActivity.class);
+                MainActivity.this.startActivity(intent);
             }
         });
 
@@ -129,5 +136,4 @@ public class MainActivity extends ActionBarActivity {
             Toast.makeText(MainActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
         }
     }
-
 }
