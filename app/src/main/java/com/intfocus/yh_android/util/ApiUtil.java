@@ -1,8 +1,6 @@
 package com.intfocus.yh_android.util;
 
 import org.OpenUDID.*;
-import org.apache.http.HttpResponse;
-import org.apache.http.util.EntityUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,9 +8,6 @@ import java.util.Map;
 import android.os.Build;
 import android.util.Log;
 
-import com.intfocus.yh_android.util.HttpUtil;
-import com.intfocus.yh_android.util.URLs;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 public class ApiUtil {
@@ -37,13 +32,13 @@ public class ApiUtil {
 			if(response.get("code").toString().compareTo("200") == 0) {
 		        String userConfigPath = String.format("%s/%s", FileUtil.basePath(), URLs.USER_CONFIG_FILENAME);
 				Log.i("userConfigPath", userConfigPath);
-				FileUtil.writeJSON(userConfigPath, response.get("body").toString());
+				FileUtil.writeFile(userConfigPath, response.get("body").toString());
 		       
 		        // need user info
 				String settingsConfigPath = FileUtil.dirPath(URLs.CONFIG_DIRNAME, URLs.SETTINGS_CONFIG_FILENAME);
 				Log.i("settingsConfigPath", settingsConfigPath);
 				
-				FileUtil.writeJSON(settingsConfigPath, response.get("body").toString());
+				FileUtil.writeFile(settingsConfigPath, response.get("body").toString());
 			} else {
 				JSONObject json = new JSONObject(response.get("body").toString());
 				ret = json.getString("info");
