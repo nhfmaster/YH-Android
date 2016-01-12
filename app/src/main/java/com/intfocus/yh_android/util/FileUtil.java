@@ -25,7 +25,6 @@ public class FileUtil {
 
 	public static String userspace() {
 		String nameSpace = "";
-		
 		try {
 	        String userConfigPath = String.format("%s/%s", URLs.STORAGE_BASE, URLs.USER_CONFIG_FILENAME);
 	        JSONObject json = FileUtil.readConfigFile(userConfigPath);
@@ -70,38 +69,59 @@ public class FileUtil {
 		
 		return String.format("%s/%s", pathName, fileName);
 	}
-	
-	public static JSONObject readConfigFile(String pathname) {
+
+	public static String readFile(String pathName) {
+		String string = null;
+		try {
+			InputStream inputStream = new FileInputStream(new File(pathName));
+			InputStreamReader inputStreamReader = new InputStreamReader(inputStream, "UTF-8");
+			BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+			String line;
+			StringBuilder stringBuilder = new StringBuilder();
+			while((line = bufferedReader.readLine()) != null) {
+				stringBuilder.append(line);
+			}
+			bufferedReader.close();
+			inputStreamReader.close();
+			string = stringBuilder.toString();
+
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return string;
+	}
+	public static JSONObject readConfigFile(String pathName) {
 		JSONObject jsonObject = null;
 		try {
-		  InputStream inputStream = new FileInputStream(new File(pathname));
-	      InputStreamReader inputStreamReader = new InputStreamReader(inputStream, "UTF-8");
-	      BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-	      String line;
-	      StringBuilder stringBuilder = new StringBuilder();
-	      while((line = bufferedReader.readLine()) != null) {
-	        stringBuilder.append(line);
-	      }
-	      bufferedReader.close();
-	      inputStreamReader.close();
-	      jsonObject = new JSONObject(stringBuilder.toString());
-	   
-	    } catch (UnsupportedEncodingException e) {
-	      e.printStackTrace();
-	    } catch (IOException e) {
-	      e.printStackTrace();
+			String string = FileUtil.readFile(pathName);
+	        jsonObject = new JSONObject(string);
 	    } catch (JSONException e) {
 	      e.printStackTrace();
 	    }
        return jsonObject;
 	}
 	
-	public static void writeJSON(String pathName, String jsonBody) throws IOException {
+	public static void writeFile(String pathName, String content) throws IOException {
+		Log.i("PathName", pathName);
 		File file = new File(pathName);
-		if(!file.exists()) { file.createNewFile(); }
-		 
-		FileOutputStream out=new FileOutputStream(file,true);        
-		out.write(jsonBody.toString().getBytes("utf-8"));
+
+		if(file.exists()) { file.delete(); }
+
+		file.createNewFile();
+		FileOutputStream out = new FileOutputStream(file, true);
+		out.write(content.toString().getBytes("utf-8"));
 		out.close();
+	}
+
+	public static String sharedPath() {
+		String pathName = String.format("%s/%s", URLs.STORAGE_BASE, URLs.SHARED_DIRNAME);
+		File file = new File(pathName);
+
+		if(!file.exists() && !file.isDirectory()) { file.mkdir(); }
+
+		return pathName;
 	}
 }

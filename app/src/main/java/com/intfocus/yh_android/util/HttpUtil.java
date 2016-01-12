@@ -5,6 +5,7 @@ import android.util.Log;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -16,6 +17,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.net.URI;
 
 
 /**
@@ -29,51 +31,37 @@ import java.util.Map;
  * @version 1.0.0
  */
 public class HttpUtil {
-//      /**
-//       * ִ执行一个HTTP GET请求，返回请求响应的HTML
-//       *
-//       * @param url                 请求的URL地址
-//       * @param queryString         请求的查询参数,可以为null
-//       * @param charset             字符集
-//       * @param pretty              是否美化
-//       * @return                    返回请求响应的HTML
-//       */
-//      public static String httpGet ( String url, String queryString, String charset, boolean pretty )
-//      {
-//            StringBuffer response = new StringBuffer();
-//            HttpClient client = new HttpClient();
-//            HttpMethod method = new GetMethod(url);
-//            try
-//            {
-//                  if ( queryString != null && !queryString.equals("") )
-//                        //对get请求参数做了http请求默认编码，好像没有任何问题，汉字编码后，就成为%式样的字符串
-//                        method.setQueryString(URIUtil.encodeQuery(queryString));
-//                  client.executeMethod(method);
-//                  if ( method.getStatusCode() == HttpStatus.SC_OK ) {
-//                        BufferedReader reader = new BufferedReader(new InputStreamReader(method.getResponseBodyAsStream(), charset));
-//                        String line;
-//                        while ( ( line = reader.readLine() ) != null )
-//                        {
-//                              if ( pretty )
-//                                    response.append(line).append(System.getProperty("line.separator"));
-//                              else
-//                                    response.append(line);
-//                        }
-//                        reader.close();
-//                  }
-//            }
-//            catch ( URIException e )
-//            {
-//            }
-//            catch ( IOException e )
-//            {
-//            }
-//            finally
-//            {
-//                  method.releaseConnection();
-//            }
-//            return response.toString();
-//      }
+      /**
+       * ִ执行一个HTTP GET请求，返回请求响应的HTML
+       *
+       * @param url                 请求的URL地址
+       * @return                    返回请求响应的HTML
+       */
+      //@throws UnsupportedEncodingException
+      public static Map<String, String> httpGet(String urlString) {
+          Log.i("URLString", urlString);
+          Map<String, String> retMap = new HashMap();
+
+          DefaultHttpClient client = new DefaultHttpClient();
+          HttpGet request = new HttpGet(urlString);
+          HttpResponse response;
+          try {
+                response = client.execute(request);
+                int code = response.getStatusLine().getStatusCode();
+                retMap.put("code", String.format("%d", code));
+                if(code == 200) {
+                    ResponseHandler<String> handler = new BasicResponseHandler();
+                    String responseBody = handler.handleResponse(response);
+                    retMap.put("body", responseBody);
+                }
+
+          } catch (IOException e) {
+                e.printStackTrace();
+                retMap.put("code", "400");
+                retMap.put("body", String.format("%s 访问失败:\n%s", urlString, e.getMessage()));
+          }
+          return retMap;
+      }
 
       /** 
        * ִ执行一个HTTP POST请求，返回请求响应的HTML
@@ -83,15 +71,15 @@ public class HttpUtil {
        * @param charset     字符集
        * @param pretty      是否美化
        * @return            返回请求响应的HTML
-     * @throws JSONException 
        */
-      //@throws UnsupportedEncodingException 
+      //@throws UnsupportedEncodingException
+      //@throws JSONException
       public static Map<String, String> httpPost(String urlString, Map params, boolean pretty ) throws UnsupportedEncodingException, JSONException {
     	    Log.i("HttpMethod", urlString);
             DefaultHttpClient client = new DefaultHttpClient();
             HttpPost method = new HttpPost(urlString);
      
-            Map<String, String> ret = new HashMap();
+            Map<String, String> retMap = new HashMap();
     	    HttpResponse response = null;
             if ( params != null ) {
               	try {
@@ -124,20 +112,32 @@ public class HttpUtil {
             try {
                 response = client.execute(method);
                 int code = response.getStatusLine().getStatusCode();
-                ret.put("code", String.format("%d", code));
+                retMap.put("code", String.format("%d", code));
 
                 ResponseHandler<String> handler = new BasicResponseHandler();
                 String responseBody = handler.handleResponse(response);
-                ret.put("body", responseBody);
+                retMap.put("body", responseBody);
             }
             catch (IOException e) {
             	e.printStackTrace();
 
-                ret.put("code", "401");
-                ret.put("body", "{\"info\": \"用户名或密码错误\"}");
+                retMap.put("code", "401");
+                retMap.put("body", "{\"info\": \"用户名或密码错误\"}");
             }
             finally {
             }
-            return ret;
+            return retMap;
       }
+
+    public static String UrlToFileName(String urlString) {
+        String path = "default";
+        try {
+            URI uri = new URI(urlString);
+            path = uri.getPath().replace("/", "_");
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+        }
+        return String.format("%s.html", path);
+    }
 }
