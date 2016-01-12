@@ -3,23 +3,14 @@ package com.intfocus.yh_android;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.webkit.JavascriptInterface;
-import android.webkit.WebChromeClient;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
 import android.widget.Toast;
+
 import com.intfocus.yh_android.util.ApiUtil;
-import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.URLs;
-import android.bluetooth.BluetoothAdapter;
 
 import org.OpenUDID.OpenUDID_manager;
 
@@ -33,6 +24,7 @@ public class LoginActivity extends Activity {
 
         setContentView(R.layout.activity_login);
         mWebView = (WebView) findViewById(R.id.webview);
+        mWebView.initialize();
 
         /*
          *  初始化OpenUDID, 设备唯一化
@@ -46,12 +38,6 @@ public class LoginActivity extends Activity {
 	private void showWebView() {
 		try {
             mWebView.requestFocus();
-
-            mWebView.setWebChromeClient(new WebChromeClient() {
-                @Override
-                public void onProgressChanged(WebView view, int progress) {
-                }
-            });
 			
 			mWebView.setOnKeyListener(new View.OnKeyListener() {
 				@Override
@@ -59,11 +45,6 @@ public class LoginActivity extends Activity {
 					return false;
 				}
 			});
-			
-			WebSettings webSettings = mWebView.getSettings();
-			webSettings.setJavaScriptEnabled(true);
-			webSettings.setDefaultTextEncodingName("utf-8");
-            webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
 
             mWebView.addJavascriptInterface(new JavaScriptInterface(), "AndroidJSBridge");
             mWebView.loadUrl(URLs.LOGIN_PATH);
