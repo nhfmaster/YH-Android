@@ -11,7 +11,7 @@ import android.util.Log;
 
 import org.json.JSONObject;
 
-public class ApiUtil {
+public class ApiHelper {
 
 	// {device: {name, platform, os, os_version, uuid}}
 	public static String authentication(String username, String password) {

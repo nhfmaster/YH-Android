@@ -12,7 +12,7 @@ import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 
-import com.intfocus.yh_android.util.ApiUtil;
+import com.intfocus.yh_android.util.ApiHelper;
 import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.HttpUtil;
 import com.intfocus.yh_android.util.URLs;
@@ -177,7 +177,7 @@ public class LoginActivity extends Activity {
         public void login(final String username, String password) {
             if(username.length() > 0 && password.length() > 0) {
                 try {
-                    String info = ApiUtil.authentication(username, URLs.MD5(password));
+                    String info = ApiHelper.authentication(username, URLs.MD5(password));
                     if (info.compareTo("success") == 0) {
                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                         LoginActivity.this.startActivity(intent);
@@ -192,40 +192,6 @@ public class LoginActivity extends Activity {
             else {
                 Toast.makeText(LoginActivity.this, "请输入用户名与密码", Toast.LENGTH_SHORT).show();
             }
-        }
-
-        public String HtmlcallJava() {
-            return "Html call Java";
-        }
-
-        public String HtmlcallJava2(final String param) {
-            return "Html call Java : " + param;
-        }
-
-        public void JavacallHtml() {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mWebView.loadUrl("javascript: showFromHtml()");
-                    Toast.makeText(LoginActivity.this, "clickBtn", Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
-
-        public void JavacallHtml2() {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mWebView.loadUrl("javascript: showFromHtml2('IT-homer blog')");
-                    Toast.makeText(LoginActivity.this, "clickBtn2", Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
-
-        @JavascriptInterface
-        public void callHandler(String tag, Object obj, Object cb) {
-            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-            LoginActivity.this.startActivity(intent);
         }
     }
 

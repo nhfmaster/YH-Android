@@ -13,16 +13,14 @@ import android.webkit.JavascriptInterface;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.intfocus.yh_android.util.ApiUtil;
 import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.HttpUtil;
 import com.intfocus.yh_android.util.URLs;
+import com.intfocus.yh_android.util.ApiHelper;
 
 import org.json.JSONObject;
-
-import static com.intfocus.yh_android.util.ApiUtil.*;
 import static java.lang.String.*;
-import android.util.Log;
+
 import android.widget.Toast;
 
 import java.util.Map;
@@ -134,7 +132,7 @@ public class SubjectActivity extends Activity {
                 htmlContent = htmlContent.replace("/images/", "../../Shared/assets/images/");
                 FileUtil.writeFile(htmlPath, htmlContent);
 
-                reportData(assetsPath, String.format("%d", user.getInt("group_id")), reportID);
+                ApiHelper.reportData(assetsPath, String.format("%d", user.getInt("group_id")), reportID);
 
                 mHandler.obtainMessage().sendToTarget();
             }
