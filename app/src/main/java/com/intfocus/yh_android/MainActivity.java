@@ -31,15 +31,32 @@ public class MainActivity extends Activity {
             mCurrentTab.setActive(false);
             mCurrentTab = (TabView) v;
             mCurrentTab.setActive(true);
-            int id = v.getId();
-            if (id == R.id.tab_kpi) {
-                switchToKPI();
-            } else if (id == R.id.tab_analysis) {
-                switchToAnalysis();
-            } else if (id == R.id.tab_app) {
-                switchToAPP();
-            } else if (id == R.id.tab_message) {
-                switchToMessage();
+
+            try {
+                String urlString;
+                switch(v.getId()) {
+                    case R.id.tab_kpi:
+                        urlString = String.format(URLs.KPI_PATH, user.getString("role_id"), user.getString("group_id"));
+                        break;
+                    case R.id.tab_analysis:
+                        urlString = String.format(URLs.ANALYSE_PATH, user.getString("role_id"));
+                        break;
+                    case R.id.tab_app:
+                        urlString = String.format(URLs.APPLICATION_PATH, user.getString("role_id"));
+                        break;
+                    case R.id.tab_message:
+                        urlString = String.format(URLs.MESSAGE_PATH, user.getString("role_id"), user.getString("user_id"));
+                        break;
+                    default:
+                        urlString = String.format(URLs.KPI_PATH, user.getString("role_id"), user.getString("group_id"));
+                        break;
+                }
+
+                mWebView.loadUrl(String.format("%s%s", URLs.HOST, urlString));
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+                Toast.makeText(MainActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
             }
         }
     };
@@ -79,51 +96,16 @@ public class MainActivity extends Activity {
 
         mCurrentTab = mTabKPI;
         mCurrentTab.setActive(true);
-        switchToKPI();
-    }
 
-    private void switchToKPI() {
-        /* 跳转到仪表盘界面 */
+
         try {
             String urlString = String.format(URLs.KPI_PATH, user.getString("role_id"), user.getString("group_id"));
             mWebView.loadUrl(String.format("%s%s", URLs.HOST, urlString));
-        } catch (JSONException e) {
+        }
+        catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(MainActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void switchToAnalysis() {
-        /* 跳转到分析界面 */
-        try {
-            String urlString = String.format(URLs.ANALYSE_PATH, user.getString("role_id"));
-            mWebView.loadUrl(String.format("%s%s", URLs.HOST, urlString));
-            /* 临时用的跳转接口 FIXME */
-            Intent intent = new Intent(this, SubjectActivity.class);
-            startActivity(intent);
-        } catch (JSONException e) {
-            e.printStackTrace();
-            Toast.makeText(MainActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private void switchToAPP() {
-        try {
-            String urlString = String.format(URLs.APPLICATION_PATH, user.getString("role_id"));
-            mWebView.loadUrl(String.format("%s%s", URLs.HOST, urlString));
-        } catch (JSONException e) {
-            e.printStackTrace();
-            Toast.makeText(MainActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private void switchToMessage() {
-        try {
-            String urlString = String.format(URLs.MESSAGE_PATH, user.getString("role_id"), user.getString("user_id"));
-            mWebView.loadUrl(String.format("%s%s", URLs.HOST, urlString));
-        } catch (JSONException e) {
-            e.printStackTrace();
-            Toast.makeText(MainActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
-        }
-    }
 }
