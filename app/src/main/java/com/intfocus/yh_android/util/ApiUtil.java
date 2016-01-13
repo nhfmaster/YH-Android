@@ -2,6 +2,7 @@ package com.intfocus.yh_android.util;
 
 import org.OpenUDID.*;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,5 +48,27 @@ public class ApiUtil {
 			e.printStackTrace();
 		}
 		return ret;
+	}
+
+	public static void reportData(String assetsPath, String groupID, String reportID) {
+		String urlPath   = String.format(URLs.API_DATA_PATH, groupID, reportID);
+		String urlString = String.format("%s%s", URLs.HOST, urlPath);
+
+		String fileName  = String.format(URLs.REPORT_DATA_FILENAME, groupID, reportID);
+		String filePath  = String.format("%s/assets/javascripts/%s", FileUtil.sharedPath(), fileName);
+
+		Map<String, String> response = HttpUtil.httpGet(urlString);
+
+		if(response.get("code").toString().compareTo("200") == 0) {
+			try {
+				FileUtil.writeFile(filePath, response.get("body").toString());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		else {
+			Log.i("Code", response.get("code").toString());
+			Log.i("Body", response.get("body").toString());
+		}
 	}
 }

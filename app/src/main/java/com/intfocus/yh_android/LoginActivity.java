@@ -29,15 +29,14 @@ import java.util.zip.ZipInputStream;
 
 public class LoginActivity extends Activity {
 
-	private WebView mWebView = null;
-    private Thread mThread;
+	private WebView mWebView;
 
 	@Override
     @SuppressLint("SetJavaScriptEnabled")
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_login);
+
         mWebView = (WebView) findViewById(R.id.webview);
         mWebView.initialize();
         mWebView.requestFocus();
@@ -228,5 +227,13 @@ public class LoginActivity extends Activity {
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
             LoginActivity.this.startActivity(intent);
         }
+    }
+
+    public static void longLog(String Tag, String str) {
+        if(str.length() > 200) {
+            Log.i(Tag, str.substring(0, 200));
+            longLog(Tag, str.substring(200));
+        } else
+            Log.i(Tag, str);
     }
 }
