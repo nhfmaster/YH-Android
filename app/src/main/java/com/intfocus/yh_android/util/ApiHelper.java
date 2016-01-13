@@ -3,12 +3,14 @@ package com.intfocus.yh_android.util;
 import org.OpenUDID.*;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
 import android.os.Build;
 import android.util.Log;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class ApiHelper {
@@ -28,7 +30,7 @@ public class ApiHelper {
     		Map<String, Map<String, String>> params = new HashMap();
     		params.put("device", device);
     		
-			Map<String, String> response = HttpUtil.httpPost(urlString, params, false);
+			Map<String, String> response = HttpUtil.httpPost(urlString, params);
 			
 			if(response.get("code").toString().compareTo("200") == 0) {
 		        String userConfigPath = String.format("%s/%s", FileUtil.basePath(), URLs.USER_CONFIG_FILENAME);
@@ -50,6 +52,9 @@ public class ApiHelper {
 		return ret;
 	}
 
+	/*
+	 *  获取报表网页数据
+	 */
 	public static void reportData(String assetsPath, String groupID, String reportID) {
 		String urlPath   = String.format(URLs.API_DATA_PATH, groupID, reportID);
 		String urlString = String.format("%s%s", URLs.HOST, urlPath);
@@ -70,5 +75,17 @@ public class ApiHelper {
 			Log.i("Code", response.get("code").toString());
 			Log.i("Body", response.get("body").toString());
 		}
+	}
+
+	/*
+	 * 发表评论
+	 */
+	public static void writeComment(int userID, int objectType, int objectID, Map params) throws UnsupportedEncodingException, JSONException {
+		String urlPath   = String.format(URLs.API_COMMENT_PATH, userID, objectID, objectType);
+		String urlString = String.format("%s%s", URLs.HOST, urlPath);
+
+		Map<String, String> response = HttpUtil.httpPost(urlString, params);
+		Log.i("WriteComment", response.get("code").toString());
+		Log.i("WriteComment", response.get("body").toString());
 	}
 }

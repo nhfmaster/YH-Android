@@ -18,6 +18,7 @@ import com.intfocus.yh_android.util.URLs;
 
 import org.json.JSONObject;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static java.lang.String.format;
@@ -31,9 +32,9 @@ public class ObjectActivity extends Activity {
     private String assetsPath;
     private String urlString;
 
+    private String bannerName;
     private int objectID;
     private int objectType;
-
 
     @Override
     @SuppressLint("SetJavaScriptEnabled")
@@ -61,9 +62,11 @@ public class ObjectActivity extends Activity {
         assetsPath = FileUtil.dirPath(URLs.HTML_DIRNAME);
 
         Intent intent = getIntent();
+        bannerName = intent.getStringExtra("bannerName");
         objectID   = intent.getIntExtra("objectID", -1);
         objectType = intent.getIntExtra("objectType", -1);
-        mTitle.setText(intent.getStringExtra("bannerName"));
+
+        mTitle.setText(bannerName);
 
         String urlPath = String.format(URLs.COMMENT_PATH, objectID, objectType);
         urlString = String.format("%s%s", URLs.HOST, urlPath);
@@ -127,6 +130,23 @@ public class ObjectActivity extends Activity {
          */
         @JavascriptInterface
         public void writeComment(final String content) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Map<String, String> params = new HashMap();
+                        params.put("object_title", bannerName);
+                        params.put("user_name", user.getString("user_name"));
+                        params.put("content", content);
+                        ApiHelper.writeComment(user.getInt("user_id"), objectType, objectID, params);
+
+                        mHandler.obtainMessage();
+                    }
+                    catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
         }
     }
 }

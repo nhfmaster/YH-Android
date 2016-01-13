@@ -80,14 +80,14 @@ public class HttpUtil {
        */
       //@throws UnsupportedEncodingException
       //@throws JSONException
-      public static Map<String, String> httpPost(String urlString, Map params, boolean pretty ) throws UnsupportedEncodingException, JSONException {
+      public static Map<String, String> httpPost(String urlString, Map params) throws UnsupportedEncodingException, JSONException {
     	    Log.i("HttpMethod", urlString);
             DefaultHttpClient client = new DefaultHttpClient();
             HttpPost request = new HttpPost(urlString);
      
             Map<String, String> retMap = new HashMap();
     	    HttpResponse response = null;
-            if ( params != null ) {
+            if(params != null) {
               	try {
             	  Iterator iter = params.entrySet().iterator();
                   JSONObject holder = new JSONObject();
@@ -95,16 +95,21 @@ public class HttpUtil {
                   while(iter.hasNext()) {
                   	Map.Entry pairs = (Map.Entry)iter.next();
                   	String key = (String)pairs.getKey();
-                  	Map m = (Map)pairs.getValue();
-                  	   
-                  	JSONObject data = new JSONObject();
-                  	Iterator iter2 = m.entrySet().iterator();
-                  	while(iter2.hasNext()) {
-                  	Map.Entry pairs2 = (Map.Entry)iter2.next();
-						data.put((String)pairs2.getKey(), (String)pairs2.getValue());
 
-		              	holder.put(key, data);
-		              }
+                      if(pairs.getValue() instanceof  Map) {
+                          Map m = (Map) pairs.getValue();
+
+                          JSONObject data = new JSONObject();
+                          Iterator iter2 = m.entrySet().iterator();
+                          while (iter2.hasNext()) {
+                              Map.Entry pairs2 = (Map.Entry) iter2.next();
+                              data.put((String) pairs2.getKey(), (String) pairs2.getValue());
+                              holder.put(key, data);
+                          }
+                      }
+                      else {
+                          holder.put(key, pairs.getValue());
+                      }
                   }
 
                   StringEntity se = new StringEntity(holder.toString());

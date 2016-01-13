@@ -24,7 +24,7 @@ public class URLs implements Serializable {
 
 
     public final static String API_DATA_PATH           = "/api/v1/group/%s/report/%s/attachment";
-    public final static String API_COMMENT_PATH        = "/api/v1/user/%s/id/%s/type/%s";
+    public final static String API_COMMENT_PATH        = "/api/v1/user/%d/id/%d/type/%d";
     public final static String API_SCREEN_LOCK_PATH    = "/api/v1/user_device/%s/screen_lock";
     public final static String API_DEVICE_STATE_PATH   = "/api/v1/user_device/%s/state";
     public final static String API_RESET_PASSWORD_PATH = "/api/v1/update/%s/password";
