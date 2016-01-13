@@ -43,6 +43,12 @@ public class URLs implements Serializable {
 
 	public final static String STORAGE_BASE              = Environment.getExternalStorageDirectory().getAbsolutePath();
 
+    /*
+     *  sd path: /storage/emulated/0
+     *  /storage/emulated/0/Shared/{assets,loading}
+     *  /storage/emulated/0/user.plist
+     *  /storage/emulated/0/user-(user-id)/{config, HTML}
+     */
 	public final static String USER_CONFIG_FILENAME      = "user.plist";
 	public final static String CONFIG_DIRNAME            = "Configs";
 	public final static String SETTINGS_CONFIG_FILENAME  = "Setting.plist";

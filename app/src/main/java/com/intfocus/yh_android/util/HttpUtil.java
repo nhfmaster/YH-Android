@@ -140,6 +140,7 @@ public class HttpUtil {
     public static String UrlToFileName(String urlString) {
         String path = "default";
         try {
+            urlString = urlString.replace(URLs.HOST, "");
             URI uri = new URI(urlString);
             path = uri.getPath().replace("/", "_");
         }
