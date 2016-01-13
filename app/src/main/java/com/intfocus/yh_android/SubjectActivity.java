@@ -30,12 +30,16 @@ public class SubjectActivity extends Activity {
     private TextView mTitle;
     private ImageView mComment;
     private WebView mWebView;
-    private Boolean isInnerLink;
     private JSONObject user;
-    private String urlString;
     private String assetsPath;
+
+    private String urlString;
+    private Boolean isInnerLink;
     private String reportID;
+
+    private String bannerName;
     private int objectID;
+    private int objectType;
 
     @Override
     @SuppressLint("SetJavaScriptEnabled")
@@ -65,10 +69,11 @@ public class SubjectActivity extends Activity {
 
         try {
             Intent intent     = getIntent();
-            String bannerName = intent.getStringExtra("bannerName");
             String link = intent.getStringExtra("link");
 
-            objectID    = intent.getIntExtra("objectId", -1);
+            bannerName  = intent.getStringExtra("bannerName");
+            objectID    = intent.getIntExtra("objectID", -1);
+            objectType  = intent.getIntExtra("objectType", -1);
             isInnerLink = !(link.startsWith("http://") || link.startsWith("https://"));
             urlString   = link;
 
@@ -90,8 +95,12 @@ public class SubjectActivity extends Activity {
         mComment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(SubjectActivity.this, ObjectActivity.class);
-                SubjectActivity.this.startActivity(intent);
+            Intent intent = new Intent(SubjectActivity.this, ObjectActivity.class);
+            intent.putExtra("bannerName", bannerName);
+            intent.putExtra("objectID", objectID);
+            intent.putExtra("objectType", objectType);
+
+            SubjectActivity.this.startActivity(intent);
             }
         });
     }

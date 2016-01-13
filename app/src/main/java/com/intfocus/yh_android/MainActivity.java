@@ -32,6 +32,7 @@ public class MainActivity extends Activity {
     private JSONObject user;
     private String urlString;
     private String assetsPath;
+    private int objectType;
 
     @Override
     @SuppressLint("SetJavaScriptEnabled")
@@ -61,6 +62,7 @@ public class MainActivity extends Activity {
             Log.i("URL", urlString);
 
 
+            objectType = 1;
             mWebView.loadUrl(String.format("file:///%s/loading/loading.html", FileUtil.sharedPath()));
             new Thread(runnable).start();
         }
@@ -113,15 +115,19 @@ public class MainActivity extends Activity {
             String urlPath;
             switch(v.getId()) {
                 case R.id.tab_kpi:
+                    objectType = 1;
                     urlPath = String.format(URLs.KPI_PATH, user.getString("role_id"), user.getString("group_id"));
                     break;
                 case R.id.tab_analysis:
+                    objectType = 2;
                     urlPath = String.format(URLs.ANALYSE_PATH, user.getString("role_id"));
                     break;
                 case R.id.tab_app:
+                    objectType = 3;
                     urlPath = String.format(URLs.APPLICATION_PATH, user.getString("role_id"));
                     break;
                 case R.id.tab_message:
+                    objectType = 5;
                     urlPath = String.format(URLs.MESSAGE_PATH, user.getString("role_id"), user.getString("user_id"));
                     break;
                 default:
@@ -187,19 +193,20 @@ public class MainActivity extends Activity {
          * JS 接口，暴露给JS的方法使用@JavascriptInterface装饰
          */
         @JavascriptInterface
-        public void pageLink(final String bannerName, final String link, final int objectId) {
+        public void pageLink(final String bannerName, final String link, final int objectID) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    String message =  String.format("%s\n%s\n%d", bannerName, link, objectId);
-                    Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
-                    longLog("JSClick", message);
+                String message =  String.format("%s\n%s\n%d", bannerName, link, objectID);
+                Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
+                longLog("JSClick", message);
 
-                    Intent intent = new Intent(MainActivity.this, SubjectActivity.class);
-                    intent.putExtra("bannerName", bannerName);
-                    intent.putExtra("link", link);
-                    intent.putExtra("objectId", objectId);
-                    MainActivity.this.startActivity(intent);
+                Intent intent = new Intent(MainActivity.this, SubjectActivity.class);
+                intent.putExtra("bannerName", bannerName);
+                intent.putExtra("link", link);
+                intent.putExtra("objectID", objectID);
+                intent.putExtra("objectType", objectType);
+                MainActivity.this.startActivity(intent);
                 }
             });
         }
