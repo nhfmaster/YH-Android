@@ -9,6 +9,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.CoreProtocolPNames;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -46,6 +47,10 @@ public class HttpUtil {
           HttpGet request = new HttpGet(urlString);
           HttpResponse response;
           try {
+              String userAgent = "Mozilla/5.0 (Linux; U; Android 4.3; en-us; HTC One - 4.3 - API 18 - 1080x1920 Build/JLS36G) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30";
+              //request.setHeader("Accept", "application/json");
+              //request.setHeader("Content-type", "application/json");
+              request.setHeader("User-Agent", userAgent);
                 response = client.execute(request);
                 int code = response.getStatusLine().getStatusCode();
                 retMap.put("code", String.format("%d", code));
@@ -53,6 +58,7 @@ public class HttpUtil {
                     ResponseHandler<String> handler = new BasicResponseHandler();
                     String responseBody = handler.handleResponse(response);
                     retMap.put("body", responseBody);
+                    Log.i("responseBody", responseBody.substring(responseBody.length() - 30));
                 }
 
           } catch (IOException e) {
@@ -77,7 +83,7 @@ public class HttpUtil {
       public static Map<String, String> httpPost(String urlString, Map params, boolean pretty ) throws UnsupportedEncodingException, JSONException {
     	    Log.i("HttpMethod", urlString);
             DefaultHttpClient client = new DefaultHttpClient();
-            HttpPost method = new HttpPost(urlString);
+            HttpPost request = new HttpPost(urlString);
      
             Map<String, String> retMap = new HashMap();
     	    HttpResponse response = null;
@@ -100,17 +106,19 @@ public class HttpUtil {
 		              	holder.put(key, data);
 		              }
                   }
+
                   StringEntity se = new StringEntity(holder.toString());
-                  method.setEntity(se);
-                  method.setHeader("Accept", "application/json");
-                  method.setHeader("Content-type", "application/json");
-                  method.setHeader("User-Agent", "Mozilla/5.0 (Linux; U; Android 4.3; en-us; HTC One - 4.3 - API 18 - 1080x1920 Build/JLS36G) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30");
+                  request.setEntity(se);
 				} catch (JSONException e) {
 					e.printStackTrace();
 				}
             }
             try {
-                response = client.execute(method);
+                String userAgent = "Mozilla/5.0 (Linux; U; Android 4.3; en-us; HTC One - 4.3 - API 18 - 1080x1920 Build/JLS36G) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30";
+                request.setHeader("Accept", "application/json");
+                request.setHeader("Content-type", "application/json");
+                request.setHeader("User-Agent", userAgent);
+                response = client.execute(request);
                 int code = response.getStatusLine().getStatusCode();
                 retMap.put("code", String.format("%d", code));
 

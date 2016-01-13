@@ -32,41 +32,6 @@ public class LoginActivity extends Activity {
 	private WebView mWebView = null;
     private Thread mThread;
 
-    private Handler mHandler = new Handler() {
-        public void handleMessage(Message message) {
-            String htmlName = HttpUtil.UrlToFileName(URLs.LOGIN_PATH);
-            String htmlPath = String.format("%s/assets/%s", FileUtil.sharedPath(), htmlName);
-            //mWebView.loadDataWithBaseURL(String.format("file:///%s/assets/", FileUtil.sharedPath()), FileUtil.readFile(htmlPath), "text/html", "UTF-8", null);
-            mWebView.loadUrl(String.format("file:///" + htmlPath));
-        }
-
-    };
-    Runnable runnable = new Runnable() {
-        @Override
-        public void run() {
-            try {
-                Map<String, String> response = HttpUtil.httpGet(URLs.LOGIN_PATH);
-                if (response.get("code").toString().compareTo("200") == 0) {
-                    String htmlName = HttpUtil.UrlToFileName(URLs.LOGIN_PATH);
-                    String htmlPath = String.format("%s/assets/%s", FileUtil.sharedPath(), htmlName);
-                    String htmlContent = response.get("body").toString();
-                    String assetsPath = String.format("file:///%s/assets/", FileUtil.sharedPath());
-                    htmlContent = htmlContent.replace("javascript/", String.format("%s/javascript/", assetsPath));
-                    htmlContent = htmlContent.replace("stylesheets/", String.format("%s/stylesheets/", assetsPath));
-                    htmlContent = htmlContent.replace("images/", String.format("%s/images/", assetsPath));
-                    Log.i("HTML", htmlContent);
-                    FileUtil.writeFile(htmlPath, response.get("body").toString());
-
-                    mHandler.obtainMessage().sendToTarget();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        ;
-    };
-
 	@Override
     @SuppressLint("SetJavaScriptEnabled")
 	protected void onCreate(Bundle savedInstanceState) {
@@ -85,38 +50,73 @@ public class LoginActivity extends Activity {
         });
 
         mWebView.addJavascriptInterface(new JavaScriptInterface(), "AndroidJSBridge");
-        mWebView.loadUrl(URLs.LOGIN_PATH);
 
         /*
          *  初始化OpenUDID, 设备唯一化
          */
         OpenUDID_manager.sync(getApplicationContext());
 
+        /*
+         *  解压表态资源
+         */
         try {
-            File file = new File(String.format("%s/assets", FileUtil.sharedPath()));
+            File file = new File(String.format("%s/loading", FileUtil.sharedPath()));
+            if(!file.exists()) {
+                unZip("loading.zip", FileUtil.sharedPath(), true);
+            }
+            file = new File(String.format("%s/assets", FileUtil.sharedPath()));
             if(!file.exists()) {
                 unZip("assets.zip", FileUtil.sharedPath(), true);
             }
-            File[] files = file.listFiles();
-            for(int i = 0; i < files.length; i ++) {
-                Log.i("FileInShared", files[i].getAbsolutePath());
-            }
+
+            String htmlPath = String.format("file:///%s/loading/login.html", FileUtil.sharedPath());
+            mWebView.loadUrl(htmlPath);
         } catch (IOException e) {
             e.printStackTrace();
         }
-//        String[] assets = new String[0];
-//        try {
-//            assets = getApplicationContext().getAssets().list("");
-//            for(int i = 0; i < assets.length; i ++) {
-//                Log.i("assets", assets[i]);
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
 
-
-//        new Thread(runnable).start();
+        /*
+         *  加载服务器网页
+         */
+        new Thread(runnable).start();
     }
+
+    private Handler mHandler = new Handler() {
+        public void handleMessage(Message message) {
+            String htmlName = HttpUtil.UrlToFileName(URLs.LOGIN_PATH);
+            String htmlPath = String.format("%s/%s", FileUtil.sharedPath(), htmlName);
+            Log.i("HTML", FileUtil.readFile(htmlPath));
+            mWebView.loadUrl(String.format("file:///" + htmlPath));
+        }
+
+    };
+    Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                Map<String, String> response = HttpUtil.httpGet(URLs.LOGIN_PATH);
+                if (response.get("code").toString().compareTo("200") == 0) {
+                    String htmlName = HttpUtil.UrlToFileName(URLs.LOGIN_PATH);
+                    String htmlPath = String.format("%s/%s", FileUtil.sharedPath(), htmlName);
+                    String htmlContent = response.get("body").toString();
+                    htmlContent = htmlContent.replace("/javascripts/", "assets/javascripts/");
+                    htmlContent = htmlContent.replace("/stylesheets/", "assets/stylesheets/");
+                    htmlContent = htmlContent.replace("/images/", "assets/images/");
+                    FileUtil.writeFile(htmlPath, htmlContent);
+
+                    mHandler.obtainMessage().sendToTarget();
+                }
+                else {
+                    Toast.makeText(LoginActivity.this, "访问服务器失败", Toast.LENGTH_LONG).show();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                Toast.makeText(LoginActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        }
+
+        ;
+    };
 
     /**
      * 解压assets的zip压缩文件到指定目录
