@@ -4,29 +4,28 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.widget.Toast;
-import android.util.Log;
-import java.io.File;
-import java.io.InputStream;
-
-import java.io.IOException;
-import java.util.Map;
-import android.os.Handler;
-import android.os.Message;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-import java.io.FileOutputStream;
-import android.content.Context;
 
 import com.intfocus.yh_android.util.ApiUtil;
 import com.intfocus.yh_android.util.FileUtil;
-import com.intfocus.yh_android.util.URLs;
 import com.intfocus.yh_android.util.HttpUtil;
+import com.intfocus.yh_android.util.URLs;
 
 import org.OpenUDID.OpenUDID_manager;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 public class LoginActivity extends Activity {
 
@@ -41,6 +40,31 @@ public class LoginActivity extends Activity {
             mWebView.loadUrl(String.format("file:///" + htmlPath));
         }
 
+    };
+    Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                Map<String, String> response = HttpUtil.httpGet(URLs.LOGIN_PATH);
+                if (response.get("code").toString().compareTo("200") == 0) {
+                    String htmlName = HttpUtil.UrlToFileName(URLs.LOGIN_PATH);
+                    String htmlPath = String.format("%s/assets/%s", FileUtil.sharedPath(), htmlName);
+                    String htmlContent = response.get("body").toString();
+                    String assetsPath = String.format("file:///%s/assets/", FileUtil.sharedPath());
+                    htmlContent = htmlContent.replace("javascript/", String.format("%s/javascript/", assetsPath));
+                    htmlContent = htmlContent.replace("stylesheets/", String.format("%s/stylesheets/", assetsPath));
+                    htmlContent = htmlContent.replace("images/", String.format("%s/images/", assetsPath));
+                    Log.i("HTML", htmlContent);
+                    FileUtil.writeFile(htmlPath, response.get("body").toString());
+
+                    mHandler.obtainMessage().sendToTarget();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        ;
     };
 
 	@Override
@@ -91,8 +115,7 @@ public class LoginActivity extends Activity {
 //        }
 
 
-
-        new Thread(runnable).start();
+//        new Thread(runnable).start();
     }
 
     /**
@@ -146,32 +169,6 @@ public class LoginActivity extends Activity {
         }
         zipInputStream.close();
     }
-
-
-
-    Runnable runnable = new Runnable() {
-        @Override
-        public void run() {
-            try {
-                Map<String, String> response = HttpUtil.httpGet(URLs.LOGIN_PATH);
-                if (response.get("code").toString().compareTo("200") == 0) {
-                    String htmlName = HttpUtil.UrlToFileName(URLs.LOGIN_PATH);
-                    String htmlPath = String.format("%s/assets/%s", FileUtil.sharedPath(), htmlName);
-                    String htmlContent = response.get("body").toString();
-                    String assetsPath = String.format("file:///%s/assets/", FileUtil.sharedPath());
-                    htmlContent = htmlContent.replace("javascript/", String.format("%s/javascript/", assetsPath));
-                    htmlContent = htmlContent.replace("stylesheets/", String.format("%s/stylesheets/", assetsPath));
-                    htmlContent = htmlContent.replace("images/", String.format("%s/images/", assetsPath));
-                    Log.i("HTML", htmlContent);
-                    FileUtil.writeFile(htmlPath, response.get("body").toString());
-
-                    mHandler.obtainMessage().sendToTarget();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        };
-    };
 
     private class JavaScriptInterface {
         /*

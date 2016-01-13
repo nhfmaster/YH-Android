@@ -1,13 +1,13 @@
 package com.intfocus.yh_android;
 
+import android.app.Activity;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Switch;
 import android.widget.TextView;
 
-public class SettingActivity extends ActionBarActivity {
+public class SettingActivity extends Activity {
 
     private TextView mUserID;
     private TextView mRoleID;
