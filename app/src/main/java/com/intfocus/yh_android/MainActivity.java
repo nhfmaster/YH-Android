@@ -198,7 +198,7 @@ public class MainActivity extends Activity {
                 @Override
                 public void run() {
                 String message =  String.format("%s\n%s\n%d", bannerName, link, objectID);
-                Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
                 longLog("JSClick", message);
 
                 Intent intent = new Intent(MainActivity.this, SubjectActivity.class);

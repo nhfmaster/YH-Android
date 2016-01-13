@@ -9,7 +9,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.CoreProtocolPNames;
+import org.apache.http.protocol.HTTP;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -108,11 +108,11 @@ public class HttpUtil {
                           }
                       }
                       else {
-                          holder.put(key, pairs.getValue());
+                          holder.put(key, (String)pairs.getValue());
                       }
                   }
 
-                  StringEntity se = new StringEntity(holder.toString());
+                  StringEntity se = new StringEntity(holder.toString(), HTTP.UTF_8);
                   request.setEntity(se);
 				} catch (JSONException e) {
 					e.printStackTrace();

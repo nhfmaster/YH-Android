@@ -23,6 +23,7 @@ import java.util.Map;
 
 import static java.lang.String.format;
 import android.content.Intent;
+import android.util.Log;
 
 public class ObjectActivity extends Activity {
 
@@ -49,6 +50,7 @@ public class ObjectActivity extends Activity {
         mWebView = (WebView) findViewById(R.id.webview);
 
         mWebView.initialize();
+        mWebView.requestFocus();
         mWebView.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
@@ -138,6 +140,7 @@ public class ObjectActivity extends Activity {
                         params.put("object_title", bannerName);
                         params.put("user_name", user.getString("user_name"));
                         params.put("content", content);
+                        Log.i("PARAMS", params.toString());
                         ApiHelper.writeComment(user.getInt("user_id"), objectType, objectID, params);
 
                         mHandler.obtainMessage();
@@ -146,7 +149,7 @@ public class ObjectActivity extends Activity {
                         e.printStackTrace();
                     }
                 }
-            });
+            }).start();
         }
     }
 }
