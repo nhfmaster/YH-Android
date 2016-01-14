@@ -210,6 +210,15 @@ public class MainActivity extends Activity {
                 }
             });
         }
+
+        @JavascriptInterface
+        public void storeTabIndex(final String pageName, final int tabIndex) {
+        }
+
+        @JavascriptInterface
+        public int restoreTabIndex(final String pageName) {
+            return 0;
+        }
     }
 
 

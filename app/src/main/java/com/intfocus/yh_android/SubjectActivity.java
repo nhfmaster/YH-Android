@@ -20,6 +20,7 @@ import com.intfocus.yh_android.util.ApiHelper;
 
 import org.json.JSONObject;
 import static java.lang.String.*;
+import android.util.Log;
 
 import android.widget.Toast;
 
@@ -53,6 +54,7 @@ public class SubjectActivity extends Activity {
         mTitle   = (TextView) findViewById(R.id.title);
         mComment = (ImageView) findViewById(R.id.comment);
         mWebView = (WebView) findViewById(R.id.webview);
+
         mWebView.initialize();
         mWebView.requestFocus();
         mWebView.setOnKeyListener(new View.OnKeyListener() {
@@ -90,7 +92,29 @@ public class SubjectActivity extends Activity {
         }
 
         mWebView.loadUrl(String.format("file:///%s/loading/loading.html", FileUtil.sharedPath()));
-        new Thread(runnable).start();
+        if(isInnerLink) {
+            new Thread(runnable).start();
+        }
+        else {
+            try {
+                /*
+                 * 外部链接传参: userid, timestamp
+                 */
+                String appendParams = String.format("?userid=%d&timestamp=%s", user.getInt("user_id"), URLs.TimeStamp);
+
+                if(urlString.indexOf("?") == -1) {
+                    urlString = String.format("%s%s", urlString, appendParams);
+                }
+                else {
+                    urlString = urlString.replace("?", appendParams);
+                }
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+            Log.i("OutLink", urlString);
+            mWebView.loadUrl(urlString);
+        }
 
         mComment.setOnClickListener(new View.OnClickListener() {
             @Override
