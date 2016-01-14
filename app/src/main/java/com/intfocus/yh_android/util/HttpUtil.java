@@ -56,8 +56,7 @@ public class HttpUtil {
           HttpGet request = new HttpGet(urlString);
           HttpResponse response;
           try {
-              String userAgent = "Mozilla/5.0 (Linux; U; Android 4.3; en-us; HTC One - 4.3 - API 18 - 1080x1920 Build/JLS36G) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30";
-              request.setHeader("User-Agent", userAgent);
+              request.setHeader("User-Agent", HttpUtil.webViewUserAgent());
 
               if(headers.containsKey("ETag")) {
                   request.setHeader("IF-None-Match", headers.get("ETag").toString());
@@ -143,10 +142,9 @@ public class HttpUtil {
 				}
             }
             try {
-                String userAgent = "Mozilla/5.0 (Linux; U; Android 4.3; en-us; HTC One - 4.3 - API 18 - 1080x1920 Build/JLS36G) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30";
                 request.setHeader("Accept", "application/json");
                 request.setHeader("Content-type", "application/json");
-                request.setHeader("User-Agent", userAgent);
+                request.setHeader("User-Agent", HttpUtil.webViewUserAgent());
                 response = client.execute(request);
 
                 Header[] headers = response.getAllHeaders();
@@ -186,43 +184,14 @@ public class HttpUtil {
         return String.format("%s.html", path);
     }
 
-    public static String urlConvertToLocal(String urlString, String assetsPath) {
-        Map<String, String> response = HttpUtil.httpGet(urlString);
-        if (response.get("code").toString().compareTo("200") == 0) {
-            String htmlName = HttpUtil.UrlToFileName(urlString);
-            String htmlPath = String.format("%s/%s", assetsPath, htmlName);
-            String htmlContent = response.get("body").toString();
-                /*
-                 *  /storage/emulated/0/Shared/{assets,loading}
-                 *  /storage/emulated/0/user.plist
-                 *  /storage/emulated/0/user-(user-id)/{config, HTML}
-                 */
-            htmlContent = htmlContent.replace("/javascripts/", "../../Shared/assets/javascripts/");
-            htmlContent = htmlContent.replace("/stylesheets/", "../../Shared/assets/stylesheets/");
-            htmlContent = htmlContent.replace("/images/", "../../Shared/assets/images/");
-            try {
-                HttpUtil.writeFile(htmlPath, htmlContent);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+    public static String webViewUserAgent() {
+        String userAgent = System.getProperty("http.agent");
+        if(userAgent.isEmpty()) {
+            userAgent = "Mozilla/5.0 (Linux; U; Android 4.3; en-us; HTC One - 4.3 - API 18 - 1080x1920 Build/JLS36G) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30 default-by-hand";
         }
 
-        return response.get("code").toString();
+        return userAgent;
     }
 
-    /*
-     * 字符串写入本地文件
-     */
-    public static void writeFile(String pathName, String content) throws IOException {
-        Log.i("PathName", pathName);
-        File file = new File(pathName);
-
-        if(file.exists()) { file.delete(); }
-
-        file.createNewFile();
-        FileOutputStream out = new FileOutputStream(file, true);
-        out.write(content.toString().getBytes("utf-8"));
-        out.close();
-    }
 
 }
