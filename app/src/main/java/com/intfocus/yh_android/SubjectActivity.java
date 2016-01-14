@@ -18,12 +18,16 @@ import com.intfocus.yh_android.util.HttpUtil;
 import com.intfocus.yh_android.util.URLs;
 import com.intfocus.yh_android.util.ApiHelper;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 import static java.lang.String.*;
 import android.util.Log;
+import java.io.File;
 
 import android.widget.Toast;
 
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.Map;
 
 public class SubjectActivity extends Activity {
@@ -139,45 +143,34 @@ public class SubjectActivity extends Activity {
     @SuppressLint("SetJavaScriptEnabled")
     private Handler mHandler = new Handler() {
         public void handleMessage(Message message) {
-            String htmlName = HttpUtil.UrlToFileName(urlString);
-            String htmlPath = String.format("%s/%s", assetsPath, htmlName);
-
-            mWebView.loadUrl(String.format("file:///" + htmlPath));
+            switch(message.what) {
+                case 200:
+                case 304:
+                    String htmlPath = (String)message.obj;
+                    Log.i("FilePath", htmlPath);
+                    mWebView.loadUrl(String.format("file:///" + htmlPath));
+                    break;
+                default:
+                    Toast.makeText(SubjectActivity.this, "访问服务器失败", Toast.LENGTH_SHORT).show();;
+                    break;
+            }
         }
 
     };
     Runnable runnable = new Runnable() {
         @Override
         public void run() {
-        try {
-            Map<String, String> response = HttpUtil.httpGet(urlString);
-            if (response.get("code").toString().compareTo("200") == 0) {
-                String htmlName = HttpUtil.UrlToFileName(urlString);
-                String htmlPath = String.format("%s/%s", assetsPath, htmlName);
-                String htmlContent = response.get("body").toString();
-                /*
-                 *  /storage/emulated/0/Shared/{assets,loading}
-                 *  /storage/emulated/0/user.plist
-                 *  /storage/emulated/0/user-(user-id)/{config, HTML}
-                 */
-                htmlContent = htmlContent.replace("/javascripts/", "../../Shared/assets/javascripts/");
-                htmlContent = htmlContent.replace("/stylesheets/", "../../Shared/assets/stylesheets/");
-                htmlContent = htmlContent.replace("/images/", "../../Shared/assets/images/");
-                FileUtil.writeFile(htmlPath, htmlContent);
+            Map<String, String> response = ApiHelper.httpGetWithHeader(urlString, assetsPath, "../../Shared/assets");
+            Message message = mHandler.obtainMessage();
+            message.what =  Integer.parseInt(response.get("code").toString());
 
-                ApiHelper.reportData(assetsPath, String.format("%d", user.getInt("group_id")), reportID);
-
-                mHandler.obtainMessage().sendToTarget();
+            String[] codes = new String[] {"200", "304"};
+            if(Arrays.asList(codes).contains(response.get("code").toString())) {
+                message.obj = response.get("path").toString();
             }
-            else {
-                Toast.makeText(SubjectActivity.this, "访问服务器失败", Toast.LENGTH_LONG).show();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+            mHandler.sendMessage(message);
         }
     };
-
 
     private class JavaScriptInterface {
         /*
@@ -185,11 +178,41 @@ public class SubjectActivity extends Activity {
          */
         @JavascriptInterface
         public void storeTabIndex(final String pageName, final int tabIndex) {
+            try {
+                String filePath    = FileUtil.dirPath(URLs.CONFIG_DIRNAME, URLs.TABINDEX_CONFIG_FILENAME);
+
+                JSONObject config = new JSONObject();
+                if((new File(filePath).exists())) {
+                    String fileContent = FileUtil.readFile(filePath);
+                    config = new JSONObject(fileContent);
+                }
+                config.put(pageName, tabIndex);
+
+                FileUtil.writeFile(filePath, config.toString());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         @JavascriptInterface
         public int restoreTabIndex(final String pageName) {
-            return 0;
+            int tabIndex = 0;
+            try {
+                String filePath    = FileUtil.dirPath(URLs.CONFIG_DIRNAME, URLs.TABINDEX_CONFIG_FILENAME);
+
+                JSONObject config = new JSONObject();
+                if((new File(filePath).exists())) {
+                    String fileContent = FileUtil.readFile(filePath);
+                    config = new JSONObject(fileContent);
+                }
+                tabIndex = config.getInt(pageName);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            return tabIndex < 0 ? 0 : tabIndex;
         }
     }
 }

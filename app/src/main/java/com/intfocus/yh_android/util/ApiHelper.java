@@ -8,10 +8,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import android.os.Build;
+import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import java.io.File;
 
 public class ApiHelper {
 
@@ -87,5 +90,67 @@ public class ApiHelper {
 		Map<String, String> response = HttpUtil.httpPost(urlString, params);
 		Log.i("WriteComment", response.get("code").toString());
 		Log.i("WriteComment", response.get("body").toString());
+	}
+
+
+
+	public static Map<String, String> httpGetWithHeader(String urlString, String assetsPath, String relativeAssetsPath) {
+		Map<String, String> retMap = new HashMap<String, String>();
+
+		String urlKey = urlString;
+		if (urlString.indexOf("?") != -1) {
+			urlKey = TextUtils.split(urlString, "?")[0];
+		}
+		try {
+			String headersFilePath = String.format("%s/%s", assetsPath, URLs.CACHED_HEADER_FILENAME);
+
+			JSONObject headersJSON = new JSONObject();
+			if((new File(headersFilePath)).exists()) {
+				headersJSON = FileUtil.readConfigFile(headersFilePath);
+			}
+			JSONObject headerJSON = new JSONObject();
+
+			Map<String, String> headers = new HashMap<String, String>();
+			if(headersJSON.has(urlKey)) {
+				headerJSON = (JSONObject)headersJSON.get(urlKey);
+				if(headerJSON.has("ETag")) {
+					headers.put("ETag", headerJSON.getString("ETag"));
+				}
+				if(headerJSON.has("Last-Modified")) {
+					headers.put("Last-Modified", headerJSON.getString("Last-Modified"));
+				}
+			}
+
+			Map<String, String> response = HttpUtil.httpGet(urlString, headers);
+			String statusCode = response.get("code").toString();
+			retMap.put("code", statusCode);
+
+			String htmlName = HttpUtil.UrlToFileName(urlString);
+			String htmlPath = String.format("%s/%s", assetsPath, htmlName);
+			retMap.put("path", htmlPath);
+
+			if (statusCode.compareTo("200") == 0) {
+				if(response.containsKey("ETag")) {
+					headerJSON.put("ETag", response.get("ETag").toString());
+				}
+				if(response.containsKey("Last-Modified")) {
+					headerJSON.put("Last-Modified", response.get("Last-Modified").toString());
+				}
+
+				headersJSON.put(urlKey, headerJSON);
+				FileUtil.writeFile(headersFilePath, headersJSON.toString());
+
+				String htmlContent = response.get("body").toString();
+				htmlContent = htmlContent.replace("/javascripts/", String.format("%s/javascripts/", relativeAssetsPath));
+				htmlContent = htmlContent.replace("/stylesheets/", String.format("%s/stylesheets/", relativeAssetsPath));
+				htmlContent = htmlContent.replace("/images/", String.format("%s/images/", relativeAssetsPath));
+				FileUtil.writeFile(htmlPath, htmlContent);
+			}
+		} catch (Exception e) {
+			retMap.put("code", "500");
+			e.printStackTrace();
+		}
+
+		return retMap;
 	}
 }

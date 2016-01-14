@@ -18,11 +18,14 @@ import com.intfocus.yh_android.util.HttpUtil;
 import com.intfocus.yh_android.util.URLs;
 
 import org.OpenUDID.OpenUDID_manager;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -82,39 +85,33 @@ public class LoginActivity extends Activity {
 
     private Handler mHandler = new Handler() {
         public void handleMessage(Message message) {
-            String htmlName = HttpUtil.UrlToFileName(URLs.LOGIN_PATH);
-            String htmlPath = String.format("%s/%s", FileUtil.sharedPath(), htmlName);
-            Log.i("HTML", FileUtil.readFile(htmlPath));
-            mWebView.loadUrl(String.format("file:///" + htmlPath));
+            switch(message.what) {
+                case 200:
+                case 304:
+                    String htmlPath = (String)message.obj;
+                    Log.i("FilePath", htmlPath);
+                    mWebView.loadUrl(String.format("file:///" + htmlPath));
+                    break;
+                default:
+                    Toast.makeText(LoginActivity.this, "访问服务器失败", Toast.LENGTH_SHORT).show();;
+                    break;
+            }
         }
 
     };
     Runnable runnable = new Runnable() {
         @Override
         public void run() {
-            try {
-                Map<String, String> response = HttpUtil.httpGet(URLs.LOGIN_PATH);
-                if (response.get("code").toString().compareTo("200") == 0) {
-                    String htmlName = HttpUtil.UrlToFileName(URLs.LOGIN_PATH);
-                    String htmlPath = String.format("%s/%s", FileUtil.sharedPath(), htmlName);
-                    String htmlContent = response.get("body").toString();
-                    htmlContent = htmlContent.replace("/javascripts/", "assets/javascripts/");
-                    htmlContent = htmlContent.replace("/stylesheets/", "assets/stylesheets/");
-                    htmlContent = htmlContent.replace("/images/", "assets/images/");
-                    FileUtil.writeFile(htmlPath, htmlContent);
+            Map<String, String> response = ApiHelper.httpGetWithHeader(URLs.LOGIN_PATH, FileUtil.sharedPath(), "assets");
+            Message message = mHandler.obtainMessage();
+            message.what =  Integer.parseInt(response.get("code").toString());
 
-                    mHandler.obtainMessage().sendToTarget();
-                }
-                else {
-                    Toast.makeText(LoginActivity.this, "访问服务器失败", Toast.LENGTH_LONG).show();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                Toast.makeText(LoginActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+            String[] codes = new String[] {"200", "304"};
+            if(Arrays.asList(codes).contains(response.get("code").toString())) {
+                message.obj = response.get("path").toString();
             }
+            mHandler.sendMessage(message);
         }
-
-        ;
     };
 
     /**

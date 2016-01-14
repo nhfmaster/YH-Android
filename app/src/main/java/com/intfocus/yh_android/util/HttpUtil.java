@@ -1,7 +1,10 @@
 package com.intfocus.yh_android.util;
 
+import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
 
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpPost;
@@ -13,6 +16,8 @@ import org.apache.http.protocol.HTTP;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
@@ -32,6 +37,10 @@ import java.net.URI;
  * @version 1.0.0
  */
 public class HttpUtil {
+
+      public static Map<String, String> httpGet(String urlString) {
+          return HttpUtil.httpGet(urlString, new HashMap<String, String>());
+      }
       /**
        * ִ执行一个HTTP GET请求，返回请求响应的HTML
        *
@@ -39,7 +48,7 @@ public class HttpUtil {
        * @return                    返回请求响应的HTML
        */
       //@throws UnsupportedEncodingException
-      public static Map<String, String> httpGet(String urlString) {
+      public static Map<String, String> httpGet(String urlString, Map<String, String>headers) {
           Log.i("URLString", urlString);
           Map<String, String> retMap = new HashMap();
 
@@ -48,20 +57,35 @@ public class HttpUtil {
           HttpResponse response;
           try {
               String userAgent = "Mozilla/5.0 (Linux; U; Android 4.3; en-us; HTC One - 4.3 - API 18 - 1080x1920 Build/JLS36G) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30";
-              //request.setHeader("Accept", "application/json");
-              //request.setHeader("Content-type", "application/json");
               request.setHeader("User-Agent", userAgent);
-                response = client.execute(request);
-                int code = response.getStatusLine().getStatusCode();
-                retMap.put("code", String.format("%d", code));
-                if(code == 200) {
-                    ResponseHandler<String> handler = new BasicResponseHandler();
-                    String responseBody = handler.handleResponse(response);
-                    retMap.put("body", responseBody);
-                    Log.i("responseBody", responseBody.substring(responseBody.length() - 30));
-                }
 
-          } catch (IOException e) {
+              if(headers.containsKey("ETag")) {
+                  request.setHeader("IF-None-Match", headers.get("ETag").toString());
+              }
+              if(headers.containsKey("Last-Modified")) {
+                  request.setHeader("If-Modified-Since", headers.get("Last-Modified").toString());
+              }
+
+              response = client.execute(request);
+
+              Header[] responseHeaders = response.getAllHeaders();
+              for (Header header : responseHeaders) {
+                  retMap.put(header.getName(), header.getValue());
+                  Log.i("HEADER", String.format("Key : %s, Value: %s", header.getName(), header.getValue()));
+              }
+
+            int code = response.getStatusLine().getStatusCode();
+            retMap.put("code", String.format("%d", code));
+
+            if(code == 200) {
+                ResponseHandler<String> handler = new BasicResponseHandler();
+                String responseBody = handler.handleResponse(response);
+                retMap.put("body", responseBody);
+                Log.i("responseBody", responseBody.substring(responseBody.length() - 30));
+            }
+
+          }
+          catch (IOException e) {
                 e.printStackTrace();
                 retMap.put("code", "400");
                 retMap.put("body", String.format("%s 访问失败:\n%s", urlString, e.getMessage()));
@@ -124,6 +148,13 @@ public class HttpUtil {
                 request.setHeader("Content-type", "application/json");
                 request.setHeader("User-Agent", userAgent);
                 response = client.execute(request);
+
+                Header[] headers = response.getAllHeaders();
+                for (Header header : headers) {
+                    retMap.put(header.getName(), header.getValue());
+                    Log.i("HEADER", String.format("Key : %s, Value: %s", header.getName(), header.getValue()));
+                }
+
                 int code = response.getStatusLine().getStatusCode();
                 retMap.put("code", String.format("%d", code));
 
@@ -154,4 +185,44 @@ public class HttpUtil {
         }
         return String.format("%s.html", path);
     }
+
+    public static String urlConvertToLocal(String urlString, String assetsPath) {
+        Map<String, String> response = HttpUtil.httpGet(urlString);
+        if (response.get("code").toString().compareTo("200") == 0) {
+            String htmlName = HttpUtil.UrlToFileName(urlString);
+            String htmlPath = String.format("%s/%s", assetsPath, htmlName);
+            String htmlContent = response.get("body").toString();
+                /*
+                 *  /storage/emulated/0/Shared/{assets,loading}
+                 *  /storage/emulated/0/user.plist
+                 *  /storage/emulated/0/user-(user-id)/{config, HTML}
+                 */
+            htmlContent = htmlContent.replace("/javascripts/", "../../Shared/assets/javascripts/");
+            htmlContent = htmlContent.replace("/stylesheets/", "../../Shared/assets/stylesheets/");
+            htmlContent = htmlContent.replace("/images/", "../../Shared/assets/images/");
+            try {
+                HttpUtil.writeFile(htmlPath, htmlContent);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return response.get("code").toString();
+    }
+
+    /*
+     * 字符串写入本地文件
+     */
+    public static void writeFile(String pathName, String content) throws IOException {
+        Log.i("PathName", pathName);
+        File file = new File(pathName);
+
+        if(file.exists()) { file.delete(); }
+
+        file.createNewFile();
+        FileOutputStream out = new FileOutputStream(file, true);
+        out.write(content.toString().getBytes("utf-8"));
+        out.close();
+    }
+
 }
