@@ -14,7 +14,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.intfocus.yh_android.util.FileUtil;
-import com.intfocus.yh_android.util.HttpUtil;
 import com.intfocus.yh_android.util.URLs;
 import com.intfocus.yh_android.util.ApiHelper;
 
@@ -160,15 +159,22 @@ public class SubjectActivity extends Activity {
     Runnable runnable = new Runnable() {
         @Override
         public void run() {
-            Map<String, String> response = ApiHelper.httpGetWithHeader(urlString, assetsPath, "../../Shared/assets");
-            Message message = mHandler.obtainMessage();
-            message.what =  Integer.parseInt(response.get("code").toString());
+            try {
+                Map<String, String> response = ApiHelper.httpGetWithHeader(urlString, assetsPath, "../../Shared/assets");
+                Message message = mHandler.obtainMessage();
+                message.what = Integer.parseInt(response.get("code").toString());
 
-            String[] codes = new String[] {"200", "304"};
-            if(Arrays.asList(codes).contains(response.get("code").toString())) {
-                message.obj = response.get("path").toString();
+                ApiHelper.reportData(String.format("%d", user.getInt("group_id")), reportID);
+
+                String[] codes = new String[]{"200", "304"};
+                if (Arrays.asList(codes).contains(response.get("code").toString())) {
+                    message.obj = response.get("path").toString();
+                }
+                mHandler.sendMessage(message);
             }
-            mHandler.sendMessage(message);
+            catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     };
 

@@ -11,6 +11,8 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.widget.Toast;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 
 import com.intfocus.yh_android.util.ApiHelper;
 import com.intfocus.yh_android.util.FileUtil;
@@ -18,21 +20,17 @@ import com.intfocus.yh_android.util.HttpUtil;
 import com.intfocus.yh_android.util.URLs;
 
 import org.OpenUDID.OpenUDID_manager;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-public class LoginActivity extends Activity {
-
-	private WebView mWebView;
+public class LoginActivity extends BaseActivity {
 
 	@Override
     @SuppressLint("SetJavaScriptEnabled")
@@ -80,7 +78,33 @@ public class LoginActivity extends Activity {
         /*
          *  加载服务器网页
          */
-        new Thread(runnable).start();
+        if(isNetworkAvailable()) {
+            new Thread(runnable).start();
+        }
+        else {
+            AlertDialog.Builder builder1 = new AlertDialog.Builder(LoginActivity.this);
+            builder1.setMessage("Write your message here.");
+            builder1.setCancelable(true);
+
+            builder1.setPositiveButton(
+                    "Yes",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                        }
+                    });
+
+            builder1.setNegativeButton(
+                    "No",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                        }
+                    });
+
+            AlertDialog alert11 = builder1.create();
+            alert11.show();
+        }
     }
 
     private Handler mHandler = new Handler() {
@@ -192,11 +216,4 @@ public class LoginActivity extends Activity {
         }
     }
 
-    public static void longLog(String Tag, String str) {
-        if(str.length() > 200) {
-            Log.i(Tag, str.substring(0, 200));
-            longLog(Tag, str.substring(200));
-        } else
-            Log.i(Tag, str);
-    }
 }

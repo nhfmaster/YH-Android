@@ -12,6 +12,9 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.intfocus.yh_android.SettingActivity;
+
+import org.apache.http.HttpResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.File;
@@ -58,17 +61,21 @@ public class ApiHelper {
 	/*
 	 *  获取报表网页数据
 	 */
-	public static void reportData(String assetsPath, String groupID, String reportID) {
+	public static void reportData(String groupID, String reportID) {
 		String urlPath   = String.format(URLs.API_DATA_PATH, groupID, reportID);
 		String urlString = String.format("%s%s", URLs.HOST, urlPath);
 
 		String fileName  = String.format(URLs.REPORT_DATA_FILENAME, groupID, reportID);
 		String filePath  = String.format("%s/assets/javascripts/%s", FileUtil.sharedPath(), fileName);
 
-		Map<String, String> response = HttpUtil.httpGet(urlString);
 
-		if(response.get("code").toString().compareTo("200") == 0) {
+		Map<String, String> headers = ApiHelper.checkResponseHeader(urlString, FileUtil.sharedPath());
+		Map<String, String> response = HttpUtil.httpGet(urlString, headers);
+
+		if(response.get("code").equals("200")) {
 			try {
+				ApiHelper.storeResponseHeader(urlString, FileUtil.sharedPath(), response);
+
 				FileUtil.writeFile(filePath, response.get("body").toString());
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -97,31 +104,12 @@ public class ApiHelper {
 	public static Map<String, String> httpGetWithHeader(String urlString, String assetsPath, String relativeAssetsPath) {
 		Map<String, String> retMap = new HashMap<String, String>();
 
-		String urlKey = urlString;
-		if (urlString.indexOf("?") != -1) {
-			urlKey = TextUtils.split(urlString, "?")[0];
-		}
+		String urlKey = urlString.indexOf("?") != -1 ? TextUtils.split(urlString, "?")[0] : urlString;
+
 		try {
-			String headersFilePath = String.format("%s/%s", assetsPath, URLs.CACHED_HEADER_FILENAME);
+			Map<String, String> headers = ApiHelper.checkResponseHeader(urlString, assetsPath);
 
-			JSONObject headersJSON = new JSONObject();
-			if((new File(headersFilePath)).exists()) {
-				headersJSON = FileUtil.readConfigFile(headersFilePath);
-			}
-			JSONObject headerJSON = new JSONObject();
-
-			Map<String, String> headers = new HashMap<String, String>();
-			if(headersJSON.has(urlKey)) {
-				headerJSON = (JSONObject)headersJSON.get(urlKey);
-				if(headerJSON.has("ETag")) {
-					headers.put("ETag", headerJSON.getString("ETag"));
-				}
-				if(headerJSON.has("Last-Modified")) {
-					headers.put("Last-Modified", headerJSON.getString("Last-Modified"));
-				}
-			}
-
-			Map<String, String> response = HttpUtil.httpGet(urlString, headers);
+			Map<String, String> response = HttpUtil.httpGet(urlKey, headers);
 			String statusCode = response.get("code").toString();
 			retMap.put("code", statusCode);
 
@@ -130,15 +118,7 @@ public class ApiHelper {
 			retMap.put("path", htmlPath);
 
 			if (statusCode.compareTo("200") == 0) {
-				if(response.containsKey("ETag")) {
-					headerJSON.put("ETag", response.get("ETag").toString());
-				}
-				if(response.containsKey("Last-Modified")) {
-					headerJSON.put("Last-Modified", response.get("Last-Modified").toString());
-				}
-
-				headersJSON.put(urlKey, headerJSON);
-				FileUtil.writeFile(headersFilePath, headersJSON.toString());
+				ApiHelper.storeResponseHeader(urlKey, assetsPath, response);
 
 				String htmlContent = response.get("body").toString();
 				htmlContent = htmlContent.replace("/javascripts/", String.format("%s/javascripts/", relativeAssetsPath));
@@ -152,5 +132,59 @@ public class ApiHelper {
 		}
 
 		return retMap;
+	}
+
+	public static Map<String, String> checkResponseHeader(String urlKey, String assetsPath) {
+		Map<String, String> headers = new HashMap<String, String>();
+
+		try {
+			JSONObject headersJSON = new JSONObject();
+
+			String headersFilePath = String.format("%s/%s", assetsPath, URLs.CACHED_HEADER_FILENAME);
+			if((new File(headersFilePath)).exists()) {
+				headersJSON = FileUtil.readConfigFile(headersFilePath);
+			}
+			JSONObject headerJSON = new JSONObject();
+
+			if(headersJSON.has(urlKey)) {
+				headerJSON = (JSONObject)headersJSON.get(urlKey);
+				if(headerJSON.has("ETag")) {
+					headers.put("ETag", headerJSON.getString("ETag"));
+				}
+				if(headerJSON.has("Last-Modified")) {
+					headers.put("Last-Modified", headerJSON.getString("Last-Modified"));
+				}
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+
+		return headers;
+	}
+
+	public static void storeResponseHeader(String urlKey, String assetsPath, Map<String, String> response) {
+		try {
+			JSONObject headersJSON = new JSONObject();
+
+			String headersFilePath = String.format("%s/%s", assetsPath, URLs.CACHED_HEADER_FILENAME);
+			if((new File(headersFilePath)).exists()) {
+				headersJSON = FileUtil.readConfigFile(headersFilePath);
+			}
+			JSONObject headerJSON = new JSONObject();
+
+			if(response.containsKey("ETag")) {
+				headerJSON.put("ETag", response.get("ETag").toString());
+			}
+			if(response.containsKey("Last-Modified")) {
+				headerJSON.put("Last-Modified", response.get("Last-Modified").toString());
+			}
+
+			headersJSON.put(urlKey, headerJSON);
+			FileUtil.writeFile(headersFilePath, headersJSON.toString());
+		} catch (JSONException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }
