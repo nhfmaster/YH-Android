@@ -85,6 +85,14 @@ public class MainActivity extends Activity {
         initTab();
     }
 
+
+    @Override
+    protected void onRestart(){
+        super.onRestart();
+
+        Log.e("!!!!!", "RESTART!!!!!!!!!!");
+    }
+
     @SuppressLint("SetJavaScriptEnabled")
     @JavascriptInterface
     private void initTab() {
