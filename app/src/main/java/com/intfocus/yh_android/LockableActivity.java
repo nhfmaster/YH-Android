@@ -7,7 +7,7 @@ import android.os.Bundle;
 /**
  * Created by wiky on 1/15/16.
  */
-public class LockableActivity extends Activity{
+public class LockableActivity extends BaseActivity{
 
     private boolean mInApp;
     private boolean mShouldLock;
@@ -22,6 +22,11 @@ public class LockableActivity extends Activity{
     @Override
     protected void onRestart(){
         super.onRestart();
+
+        /*
+         * TODO
+         * 如果没有设置锁屏，则这里应该直接return
+         */
 
         if(mShouldLock){
             Intent intent=new Intent(this, LockActivity.class);

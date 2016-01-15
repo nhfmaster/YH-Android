@@ -21,7 +21,7 @@ public class URLs implements Serializable {
 	public final static String HOST1  = "http://10.0.3.2:4567";
 
 	//login
-    public final static String LOGIN_PATH              = String.format("%s/mobile/login", HOST1);
+    public final static String LOGIN_PATH              = String.format("%s/mobile/login", HOST);
     public final static String API_USER_PATH           = "%s/api/v1/%s/%s/%s/authentication";
 
 

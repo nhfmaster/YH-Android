@@ -19,7 +19,7 @@ import android.util.Log;
 /**
  * Created by lijunjie on 16/1/14.
  */
-public class BaseActivity extends LockableActivity {
+public class BaseActivity extends Activity {
 
     protected WebView mWebView;
     protected JSONObject user;
