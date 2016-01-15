@@ -3,6 +3,8 @@ package com.intfocus.yh_android;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -16,7 +18,6 @@ import android.content.DialogInterface;
 
 import com.intfocus.yh_android.util.ApiHelper;
 import com.intfocus.yh_android.util.FileUtil;
-import com.intfocus.yh_android.util.HttpUtil;
 import com.intfocus.yh_android.util.URLs;
 
 import org.OpenUDID.OpenUDID_manager;
@@ -56,10 +57,14 @@ public class LoginActivity extends BaseActivity {
          */
         OpenUDID_manager.sync(getApplicationContext());
 
-        /*
-         *  解压表态资源
-         */
+
         try {
+            String htmlPath = String.format("file:///%s/loading/login.html", FileUtil.sharedPath());
+            mWebView.loadUrl(htmlPath);
+
+            /*
+             *  解压表态资源
+             */
             File file = new File(String.format("%s/loading", FileUtil.sharedPath()));
             if(!file.exists()) {
                 unZip("loading.zip", FileUtil.sharedPath(), true);
@@ -69,8 +74,11 @@ public class LoginActivity extends BaseActivity {
                 unZip("assets.zip", FileUtil.sharedPath(), true);
             }
 
-            String htmlPath = String.format("file:///%s/loading/login.html", FileUtil.sharedPath());
-            mWebView.loadUrl(htmlPath);
+            /*
+             * 检测登录界面，版本是否升级
+             */
+            checkVersionUpgrade(FileUtil.sharedPath());
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -104,6 +112,34 @@ public class LoginActivity extends BaseActivity {
 
             AlertDialog alert11 = builder1.create();
             alert11.show();
+        }
+    }
+
+    public void checkVersionUpgrade(String assetsPath) {
+        try {
+            PackageInfo packageInfo  = getPackageManager().getPackageInfo(getPackageName(), 0);
+            String versionConfigPath = String.format("%s/%s", assetsPath, URLs.CURRENT_VERSION__FILENAME);
+
+            boolean isUpgrade = false;
+            if((new File(versionConfigPath)).exists()) {
+                String localVersion  = FileUtil.readFile(versionConfigPath);
+                if(localVersion.compareTo(packageInfo.versionName) != 0) {
+                    isUpgrade = true;
+                    Log.i("VersionUpgrade", String.format("%s => %s remove %s/%s", localVersion, packageInfo.versionName, assetsPath, URLs.CACHED_HEADER_FILENAME));
+                }
+            }
+            else {
+                isUpgrade = true;
+            }
+            if(isUpgrade) {
+                ApiHelper.clearResponseHeader(URLs.LOGIN_PATH, assetsPath);
+                FileUtil.writeFile(versionConfigPath, packageInfo.versionName);
+            }
+        }
+        catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -200,12 +236,17 @@ public class LoginActivity extends BaseActivity {
                 try {
                     String info = ApiHelper.authentication(username, URLs.MD5(password));
                     if (info.compareTo("success") == 0) {
-//
-//                        Log.i("FilePath", urlString);
-//                        mWebView.loadUrl(String.format("file:///" + urlString));
 
+                        // 检测用户空间，版本是否升级
+                        assetsPath = FileUtil.dirPath(URLs.HTML_DIRNAME);
+                        checkVersionUpgrade(assetsPath);
+
+                        // 跳转至主界面
                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                         LoginActivity.this.startActivity(intent);
+
+                        // 登录界面，并未被销毁 - reload webview
+                        new Thread(runnable).start();
                     } else {
                         Toast.makeText(LoginActivity.this, info, Toast.LENGTH_SHORT).show();
                     }

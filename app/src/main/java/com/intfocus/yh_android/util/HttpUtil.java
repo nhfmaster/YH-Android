@@ -27,16 +27,6 @@ import java.net.URI;
 
 public class HttpUtil {
 
-    public static boolean isNetworkAvailable() {
-//        ConnectivityManager cm =
-//                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-//        NetworkInfo netInfo = cm.getActiveNetworkInfo();
-//        return netInfo != null && netInfo.isConnectedOrConnecting();
-//        Map<String, String> response = HttpUtil.httpGet(URLs.HOST, new HashMap<String, String>());
-//        return response.get("code").equals("500");
-        return true;
-    }
-
     /**
      * ִ执行一个HTTP GET请求，返回请求响应的HTML
      *
@@ -77,7 +67,7 @@ public class HttpUtil {
             Header[] responseHeaders = response.getAllHeaders();
             for (Header header : responseHeaders) {
                 retMap.put(header.getName(), header.getValue());
-                Log.i("HEADER", String.format("Key : %s, Value: %s", header.getName(), header.getValue()));
+                // Log.i("HEADER", String.format("Key : %s, Value: %s", header.getName(), header.getValue()));
             }
 
             int code = response.getStatusLine().getStatusCode();
@@ -87,7 +77,6 @@ public class HttpUtil {
                 ResponseHandler<String> handler = new BasicResponseHandler();
                 String responseBody = handler.handleResponse(response);
                 retMap.put("body", responseBody);
-                Log.i("responseBody", responseBody.substring(responseBody.length() - 30));
             }
 
         }
@@ -168,7 +157,7 @@ public class HttpUtil {
             Header[] headers = response.getAllHeaders();
             for (Header header : headers) {
                 retMap.put(header.getName(), header.getValue());
-                Log.i("HEADER", String.format("Key : %s, Value: %s", header.getName(), header.getValue()));
+                // Log.i("HEADER", String.format("Key : %s, Value: %s", header.getName(), header.getValue()));
             }
 
             int code = response.getStatusLine().getStatusCode();

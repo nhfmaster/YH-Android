@@ -83,7 +83,6 @@ public class ApiHelper {
 		}
 		else {
 			Log.i("Code", response.get("code").toString());
-			Log.i("Body", response.get("body").toString());
 		}
 	}
 
@@ -134,6 +133,13 @@ public class ApiHelper {
 		return retMap;
 	}
 
+	public static void clearResponseHeader(String urlKey, String assetsPath) {
+		String headersFilePath = String.format("%s/%s", assetsPath, URLs.CACHED_HEADER_FILENAME);
+		File file = new File(headersFilePath);
+		if(file.exists()) {
+			file.delete();
+		}
+	}
 	public static Map<String, String> checkResponseHeader(String urlKey, String assetsPath) {
 		Map<String, String> headers = new HashMap<String, String>();
 
