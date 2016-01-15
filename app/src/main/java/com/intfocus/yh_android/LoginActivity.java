@@ -112,9 +112,9 @@ public class LoginActivity extends BaseActivity {
             switch(message.what) {
                 case 200:
                 case 304:
-                    String htmlPath = (String)message.obj;
-                    Log.i("FilePath", htmlPath);
-                    mWebView.loadUrl(String.format("file:///" + htmlPath));
+                    urlString = (String)message.obj;
+                    Log.i("FilePath", urlString);
+                    mWebView.loadUrl(String.format("file:///" + urlString));
                     break;
                 default:
                     Toast.makeText(LoginActivity.this, "访问服务器失败", Toast.LENGTH_SHORT).show();;
@@ -200,6 +200,10 @@ public class LoginActivity extends BaseActivity {
                 try {
                     String info = ApiHelper.authentication(username, URLs.MD5(password));
                     if (info.compareTo("success") == 0) {
+//
+//                        Log.i("FilePath", urlString);
+//                        mWebView.loadUrl(String.format("file:///" + urlString));
+
                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                         LoginActivity.this.startActivity(intent);
                     } else {

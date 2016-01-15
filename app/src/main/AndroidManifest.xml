@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.intfocus.yh_android"
     android:versionCode="1"
-    android:versionName="0.0.5" >
+    android:versionName="0.0.8" >
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
