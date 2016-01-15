@@ -16,6 +16,7 @@ import org.json.JSONObject;
 import android.util.Log;
 
 import com.intfocus.yh_android.util.URLs;
+import android.text.TextUtils;
 
 public class FileUtil {
 	public static String basePath() {
@@ -55,7 +56,8 @@ public class FileUtil {
 		try {
 			File folder = new File(pathName);
 			if(!folder.exists() && !folder.isDirectory()) {
-				folder.mkdir();
+				//folder.mkdir();
+				folder.mkdirs();
 			}
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -70,6 +72,14 @@ public class FileUtil {
 		return String.format("%s/%s", pathName, fileName);
 	}
 
+	public static String dirsPath(String[] dirNames) {
+
+		return FileUtil.dirPath(TextUtils.join("/", dirNames));
+	}
+
+	/*
+	 * 读取本地文件内容
+	 */
 	public static String readFile(String pathName) {
 		String string = null;
 		try {
@@ -93,6 +103,10 @@ public class FileUtil {
 
 		return string;
 	}
+
+	/*
+	 * 读取本地文件内容，并转化为json
+	 */
 	public static JSONObject readConfigFile(String pathName) {
 		JSONObject jsonObject = null;
 		try {
@@ -103,7 +117,10 @@ public class FileUtil {
 	    }
        return jsonObject;
 	}
-	
+
+	/*
+	 * 字符串写入本地文件
+	 */
 	public static void writeFile(String pathName, String content) throws IOException {
 		Log.i("PathName", pathName);
 		File file = new File(pathName);
@@ -116,12 +133,30 @@ public class FileUtil {
 		out.close();
 	}
 
+	/*
+	 *  共享资源
+	 *  1. assets资源
+	 *  2. loading页面
+	 *  3. 登录缓存页面
+	 */
 	public static String sharedPath() {
 		String pathName = String.format("%s/%s", URLs.STORAGE_BASE, URLs.SHARED_DIRNAME);
 		File file = new File(pathName);
 
 		if(!file.exists() && !file.isDirectory()) { file.mkdir(); }
 
+		return pathName;
+	}
+
+	/*
+	 * 共享资源中的文件（夹）（忽略是否存在）
+	 */
+	public static String sharedPath(String folderName) {
+		if(!folderName.startsWith("/")) {
+			folderName = String.format("/%s", folderName);
+		}
+
+		String pathName = String.format("%s%s", FileUtil.sharedPath(), folderName);
 		return pathName;
 	}
 }

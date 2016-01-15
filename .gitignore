@@ -8,6 +8,9 @@
 # Java class files
 *.class
 
+app/src/main/assets/loading
+app/src/main/assets/assets
+
 # Generated files
 bin/
 gen/
