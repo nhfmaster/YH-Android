@@ -11,8 +11,10 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.widget.Toast;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 
-import com.intfocus.yh_android.util.ApiUtil;
+import com.intfocus.yh_android.util.ApiHelper;
 import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.HttpUtil;
 import com.intfocus.yh_android.util.URLs;
@@ -23,56 +25,19 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-public class LoginActivity extends Activity {
-
-	private WebView mWebView = null;
-    private Thread mThread;
-
-    private Handler mHandler = new Handler() {
-        public void handleMessage(Message message) {
-            String htmlName = HttpUtil.UrlToFileName(URLs.LOGIN_PATH);
-            String htmlPath = String.format("%s/assets/%s", FileUtil.sharedPath(), htmlName);
-            //mWebView.loadDataWithBaseURL(String.format("file:///%s/assets/", FileUtil.sharedPath()), FileUtil.readFile(htmlPath), "text/html", "UTF-8", null);
-            mWebView.loadUrl(String.format("file:///" + htmlPath));
-        }
-
-    };
-    Runnable runnable = new Runnable() {
-        @Override
-        public void run() {
-            try {
-                Map<String, String> response = HttpUtil.httpGet(URLs.LOGIN_PATH);
-                if (response.get("code").toString().compareTo("200") == 0) {
-                    String htmlName = HttpUtil.UrlToFileName(URLs.LOGIN_PATH);
-                    String htmlPath = String.format("%s/assets/%s", FileUtil.sharedPath(), htmlName);
-                    String htmlContent = response.get("body").toString();
-                    String assetsPath = String.format("file:///%s/assets/", FileUtil.sharedPath());
-                    htmlContent = htmlContent.replace("javascript/", String.format("%s/javascript/", assetsPath));
-                    htmlContent = htmlContent.replace("stylesheets/", String.format("%s/stylesheets/", assetsPath));
-                    htmlContent = htmlContent.replace("images/", String.format("%s/images/", assetsPath));
-                    Log.i("HTML", htmlContent);
-                    FileUtil.writeFile(htmlPath, response.get("body").toString());
-
-                    mHandler.obtainMessage().sendToTarget();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        ;
-    };
+public class LoginActivity extends BaseActivity {
 
 	@Override
     @SuppressLint("SetJavaScriptEnabled")
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_login);
+
         mWebView = (WebView) findViewById(R.id.webview);
         mWebView.initialize();
         mWebView.requestFocus();
@@ -85,38 +50,93 @@ public class LoginActivity extends Activity {
         });
 
         mWebView.addJavascriptInterface(new JavaScriptInterface(), "AndroidJSBridge");
-        mWebView.loadUrl(URLs.LOGIN_PATH);
 
         /*
          *  初始化OpenUDID, 设备唯一化
          */
         OpenUDID_manager.sync(getApplicationContext());
 
+        /*
+         *  解压表态资源
+         */
         try {
-            File file = new File(String.format("%s/assets", FileUtil.sharedPath()));
+            File file = new File(String.format("%s/loading", FileUtil.sharedPath()));
+            if(!file.exists()) {
+                unZip("loading.zip", FileUtil.sharedPath(), true);
+            }
+            file = new File(String.format("%s/assets", FileUtil.sharedPath()));
             if(!file.exists()) {
                 unZip("assets.zip", FileUtil.sharedPath(), true);
             }
-            File[] files = file.listFiles();
-            for(int i = 0; i < files.length; i ++) {
-                Log.i("FileInShared", files[i].getAbsolutePath());
-            }
+
+            String htmlPath = String.format("file:///%s/loading/login.html", FileUtil.sharedPath());
+            mWebView.loadUrl(htmlPath);
         } catch (IOException e) {
             e.printStackTrace();
         }
-//        String[] assets = new String[0];
-//        try {
-//            assets = getApplicationContext().getAssets().list("");
-//            for(int i = 0; i < assets.length; i ++) {
-//                Log.i("assets", assets[i]);
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
 
+        /*
+         *  加载服务器网页
+         */
+        if(isNetworkAvailable()) {
+            new Thread(runnable).start();
+        }
+        else {
+            AlertDialog.Builder builder1 = new AlertDialog.Builder(LoginActivity.this);
+            builder1.setMessage("Write your message here.");
+            builder1.setCancelable(true);
 
-//        new Thread(runnable).start();
+            builder1.setPositiveButton(
+                    "Yes",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                        }
+                    });
+
+            builder1.setNegativeButton(
+                    "No",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                        }
+                    });
+
+            AlertDialog alert11 = builder1.create();
+            alert11.show();
+        }
     }
+
+    private Handler mHandler = new Handler() {
+        public void handleMessage(Message message) {
+            switch(message.what) {
+                case 200:
+                case 304:
+                    String htmlPath = (String)message.obj;
+                    Log.i("FilePath", htmlPath);
+                    mWebView.loadUrl(String.format("file:///" + htmlPath));
+                    break;
+                default:
+                    Toast.makeText(LoginActivity.this, "访问服务器失败", Toast.LENGTH_SHORT).show();;
+                    break;
+            }
+        }
+
+    };
+    Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            Map<String, String> response = ApiHelper.httpGetWithHeader(URLs.LOGIN_PATH, FileUtil.sharedPath(), "assets");
+            Message message = mHandler.obtainMessage();
+            message.what =  Integer.parseInt(response.get("code").toString());
+
+            String[] codes = new String[] {"200", "304"};
+            if(Arrays.asList(codes).contains(response.get("code").toString())) {
+                message.obj = response.get("path").toString();
+            }
+            mHandler.sendMessage(message);
+        }
+    };
 
     /**
      * 解压assets的zip压缩文件到指定目录
@@ -178,7 +198,7 @@ public class LoginActivity extends Activity {
         public void login(final String username, String password) {
             if(username.length() > 0 && password.length() > 0) {
                 try {
-                    String info = ApiUtil.authentication(username, URLs.MD5(password));
+                    String info = ApiHelper.authentication(username, URLs.MD5(password));
                     if (info.compareTo("success") == 0) {
                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                         LoginActivity.this.startActivity(intent);
@@ -194,39 +214,6 @@ public class LoginActivity extends Activity {
                 Toast.makeText(LoginActivity.this, "请输入用户名与密码", Toast.LENGTH_SHORT).show();
             }
         }
-
-        public String HtmlcallJava() {
-            return "Html call Java";
-        }
-
-        public String HtmlcallJava2(final String param) {
-            return "Html call Java : " + param;
-        }
-
-        public void JavacallHtml() {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mWebView.loadUrl("javascript: showFromHtml()");
-                    Toast.makeText(LoginActivity.this, "clickBtn", Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
-
-        public void JavacallHtml2() {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mWebView.loadUrl("javascript: showFromHtml2('IT-homer blog')");
-                    Toast.makeText(LoginActivity.this, "clickBtn2", Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
-
-        @JavascriptInterface
-        public void callHandler(String tag, Object obj, Object cb) {
-            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-            LoginActivity.this.startActivity(intent);
-        }
     }
+
 }

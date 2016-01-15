@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.webkit.WebSettings;
 import android.webkit.WebViewClient;
+import android.webkit.WebChromeClient;
 
 /**
  * Created by wiky on 1/11/16.
@@ -26,6 +27,8 @@ public class WebView extends android.webkit.WebView {
         webSettings.setJavaScriptEnabled(true);
         webSettings.setDefaultTextEncodingName("utf-8");
         webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+
+        setWebChromeClient(new WebChromeClient());
         setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(android.webkit.WebView view, String url) {
