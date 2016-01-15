@@ -58,7 +58,6 @@ public class LoginActivity extends BaseActivity {
          */
         OpenUDID_manager.sync(getApplicationContext());
 
-        PgyUpdateManager.register(this);
 
 
         try {
@@ -116,6 +115,9 @@ public class LoginActivity extends BaseActivity {
             AlertDialog alert11 = builder1.create();
             alert11.show();
         }
+
+
+        PgyUpdateManager.register(this);
     }
 
     public void checkVersionUpgrade(String assetsPath) {
