@@ -147,8 +147,8 @@ public class MainActivity extends Activity {
                     break;
             }
 
-            urlString = String.format("%s%s", URLs.HOST, urlPath);
-            new Thread(runnable).start();
+             urlString = String.format("%s%s", URLs.HOST, urlPath);
+             new Thread(runnable).start();
         }
         catch (Exception e) {
             e.printStackTrace();
