@@ -1,13 +1,19 @@
 package com.intfocus.yh_android;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.content.pm.PackageManager.NameNotFoundException;
 
-public class SettingActivity extends Activity {
+import org.json.JSONException;
+import com.intfocus.yh_android.util.URLs;
+import android.content.pm.PackageInfo;
+import android.text.TextUtils;
+import android.content.Context;
+
+public class SettingActivity extends BaseActivity {
 
     private TextView mUserID;
     private TextView mRoleID;
@@ -77,6 +83,29 @@ public class SettingActivity extends Activity {
 
     private void initialize() {
         /* 初始化界面内容 TODO */
-        mUserID.setText("UserID");
+        try {
+            mUserID.setText(user.getString("user_name"));
+            mRoleID.setText(user.getString("role_name"));
+            mGroupID.setText(user.getString("group_name"));
+
+            mAppName.setText(getApplicationName(SettingActivity.this));
+            try {
+                PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+                mAppVersion.setText(packageInfo.versionName);
+            }
+            catch (NameNotFoundException e) {
+                e.printStackTrace();
+            }
+            mDeviceID.setText(TextUtils.split(android.os.Build.MODEL, " - ")[0]);
+            mApiDomain.setText(URLs.HOST.replace("http://", ""));
+        }
+        catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static String getApplicationName(Context context) {
+        int stringId = context.getApplicationInfo().labelRes;
+        return context.getString(stringId);
     }
 }
