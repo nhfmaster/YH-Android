@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import com.pgyersdk.update.PgyUpdateManager;
 
 public class LoginActivity extends BaseActivity {
 
@@ -56,6 +57,8 @@ public class LoginActivity extends BaseActivity {
          *  初始化OpenUDID, 设备唯一化
          */
         OpenUDID_manager.sync(getApplicationContext());
+
+        PgyUpdateManager.register(this);
 
 
         try {
