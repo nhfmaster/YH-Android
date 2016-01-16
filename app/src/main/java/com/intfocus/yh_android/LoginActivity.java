@@ -168,7 +168,7 @@ public class LoginActivity extends BaseActivity {
                         LoginActivity.this.startActivity(intent);
 
                         // 登录界面，并未被销毁 - reload webview
-                        new Thread(runnable).start();
+                        // new Thread(runnable).start();
                     } else {
                         Toast.makeText(LoginActivity.this, info, Toast.LENGTH_SHORT).show();
                     }

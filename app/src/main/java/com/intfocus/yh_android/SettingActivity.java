@@ -64,7 +64,6 @@ public class SettingActivity extends LockableActivity {
 
             Intent intent = new Intent();
             intent.setClass(SettingActivity.this, LoginActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);//设置不要刷新将要跳到的界面
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);//它可以关掉所要到的界面中间的activity
             startActivity(intent);
         }
