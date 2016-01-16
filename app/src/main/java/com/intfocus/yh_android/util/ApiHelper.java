@@ -21,7 +21,10 @@ import java.io.File;
 
 public class ApiHelper {
 
-	// {device: {name, platform, os, os_version, uuid}}
+	/*
+	 * 用户登录验证
+	 * params: {device: {name, platform, os, os_version, uuid}}
+	 */
 	public static String authentication(String username, String password) {
 		String ret = "success";
 
@@ -37,23 +40,28 @@ public class ApiHelper {
     		params.put("device", device);
     		
 			Map<String, String> response = HttpUtil.httpPost(urlString, params);
-			
-			if(response.get("code").toString().compareTo("200") == 0) {
-		        String userConfigPath = String.format("%s/%s", FileUtil.basePath(), URLs.USER_CONFIG_FILENAME);
-				Log.i("userConfigPath", userConfigPath);
-				FileUtil.writeFile(userConfigPath, response.get("body").toString());
-		       
+			boolean isValidate = response.get("code").equals("200");
+
+			JSONObject json = new JSONObject(response.get("body").toString());
+			json.put("is_login", isValidate);
+
+			String userConfigPath = String.format("%s/%s", FileUtil.basePath(), URLs.USER_CONFIG_FILENAME);
+			FileUtil.writeFile(userConfigPath, json.toString());
+
+			if(isValidate) {
 		        // need user info
 				String settingsConfigPath = FileUtil.dirPath(URLs.CONFIG_DIRNAME, URLs.SETTINGS_CONFIG_FILENAME);
+				Log.i("userConfigPath", userConfigPath);
 				Log.i("settingsConfigPath", settingsConfigPath);
 				
-				FileUtil.writeFile(settingsConfigPath, response.get("body").toString());
-			} else {
-				JSONObject json = new JSONObject(response.get("body").toString());
+				FileUtil.writeFile(settingsConfigPath, json.toString());
+			}
+			else {
 				ret = json.getString("info");
 			}
 		} catch(Exception e) {
 			e.printStackTrace();
+			ret = e.getMessage();
 		}
 		return ret;
 	}

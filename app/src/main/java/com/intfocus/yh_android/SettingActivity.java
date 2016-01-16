@@ -8,10 +8,16 @@ import android.widget.TextView;
 import android.content.pm.PackageManager.NameNotFoundException;
 
 import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.URLs;
 import android.content.pm.PackageInfo;
 import android.text.TextUtils;
 import android.content.Context;
+import android.content.Intent;
+
+import java.io.IOException;
 
 public class SettingActivity extends LockableActivity {
 
@@ -36,21 +42,45 @@ public class SettingActivity extends LockableActivity {
 
         @Override
         public void onClick(View v) {
-            /* 退出登录 TODO */
+            /*
+             * 退出登录
+             */
+            try {
+                String userConfigPath = String.format("%s/%s", FileUtil.basePath(), URLs.USER_CONFIG_FILENAME);
+                JSONObject json       = FileUtil.readConfigFile(userConfigPath);
+                json.put("is_login", false);
+
+                FileUtil.writeFile(userConfigPath, json.toString());
+
+                String settingsConfigPath = FileUtil.dirPath(URLs.CONFIG_DIRNAME, URLs.SETTINGS_CONFIG_FILENAME);
+                FileUtil.writeFile(settingsConfigPath, json.toString());
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+            }
+            catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            Intent intent = new Intent();
+            intent.setClass(SettingActivity.this, LoginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);//设置不要刷新将要跳到的界面
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);//它可以关掉所要到的界面中间的activity
+            startActivity(intent);
         }
     };
     private View.OnClickListener mChangePWDListener = new View.OnClickListener() {
 
         @Override
         public void onClick(View v) {
-            /* 修改密码 TODO */
+            /* 修改密码 */
         }
     };
     private View.OnClickListener mChangeLockListener = new View.OnClickListener() {
 
         @Override
         public void onClick(View v) {
-            /* 修改锁屏密码 TODO */
+            /* 修改锁屏密码 */
         }
     };
 
@@ -78,11 +108,13 @@ public class SettingActivity extends LockableActivity {
         mChangePWD.setOnClickListener(mChangePWDListener);
         mLogout.setOnClickListener(mLogoutListener);
 
-        initialize();
+        initializeUI();
     }
 
-    private void initialize() {
-        /* 初始化界面内容 TODO */
+    private void initializeUI() {
+        /*
+         * 初始化界面内容
+         */
         try {
             mUserID.setText(user.getString("user_name"));
             mRoleID.setText(user.getString("role_name"));

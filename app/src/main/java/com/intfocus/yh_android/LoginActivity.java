@@ -85,7 +85,6 @@ public class LoginActivity extends BaseActivity {
             alert11.show();
         }
 
-
         PgyUpdateManager.register(this);
     }
 
