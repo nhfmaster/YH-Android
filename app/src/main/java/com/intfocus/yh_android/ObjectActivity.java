@@ -26,7 +26,7 @@ import static java.lang.String.format;
 import android.content.Intent;
 import android.util.Log;
 
-public class ObjectActivity extends Activity {
+public class ObjectActivity extends LockableActivity {
 
     private TextView mTitle;
     private WebView mWebView;

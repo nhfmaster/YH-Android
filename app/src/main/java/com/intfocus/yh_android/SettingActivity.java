@@ -13,7 +13,7 @@ import android.content.pm.PackageInfo;
 import android.text.TextUtils;
 import android.content.Context;
 
-public class SettingActivity extends BaseActivity {
+public class SettingActivity extends LockableActivity {
 
     private TextView mUserID;
     private TextView mRoleID;

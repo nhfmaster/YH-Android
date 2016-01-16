@@ -29,7 +29,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
 
-public class SubjectActivity extends Activity {
+public class SubjectActivity extends LockableActivity {
 
     private TextView mTitle;
     private ImageView mComment;
