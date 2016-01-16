@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
 
-public class MainActivity extends Activity {
+public class MainActivity extends LockableActivity {
 
     private WebView mWebView;
     private TabView mTabKPI;
@@ -83,6 +83,14 @@ public class MainActivity extends Activity {
         });
 
         initTab();
+    }
+
+
+    @Override
+    protected void onRestart(){
+        super.onRestart();
+
+        Log.e("!!!!!", "RESTART!!!!!!!!!!");
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -245,17 +253,6 @@ public class MainActivity extends Activity {
             }
 
             return tabIndex < 0 ? 0 : tabIndex;
-        }
-    }
-
-
-    public static void longLog(String Tag, String str) {
-        if(str.length() > 200) {
-            Log.i(Tag, str.substring(0, 200));
-            longLog(Tag, str.substring(200));
-        }
-        else {
-            Log.i(Tag, str);
         }
     }
 }
