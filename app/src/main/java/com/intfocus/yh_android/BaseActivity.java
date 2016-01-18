@@ -10,6 +10,7 @@ import com.intfocus.yh_android.util.URLs;
 import org.json.JSONObject;
 
 import java.io.File;
+
 import android.net.ConnectivityManager;
 import android.content.Context;
 import android.net.NetworkInfo;
@@ -32,7 +33,7 @@ public class BaseActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         String userConfigPath = String.format("%s/%s", FileUtil.basePath(), URLs.USER_CONFIG_FILENAME);
-        if((new File(userConfigPath)).exists()) {
+        if ((new File(userConfigPath)).exists()) {
             user = FileUtil.readConfigFile(userConfigPath);
             assetsPath = FileUtil.dirPath(URLs.HTML_DIRNAME);
         }
@@ -47,7 +48,7 @@ public class BaseActivity extends Activity {
 
 
     public void longLog(String Tag, String str) {
-        if(str.length() > 200) {
+        if (str.length() > 200) {
             Log.i(Tag, str.substring(0, 200));
             longLog(Tag, str.substring(200));
         } else

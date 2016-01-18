@@ -15,7 +15,7 @@ import java.util.List;
 
 public class LockActivity extends ActionBarActivity {
 
-    private List<TextView> mTextViews =new ArrayList<TextView>(4);
+    private List<TextView> mTextViews = new ArrayList<TextView>(4);
     private EditText mEdit;
     private String mPassword;
 
@@ -28,7 +28,7 @@ public class LockActivity extends ActionBarActivity {
         mTextViews.add((TextView) findViewById(R.id.pwd1));
         mTextViews.add((TextView) findViewById(R.id.pwd2));
         mTextViews.add((TextView) findViewById(R.id.pwd3));
-        mPassword="";
+        mPassword = "";
 
         mEdit = (EditText) findViewById(R.id.input);
         mEdit.requestFocus();
@@ -57,37 +57,37 @@ public class LockActivity extends ActionBarActivity {
         });
     }
 
-    private void checkPassword(){
-        if(mPassword.length()<4){
+    private void checkPassword() {
+        if (mPassword.length() < 4) {
             updatePassword();
             return;
         }
         /* TODO 检查密码 */
-        if(mPassword.equals("1234")){
+        if (mPassword.equals("1234")) {
             hideKeyboard(mEdit);
             finish();
-        }else{
-            mPassword="";
+        } else {
+            mPassword = "";
             updatePassword();
         }
     }
 
-    private void updatePassword(){
-        for (int i=0;i<mPassword.length();i++){
+    private void updatePassword() {
+        for (int i = 0; i < mPassword.length(); i++) {
             mTextViews.get(i).setText("*");
         }
-        for (int i=mPassword.length();i<4;i++){
+        for (int i = mPassword.length(); i < 4; i++) {
             mTextViews.get(i).setText("");
         }
     }
 
-    protected void showKeyboard(View v){
+    protected void showKeyboard(View v) {
         InputMethodManager imm = (InputMethodManager) LockActivity.this.getSystemService(
                 Context.INPUT_METHOD_SERVICE);
         imm.showSoftInput(v, InputMethodManager.SHOW_FORCED);
     }
 
-    protected void hideKeyboard(View v){
+    protected void hideKeyboard(View v) {
         InputMethodManager imm = (InputMethodManager) LockActivity.this.getSystemService(
                 Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
