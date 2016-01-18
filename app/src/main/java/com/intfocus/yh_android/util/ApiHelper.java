@@ -43,6 +43,7 @@ public class ApiHelper {
 			boolean isValidate = response.get("code").equals("200");
 
 			JSONObject json = new JSONObject(response.get("body").toString());
+			json.put("password", password);
 			json.put("is_login", isValidate);
 
 			String userConfigPath = String.format("%s/%s", FileUtil.basePath(), URLs.USER_CONFIG_FILENAME);
@@ -141,6 +142,26 @@ public class ApiHelper {
 		return retMap;
 	}
 
+	public static Map<String, String> resetPassword(String userID, String newPassword) {
+		Map<String, String> retMap = new HashMap<String, String>();
+
+		try {
+			String urlPath = String.format(URLs.API_RESET_PASSWORD_PATH, userID);
+			String urlString = String.format("%s/%s", URLs.HOST, urlPath);
+
+			Map<String, String> params = new HashMap<String, String>();
+			params.put("password", newPassword);
+			retMap = HttpUtil.httpPost(urlString, params);
+		} catch(Exception e) {
+			e.printStackTrace();
+			retMap.put("code", "500");
+			retMap.put("body", e.getLocalizedMessage());
+		}
+		return retMap;
+	}
+	/*
+	 * assistant methods
+	 */
 	public static void clearResponseHeader(String urlKey, String assetsPath) {
 		String headersFilePath = String.format("%s/%s", assetsPath, URLs.CACHED_HEADER_FILENAME);
 		File file = new File(headersFilePath);

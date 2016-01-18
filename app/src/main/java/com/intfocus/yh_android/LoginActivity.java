@@ -23,14 +23,15 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
+
 import com.pgyersdk.update.PgyUpdateManager;
 
 public class LoginActivity extends BaseActivity {
 
-	@Override
+    @Override
     @SuppressLint("SetJavaScriptEnabled")
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
         mWebView = (WebView) findViewById(R.id.webview);
@@ -57,10 +58,9 @@ public class LoginActivity extends BaseActivity {
         /*
          *  加载服务器网页
          */
-        if(isNetworkAvailable()) {
+        if (isNetworkAvailable()) {
             new Thread(runnable).start();
-        }
-        else {
+        } else {
             AlertDialog.Builder builder1 = new AlertDialog.Builder(LoginActivity.this);
             builder1.setMessage("Write your message here.");
             builder1.setCancelable(true);
@@ -85,31 +85,32 @@ public class LoginActivity extends BaseActivity {
             alert11.show();
         }
 
+        /*
+         *  检测版本更新
+         */
         PgyUpdateManager.register(this);
     }
 
     public void checkVersionUpgrade(String assetsPath) {
         try {
-            PackageInfo packageInfo  = getPackageManager().getPackageInfo(getPackageName(), 0);
+            PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
             String versionConfigPath = String.format("%s/%s", assetsPath, URLs.CURRENT_VERSION__FILENAME);
 
             boolean isUpgrade = false;
-            if((new File(versionConfigPath)).exists()) {
-                String localVersion  = FileUtil.readFile(versionConfigPath);
-                if(localVersion.compareTo(packageInfo.versionName) != 0) {
+            if ((new File(versionConfigPath)).exists()) {
+                String localVersion = FileUtil.readFile(versionConfigPath);
+                if (localVersion.compareTo(packageInfo.versionName) != 0) {
                     isUpgrade = true;
                     Log.i("VersionUpgrade", String.format("%s => %s remove %s/%s", localVersion, packageInfo.versionName, assetsPath, URLs.CACHED_HEADER_FILENAME));
                 }
-            }
-            else {
+            } else {
                 isUpgrade = true;
             }
-            if(isUpgrade) {
+            if (isUpgrade) {
                 ApiHelper.clearResponseHeader(URLs.LOGIN_PATH, assetsPath);
                 FileUtil.writeFile(versionConfigPath, packageInfo.versionName);
             }
-        }
-        catch (PackageManager.NameNotFoundException e) {
+        } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
@@ -118,15 +119,16 @@ public class LoginActivity extends BaseActivity {
 
     private Handler mHandler = new Handler() {
         public void handleMessage(Message message) {
-            switch(message.what) {
+            switch (message.what) {
                 case 200:
                 case 304:
-                    urlString = (String)message.obj;
+                    urlString = (String) message.obj;
                     Log.i("FilePath", urlString);
                     mWebView.loadUrl(String.format("file:///" + urlString));
                     break;
                 default:
-                    Toast.makeText(LoginActivity.this, "访问服务器失败", Toast.LENGTH_SHORT).show();;
+                    Toast.makeText(LoginActivity.this, "访问服务器失败", Toast.LENGTH_SHORT).show();
+                    ;
                     break;
             }
         }
@@ -137,10 +139,10 @@ public class LoginActivity extends BaseActivity {
         public void run() {
             Map<String, String> response = ApiHelper.httpGetWithHeader(URLs.LOGIN_PATH, FileUtil.sharedPath(), "assets");
             Message message = mHandler.obtainMessage();
-            message.what =  Integer.parseInt(response.get("code").toString());
+            message.what = Integer.parseInt(response.get("code").toString());
 
-            String[] codes = new String[] {"200", "304"};
-            if(Arrays.asList(codes).contains(response.get("code").toString())) {
+            String[] codes = new String[]{"200", "304"};
+            if (Arrays.asList(codes).contains(response.get("code").toString())) {
                 message.obj = response.get("path").toString();
             }
             mHandler.sendMessage(message);
@@ -154,7 +156,7 @@ public class LoginActivity extends BaseActivity {
          */
         @JavascriptInterface
         public void login(final String username, String password) {
-            if(username.length() > 0 && password.length() > 0) {
+            if (username.length() > 0 && password.length() > 0) {
                 try {
                     String info = ApiHelper.authentication(username, URLs.MD5(password));
                     if (info.compareTo("success") == 0) {
@@ -176,8 +178,7 @@ public class LoginActivity extends BaseActivity {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            }
-            else {
+            } else {
                 Toast.makeText(LoginActivity.this, "请输入用户名与密码", Toast.LENGTH_SHORT).show();
             }
         }

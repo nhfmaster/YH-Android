@@ -5,11 +5,13 @@ import android.app.Activity;
 import android.os.Bundle;
 
 import com.intfocus.yh_android.util.FileUtil;
+import com.intfocus.yh_android.util.HttpUtil;
 import com.intfocus.yh_android.util.URLs;
 
 import org.json.JSONObject;
 
 import java.io.File;
+import java.util.HashMap;
 
 import android.net.ConnectivityManager;
 import android.content.Context;
@@ -39,11 +41,21 @@ public class BaseActivity extends Activity {
         }
     }
 
+    public boolean isNetworkAvailable2() {
+        final ConnectivityManager conMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        final NetworkInfo activeNetwork = conMgr.getActiveNetworkInfo();
+        return activeNetwork != null && activeNetwork.isConnected();
+    }
+
     public boolean isNetworkAvailable() {
-        ConnectivityManager cm =
-                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo netInfo = cm.getActiveNetworkInfo();
-        return netInfo != null && netInfo.isConnectedOrConnecting();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                HttpUtil.httpGet(URLs.HOST, new HashMap<String, String>());
+            }
+        }).start();
+
+        return true;
     }
 
 

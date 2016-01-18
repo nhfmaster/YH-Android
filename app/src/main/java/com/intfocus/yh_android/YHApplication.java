@@ -60,9 +60,8 @@ public class YHApplication extends Application {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        Log.i("App", "hello world");
     }
+
 
     /**
      * 解压assets的zip压缩文件到指定目录

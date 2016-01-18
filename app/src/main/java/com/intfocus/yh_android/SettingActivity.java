@@ -84,7 +84,8 @@ public class SettingActivity extends LockableActivity {
     private View.OnClickListener mChangePWDListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            Toast.makeText(SettingActivity.this, "TODO: 修改密码", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(SettingActivity.this, ResetPasswordActivity.class);
+            SettingActivity.this.startActivity(intent);
         }
     };
 

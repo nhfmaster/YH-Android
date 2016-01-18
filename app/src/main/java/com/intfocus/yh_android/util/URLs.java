@@ -55,13 +55,13 @@ public class URLs implements Serializable {
 	public final static String USER_CONFIG_FILENAME      = "user.plist";
 	public final static String CONFIG_DIRNAME            = "Configs";
 	public final static String SETTINGS_CONFIG_FILENAME  = "Setting.plist";
-	public final static String TABINDEX_CONFIG_FILENAME  = "PageTabIndex.plist";
-	public final static String GESTURE_PASSWORD_FILENAME = "GesturePassword.plist";
+	public final static String TABINDEX_CONFIG_FILENAME  = "page_tab_index.plist";
+	public final static String GESTURE_PASSWORD_FILENAME = "gesture_password.plist";
 	public final static String HTML_DIRNAME              = "HTML";
 	public final static String ASSETS1_DIRNAME           = "Assets";
 	public final static String SHARED_DIRNAME            = "Shared";
 
-	public final static String CACHED_HEADER_FILENAME    = "cachedHeader.plist";
+	public final static String CACHED_HEADER_FILENAME    = "cached_header.plist";
     public final static String CURRENT_VERSION__FILENAME = "current_version.txt";
 	
 
