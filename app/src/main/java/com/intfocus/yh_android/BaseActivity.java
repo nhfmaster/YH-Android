@@ -5,11 +5,14 @@ import android.app.Activity;
 import android.os.Bundle;
 
 import com.intfocus.yh_android.util.FileUtil;
+import com.intfocus.yh_android.util.HttpUtil;
 import com.intfocus.yh_android.util.URLs;
 
 import org.json.JSONObject;
 
 import java.io.File;
+import java.util.HashMap;
+
 import android.net.ConnectivityManager;
 import android.content.Context;
 import android.net.NetworkInfo;
@@ -32,22 +35,32 @@ public class BaseActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         String userConfigPath = String.format("%s/%s", FileUtil.basePath(), URLs.USER_CONFIG_FILENAME);
-        if((new File(userConfigPath)).exists()) {
+        if ((new File(userConfigPath)).exists()) {
             user = FileUtil.readConfigFile(userConfigPath);
             assetsPath = FileUtil.dirPath(URLs.HTML_DIRNAME);
         }
     }
 
+    public boolean isNetworkAvailable2() {
+        final ConnectivityManager conMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        final NetworkInfo activeNetwork = conMgr.getActiveNetworkInfo();
+        return activeNetwork != null && activeNetwork.isConnected();
+    }
+
     public boolean isNetworkAvailable() {
-        ConnectivityManager cm =
-                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo netInfo = cm.getActiveNetworkInfo();
-        return netInfo != null && netInfo.isConnectedOrConnecting();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                HttpUtil.httpGet(URLs.HOST, new HashMap<String, String>());
+            }
+        }).start();
+
+        return true;
     }
 
 
     public void longLog(String Tag, String str) {
-        if(str.length() > 200) {
+        if (str.length() > 200) {
             Log.i(Tag, str.substring(0, 200));
             longLog(Tag, str.substring(200));
         } else

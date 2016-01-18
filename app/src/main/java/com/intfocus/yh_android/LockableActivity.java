@@ -7,7 +7,7 @@ import android.os.Bundle;
 /**
  * Created by wiky on 1/15/16.
  */
-public class LockableActivity extends BaseActivity{
+public class LockableActivity extends BaseActivity {
 
     private boolean mInApp;
     private boolean mShouldLock;
@@ -15,12 +15,12 @@ public class LockableActivity extends BaseActivity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mInApp =false;
-        mShouldLock=true;
+        mInApp = false;
+        mShouldLock = true;
     }
 
     @Override
-    protected void onRestart(){
+    protected void onRestart() {
         super.onRestart();
 
         /*
@@ -28,28 +28,28 @@ public class LockableActivity extends BaseActivity{
          * 如果没有设置锁屏，则这里应该直接return
          */
 
-        if(mShouldLock){
-            Intent intent=new Intent(this, LockActivity.class);
+        if (mShouldLock) {
+            Intent intent = new Intent(this, LockActivity.class);
             startActivity(intent);
-        }else{
-            mInApp=false;
+        } else {
+            mInApp = false;
         }
     }
 
     @Override
-    protected void onStop(){
+    protected void onStop() {
         super.onStop();
-        if(mInApp){
-            mShouldLock=false;
-        }else{
-            mShouldLock=true;
+        if (mInApp) {
+            mShouldLock = false;
+        } else {
+            mShouldLock = true;
         }
     }
 
 
     @Override
-    public void startActivity(Intent intent){
+    public void startActivity(Intent intent) {
         super.startActivity(intent);
-        mInApp =true;
+        mInApp = true;
     }
 }

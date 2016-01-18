@@ -152,6 +152,15 @@
                 android:text="域名" />
         </RelativeLayout>
 
+
+        <RelativeLayout style="@style/SettingGroup">
+
+            <TextView
+                android:id="@+id/check_upgrade"
+                style="@style/SettingButton"
+                android:text="检测版本更新" />
+        </RelativeLayout>
+
         <View style="@style/Divider" />
 
         <TextView
