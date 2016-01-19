@@ -5,16 +5,12 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 
 import com.intfocus.yh_android.util.ApiHelper;
-import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.URLs;
 
 import org.json.JSONException;
@@ -22,7 +18,6 @@ import org.json.JSONObject;
 
 import android.app.AlertDialog.Builder;
 
-import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -76,6 +71,15 @@ public class ResetPasswordActivity extends BaseActivity {
                                 new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
+                                        try {
+                                            JSONObject configJSON = new JSONObject();
+                                            configJSON.put("is_login", false);
+
+                                            modifiedUserConfig(configJSON);
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+
                                         Intent intent = new Intent();
                                         intent.setClass(ResetPasswordActivity.this, LoginActivity.class);
                                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);//它可以关掉所要到的界面中间的activity

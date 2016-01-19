@@ -16,8 +16,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import android.net.ConnectivityManager;
@@ -74,10 +76,20 @@ public class BaseActivity extends Activity {
         @Override
         public void run() {
             Map<String, String> response = HttpUtil.httpGet(urlStringForDetecting, new HashMap<String, String>());
+            int statusCode = Integer.parseInt(response.get("code").toString());
+            if(statusCode == 200) {
+                Log.i("StatusCode", response.get("body").toString());
+                try {
+                    JSONObject json = new JSONObject(response.get("body").toString());
+                    statusCode = json.getBoolean("device_state") ? 200 : 401;
+                } catch(JSONException e) {
+                    e.printStackTrace();
+                }
+            }
             Log.i("Detecting", response.get("code").toString());
 
             Message message = mHandlerForDetecting.obtainMessage();
-            message.what = Integer.parseInt(response.get("code").toString());
+            message.what = statusCode;
             mHandlerForDetecting.sendMessage(message);
         }
     };
@@ -89,9 +101,10 @@ public class BaseActivity extends Activity {
                     new Thread(mRunnableWithAPI).start();
                     break;
                 case 400:
-                    showDialogForDetecting(400);
+                    showDialogForWithoutNetwork();
                     break;
                 case 401:
+                    showDialogForDeviceForbided();
                     break;
                 default:
                     Log.i("UnkownCode", urlStringForDetecting);
@@ -142,7 +155,7 @@ public class BaseActivity extends Activity {
         }
     };
 
-    public void showDialogForDetecting(int statusCode) {
+    public void showDialogForWithoutNetwork() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(BaseActivity.this);
         alertDialog.setTitle("温馨提示");
         alertDialog.setMessage("网络环境不稳定");
@@ -168,11 +181,53 @@ public class BaseActivity extends Activity {
         alertDialog.show();
     }
 
+
+    public void showDialogForDeviceForbided() {
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(BaseActivity.this);
+        alertDialog.setTitle("温馨提示");
+        alertDialog.setMessage("您被禁止在该设备使用本应用");
+
+        alertDialog.setNegativeButton(
+                "知道了",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        new Thread(mRunnableForDetecting).start();
+                        dialog.dismiss();
+                    }
+                }
+        );
+        alertDialog.show();
+    }
+
     public void longLog(String Tag, String str) {
         if (str.length() > 200) {
             Log.i(Tag, str.substring(0, 200));
             longLog(Tag, str.substring(200));
         } else
             Log.i(Tag, str);
+    }
+
+
+    protected void modifiedUserConfig(JSONObject configJSON) {
+        try {
+            String userConfigPath = String.format("%s/%s", FileUtil.basePath(), URLs.USER_CONFIG_FILENAME);
+            JSONObject json = FileUtil.readConfigFile(userConfigPath);
+
+            Iterator it = configJSON.keys();
+            while (it.hasNext()) {
+                String key = (String) it.next();
+                json.put(key, configJSON.get(key));
+            }
+
+            FileUtil.writeFile(userConfigPath, json.toString());
+
+            String settingsConfigPath = FileUtil.dirPath(URLs.CONFIG_DIRNAME, URLs.SETTINGS_CONFIG_FILENAME);
+            FileUtil.writeFile(settingsConfigPath, json.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 }
