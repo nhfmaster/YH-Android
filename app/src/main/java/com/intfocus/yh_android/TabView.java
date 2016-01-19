@@ -2,6 +2,7 @@ package com.intfocus.yh_android;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.Gravity;
@@ -62,8 +63,10 @@ public class TabView extends LinearLayout {
     private void update() {
         if (mActive) {
             mImageView.setImageDrawable(mActiveDrawable);
+            mTextView.setTextColor(Color.parseColor("#53a93f"));
         } else {
             mImageView.setImageDrawable(mDrawable);
+            mTextView.setTextColor(Color.BLACK);
         }
     }
 
