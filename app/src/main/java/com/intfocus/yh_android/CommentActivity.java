@@ -24,7 +24,7 @@ import static java.lang.String.format;
 import android.content.Intent;
 import android.util.Log;
 
-public class CommentActivity extends LockableActivity {
+public class CommentActivity extends BaseActivity {
 
     private TextView mTitle;
 

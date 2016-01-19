@@ -83,7 +83,7 @@ public class BaseActivity extends Activity {
                     JSONObject json = new JSONObject(response.get("body").toString());
                     statusCode = json.getBoolean("device_state") ? 200 : 401;
                 } catch(JSONException e) {
-                    e.printStackTrace();
+                    //e.printStackTrace();
                 }
             }
             Log.i("Detecting", response.get("code").toString());

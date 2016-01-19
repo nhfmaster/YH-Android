@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
 
-public class MainActivity extends LockableActivity {
+public class MainActivity extends BaseActivity {
 
     private TabView mTabKPI;
     private TabView mTabAnalysis;

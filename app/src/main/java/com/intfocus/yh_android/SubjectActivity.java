@@ -25,7 +25,7 @@ import java.io.File;
 
 import java.io.IOException;
 
-public class SubjectActivity extends LockableActivity {
+public class SubjectActivity extends BaseActivity {
 
     private TextView mTitle;
     private ImageView mComment;

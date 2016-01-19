@@ -5,16 +5,11 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.widget.Toast;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import com.intfocus.yh_android.util.HttpUtil;
 
 import com.intfocus.yh_android.util.ApiHelper;
 import com.intfocus.yh_android.util.FileUtil;
@@ -22,9 +17,6 @@ import com.intfocus.yh_android.util.URLs;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 import com.pgyersdk.update.PgyUpdateManager;
 

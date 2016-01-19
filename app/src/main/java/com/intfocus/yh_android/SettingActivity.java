@@ -1,6 +1,5 @@
 package com.intfocus.yh_android;
 
-import com.intfocus.yh_android.LockActivity;
 
 import android.os.Bundle;
 import android.view.View;
@@ -9,33 +8,23 @@ import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.content.pm.PackageManager.NameNotFoundException;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.URLs;
-
 import android.content.pm.PackageInfo;
 import android.text.TextUtils;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
-
 import android.content.DialogInterface;
-
 import com.pgyersdk.update.PgyUpdateManager;
-
 import android.app.AlertDialog;
 import android.widget.Toast;
-
 import com.pgyersdk.javabean.AppBean;
 import com.pgyersdk.update.UpdateManagerListener;
 
-import java.util.Iterator;
-import java.io.IOException;
-
-public class SettingActivity extends LockableActivity {
+public class SettingActivity extends BaseActivity {
 
     private TextView mUserID;
     private TextView mRoleID;
@@ -49,6 +38,7 @@ public class SettingActivity extends LockableActivity {
     private Switch mLockSwitch;
     private TextView mChangeLock;
     private Button mLogout;
+
     private View.OnClickListener mOnBackListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -237,6 +227,5 @@ public class SettingActivity extends LockableActivity {
         int stringId = context.getApplicationInfo().labelRes;
         return context.getString(stringId);
     }
-
 
 }

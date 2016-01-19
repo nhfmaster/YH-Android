@@ -11,6 +11,7 @@ import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 
 import com.intfocus.yh_android.util.ApiHelper;
+import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.URLs;
 
 import org.json.JSONException;
@@ -18,6 +19,8 @@ import org.json.JSONObject;
 
 import android.app.AlertDialog.Builder;
 
+import java.io.IOException;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
