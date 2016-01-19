@@ -14,6 +14,7 @@ import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import com.intfocus.yh_android.util.HttpUtil;
 
 import com.intfocus.yh_android.util.ApiHelper;
 import com.intfocus.yh_android.util.FileUtil;
@@ -22,6 +23,7 @@ import com.intfocus.yh_android.util.URLs;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.pgyersdk.update.PgyUpdateManager;
@@ -47,8 +49,10 @@ public class LoginActivity extends BaseActivity {
         mWebView.addJavascriptInterface(new JavaScriptInterface(), "AndroidJSBridge");
 
 
-        String htmlPath = String.format("file:///%s/loading/login.html", FileUtil.sharedPath());
-        mWebView.loadUrl(htmlPath);
+        /*
+         * 显示加载中...界面
+         */
+        mWebView.loadUrl(urlStringForLoading);
 
         /*
          * 检测登录界面，版本是否升级
@@ -58,32 +62,9 @@ public class LoginActivity extends BaseActivity {
         /*
          *  加载服务器网页
          */
-        if (isNetworkAvailable()) {
-            new Thread(runnable).start();
-        } else {
-            AlertDialog.Builder builder1 = new AlertDialog.Builder(LoginActivity.this);
-            builder1.setMessage("Write your message here.");
-            builder1.setCancelable(true);
+        urlString = URLs.LOGIN_PATH;
 
-            builder1.setPositiveButton(
-                    "Yes",
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            dialog.cancel();
-                        }
-                    });
-
-            builder1.setNegativeButton(
-                    "No",
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            dialog.cancel();
-                        }
-                    });
-
-            AlertDialog alert11 = builder1.create();
-            alert11.show();
-        }
+        new Thread(mRunnableForDetecting).start();
 
         /*
          *  检测版本更新
@@ -117,37 +98,6 @@ public class LoginActivity extends BaseActivity {
         }
     }
 
-    private Handler mHandler = new Handler() {
-        public void handleMessage(Message message) {
-            switch (message.what) {
-                case 200:
-                case 304:
-                    urlString = (String) message.obj;
-                    Log.i("FilePath", urlString);
-                    mWebView.loadUrl(String.format("file:///" + urlString));
-                    break;
-                default:
-                    Toast.makeText(LoginActivity.this, "访问服务器失败", Toast.LENGTH_SHORT).show();
-                    ;
-                    break;
-            }
-        }
-
-    };
-    Runnable runnable = new Runnable() {
-        @Override
-        public void run() {
-            Map<String, String> response = ApiHelper.httpGetWithHeader(URLs.LOGIN_PATH, FileUtil.sharedPath(), "assets");
-            Message message = mHandler.obtainMessage();
-            message.what = Integer.parseInt(response.get("code").toString());
-
-            String[] codes = new String[]{"200", "304"};
-            if (Arrays.asList(codes).contains(response.get("code").toString())) {
-                message.obj = response.get("path").toString();
-            }
-            mHandler.sendMessage(message);
-        }
-    };
 
 
     private class JavaScriptInterface {
@@ -168,9 +118,6 @@ public class LoginActivity extends BaseActivity {
                         // 跳转至主界面
                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                         LoginActivity.this.startActivity(intent);
-
-                        // 登录界面，并未被销毁 - reload webview
-                        // new Thread(runnable).start();
                     } else {
                         Toast.makeText(LoginActivity.this, info, Toast.LENGTH_SHORT).show();
                     }

@@ -27,15 +27,11 @@ import java.util.Map;
 
 public class MainActivity extends LockableActivity {
 
-    private WebView mWebView;
     private TabView mTabKPI;
     private TabView mTabAnalysis;
     private TabView mTabAPP;
     private TabView mTabMessage;
     private TabView mCurrentTab;
-    private JSONObject user;
-    private String urlString;
-    private String assetsPath;
     private int objectType;
 
     @Override
@@ -43,10 +39,6 @@ public class MainActivity extends LockableActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        String userConfigPath = String.format("%s/%s", FileUtil.basePath(), URLs.USER_CONFIG_FILENAME);
-        user       = FileUtil.readConfigFile(userConfigPath);
-        assetsPath = FileUtil.dirPath(URLs.HTML_DIRNAME);
 
         mWebView = (WebView) findViewById(R.id.webview);
         mWebView.initialize();
@@ -58,19 +50,15 @@ public class MainActivity extends LockableActivity {
             }
         });
         mWebView.addJavascriptInterface(new JavaScriptInterface(), "AndroidJSBridge");
+        mWebView.loadUrl(urlStringForLoading);
 
         try {
             String urlPath = String.format(URLs.KPI_PATH, user.getString("role_id"), user.getString("group_id"));
-            //urlPath = "/mobile/test";
             urlString = String.format("%s%s", URLs.HOST, urlPath);
-            Log.i("URL", urlString);
-
-
             objectType = 1;
-            mWebView.loadUrl(String.format("file:///%s/loading/loading.html", FileUtil.sharedPath()));
-            new Thread(runnable).start();
-        }
-        catch (JSONException e) {
+
+            new Thread(mRunnableForDetecting).start();
+        } catch (JSONException e) {
             e.printStackTrace();
         }
 
@@ -87,7 +75,7 @@ public class MainActivity extends LockableActivity {
 
 
     @Override
-    protected void onRestart(){
+    protected void onRestart() {
         super.onRestart();
 
         Log.e("!!!!!", "RESTART!!!!!!!!!!");
@@ -114,77 +102,44 @@ public class MainActivity extends LockableActivity {
     private View.OnClickListener mTabChangeListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-        if (v == mCurrentTab) {
-            return;
-        }
-        mCurrentTab.setActive(false);
-        mCurrentTab = (TabView) v;
-        mCurrentTab.setActive(true);
-
-        mWebView.loadUrl(String.format("file:///%s/loading/loading.html", FileUtil.sharedPath()));
-
-        try {
-            String urlPath;
-            switch(v.getId()) {
-                case R.id.tab_kpi:
-                    objectType = 1;
-                    urlPath = String.format(URLs.KPI_PATH, user.getString("role_id"), user.getString("group_id"));
-                    break;
-                case R.id.tab_analysis:
-                    objectType = 2;
-                    urlPath = String.format(URLs.ANALYSE_PATH, user.getString("role_id"));
-                    break;
-                case R.id.tab_app:
-                    objectType = 3;
-                    urlPath = String.format(URLs.APPLICATION_PATH, user.getString("role_id"));
-                    break;
-                case R.id.tab_message:
-                    objectType = 5;
-                    urlPath = String.format(URLs.MESSAGE_PATH, user.getString("role_id"), user.getString("user_id"));
-                    break;
-                default:
-                    urlPath = String.format(URLs.KPI_PATH, user.getString("role_id"), user.getString("group_id"));
-                    break;
+            if (v == mCurrentTab) {
+                return;
             }
+            mCurrentTab.setActive(false);
+            mCurrentTab = (TabView) v;
+            mCurrentTab.setActive(true);
 
-             urlString = String.format("%s%s", URLs.HOST, urlPath);
-             new Thread(runnable).start();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-        }
-    };
+            mWebView.loadUrl(String.format("file:///%s/loading/loading.html", FileUtil.sharedPath()));
 
-    @SuppressLint("SetJavaScriptEnabled")
-    private Handler mHandler = new Handler() {
-        public void handleMessage(Message message) {
-            switch(message.what) {
-                case 200:
-                case 304:
-                    String htmlPath = (String)message.obj;
-                    Log.i("FilePath", htmlPath);
-                    mWebView.loadUrl(String.format("file:///" + htmlPath));
-                    break;
-                default:
-                    Toast.makeText(MainActivity.this, "访问服务器失败", Toast.LENGTH_SHORT).show();;
-                    break;
+            try {
+                String urlPath;
+                switch (v.getId()) {
+                    case R.id.tab_kpi:
+                        objectType = 1;
+                        urlPath = String.format(URLs.KPI_PATH, user.getString("role_id"), user.getString("group_id"));
+                        break;
+                    case R.id.tab_analysis:
+                        objectType = 2;
+                        urlPath = String.format(URLs.ANALYSE_PATH, user.getString("role_id"));
+                        break;
+                    case R.id.tab_app:
+                        objectType = 3;
+                        urlPath = String.format(URLs.APPLICATION_PATH, user.getString("role_id"));
+                        break;
+                    case R.id.tab_message:
+                        objectType = 5;
+                        urlPath = String.format(URLs.MESSAGE_PATH, user.getString("role_id"), user.getString("user_id"));
+                        break;
+                    default:
+                        urlPath = String.format(URLs.KPI_PATH, user.getString("role_id"), user.getString("group_id"));
+                        break;
+                }
+
+                urlString = String.format("%s%s", URLs.HOST, urlPath);
+                new Thread(mRunnableForDetecting).start();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        }
-
-    };
-    Runnable runnable = new Runnable() {
-        @Override
-        public void run() {
-            Map<String, String> response = ApiHelper.httpGetWithHeader(urlString, assetsPath, "../../Shared/assets");
-            Message message = mHandler.obtainMessage();
-            message.what =  Integer.parseInt(response.get("code").toString());
-
-            String[] codes = new String[] {"200", "304"};
-            if(Arrays.asList(codes).contains(response.get("code").toString())) {
-                message.obj = response.get("path").toString();
-            }
-            mHandler.sendMessage(message);
         }
     };
 
@@ -198,16 +153,15 @@ public class MainActivity extends LockableActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                String message =  String.format("%s\n%s\n%d", bannerName, link, objectID);
-                //Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
-                longLog("JSClick", message);
+                    String message = String.format("%s\n%s\n%d", bannerName, link, objectID);
+                    longLog("JSClick", message);
 
-                Intent intent = new Intent(MainActivity.this, SubjectActivity.class);
-                intent.putExtra("bannerName", bannerName);
-                intent.putExtra("link", link);
-                intent.putExtra("objectID", objectID);
-                intent.putExtra("objectType", objectType);
-                MainActivity.this.startActivity(intent);
+                    Intent intent = new Intent(MainActivity.this, SubjectActivity.class);
+                    intent.putExtra("bannerName", bannerName);
+                    intent.putExtra("link", link);
+                    intent.putExtra("objectID", objectID);
+                    intent.putExtra("objectType", objectType);
+                    MainActivity.this.startActivity(intent);
                 }
             });
         }
@@ -218,10 +172,10 @@ public class MainActivity extends LockableActivity {
         @JavascriptInterface
         public void storeTabIndex(final String pageName, final int tabIndex) {
             try {
-                String filePath    = FileUtil.dirPath(URLs.CONFIG_DIRNAME, URLs.TABINDEX_CONFIG_FILENAME);
+                String filePath = FileUtil.dirPath(URLs.CONFIG_DIRNAME, URLs.TABINDEX_CONFIG_FILENAME);
 
                 JSONObject config = new JSONObject();
-                if((new File(filePath).exists())) {
+                if ((new File(filePath).exists())) {
                     String fileContent = FileUtil.readFile(filePath);
                     config = new JSONObject(fileContent);
                 }
@@ -239,17 +193,17 @@ public class MainActivity extends LockableActivity {
         public int restoreTabIndex(final String pageName) {
             int tabIndex = 0;
             try {
-                String filePath    = FileUtil.dirPath(URLs.CONFIG_DIRNAME, URLs.TABINDEX_CONFIG_FILENAME);
+                String filePath = FileUtil.dirPath(URLs.CONFIG_DIRNAME, URLs.TABINDEX_CONFIG_FILENAME);
 
                 JSONObject config = new JSONObject();
-                if((new File(filePath).exists())) {
+                if ((new File(filePath).exists())) {
                     String fileContent = FileUtil.readFile(filePath);
                     config = new JSONObject(fileContent);
                 }
                 tabIndex = config.getInt(pageName);
 
             } catch (JSONException e) {
-                e.printStackTrace();
+                // e.printStackTrace();
             }
 
             return tabIndex < 0 ? 0 : tabIndex;

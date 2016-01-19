@@ -47,47 +47,12 @@ public class ResetPasswordActivity extends BaseActivity {
             }
         });
         mWebView.addJavascriptInterface(new JavaScriptInterface(), "AndroidJSBridge");
-        mWebView.loadUrl(String.format("file:///%s/loading/loading.html", FileUtil.sharedPath()));
+        mWebView.loadUrl(urlStringForLoading);
 
 
         urlString = String.format("%s%s", URLs.HOST, URLs.RESET_PASSWORD_PATH);
-        new Thread(runnable).start();
+        new Thread(mRunnableForDetecting).start();
     }
-
-
-    @SuppressLint("SetJavaScriptEnabled")
-    private Handler mHandler = new Handler() {
-        public void handleMessage(Message message) {
-            switch (message.what) {
-                case 200:
-                case 304:
-                    String htmlPath = (String) message.obj;
-                    Log.i("FilePath", htmlPath);
-                    mWebView.loadUrl(String.format("file:///" + htmlPath));
-                    break;
-                default:
-                    Toast.makeText(ResetPasswordActivity.this, "访问服务器失败", Toast.LENGTH_SHORT).show();
-                    ;
-                    break;
-            }
-        }
-
-    };
-
-    Runnable runnable = new Runnable() {
-        @Override
-        public void run() {
-            Map<String, String> response = ApiHelper.httpGetWithHeader(urlString, assetsPath, "../../Shared/assets");
-            Message message = mHandler.obtainMessage();
-            message.what = Integer.parseInt(response.get("code").toString());
-
-            String[] codes = new String[]{"200", "304"};
-            if (Arrays.asList(codes).contains(response.get("code").toString())) {
-                message.obj = response.get("path").toString();
-            }
-            mHandler.sendMessage(message);
-        }
-    };
 
     private class JavaScriptInterface {
         /*
@@ -134,7 +99,7 @@ public class ResetPasswordActivity extends BaseActivity {
 
                 } else {
                     Toast.makeText(ResetPasswordActivity.this, "原始密码输入有误", Toast.LENGTH_SHORT).show();
-                    new Thread(runnable).start();
+                    new Thread(mRunnableForDetecting).start();
                 }
             } catch (JSONException e) {
                 e.printStackTrace();

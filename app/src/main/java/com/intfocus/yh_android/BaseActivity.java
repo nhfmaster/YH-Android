@@ -2,22 +2,31 @@ package com.intfocus.yh_android;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 
+import com.intfocus.yh_android.util.ApiHelper;
 import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.HttpUtil;
 import com.intfocus.yh_android.util.URLs;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 
 import android.net.ConnectivityManager;
 import android.content.Context;
 import android.net.NetworkInfo;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
-
+import android.widget.Toast;
 
 /**
  * Created by lijunjie on 16/1/14.
@@ -28,6 +37,9 @@ public class BaseActivity extends Activity {
     protected JSONObject user;
     protected String urlString;
     protected String assetsPath;
+    protected String relativeAssetsPath;
+    protected String urlStringForDetecting;
+    protected String urlStringForLoading;
 
     @Override
     @SuppressLint("SetJavaScriptEnabled")
@@ -35,29 +47,126 @@ public class BaseActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         String userConfigPath = String.format("%s/%s", FileUtil.basePath(), URLs.USER_CONFIG_FILENAME);
+
+        assetsPath = FileUtil.sharedPath();
+        urlStringForDetecting = URLs.HOST;
+        relativeAssetsPath = "assets";
+        urlStringForLoading = String.format("file:///%s/loading/login.html", FileUtil.sharedPath());
+
         if ((new File(userConfigPath)).exists()) {
-            user = FileUtil.readConfigFile(userConfigPath);
-            assetsPath = FileUtil.dirPath(URLs.HTML_DIRNAME);
+            try {
+                user = FileUtil.readConfigFile(userConfigPath);
+                if (user.getBoolean("is_login")) {
+                    assetsPath = FileUtil.dirPath(URLs.HTML_DIRNAME);
+                    String urlPath = String.format(URLs.API_DEVICE_STATE_PATH, user.getInt("user_device_id"));
+                    urlStringForDetecting = String.format("%s%s", URLs.HOST, urlPath);
+                    relativeAssetsPath = "../../Shared/assets";
+                    urlStringForLoading = String.format("file:///%s/loading/loading.html", FileUtil.sharedPath());
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    public boolean isNetworkAvailable2() {
-        final ConnectivityManager conMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        final NetworkInfo activeNetwork = conMgr.getActiveNetworkInfo();
-        return activeNetwork != null && activeNetwork.isConnected();
-    }
 
-    public boolean isNetworkAvailable() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                HttpUtil.httpGet(URLs.HOST, new HashMap<String, String>());
+    Runnable mRunnableForDetecting = new Runnable() {
+        @Override
+        public void run() {
+            Map<String, String> response = HttpUtil.httpGet(urlStringForDetecting, new HashMap<String, String>());
+            Log.i("Detecting", response.get("code").toString());
+
+            Message message = mHandlerForDetecting.obtainMessage();
+            message.what = Integer.parseInt(response.get("code").toString());
+            mHandlerForDetecting.sendMessage(message);
+        }
+    };
+
+    protected Handler mHandlerForDetecting = new Handler() {
+        public void handleMessage(Message message) {
+            switch (message.what) {
+                case 200:
+                    new Thread(mRunnableWithAPI).start();
+                    break;
+                case 400:
+                    showDialogForDetecting(400);
+                    break;
+                case 401:
+                    break;
+                default:
+                    Log.i("UnkownCode", urlStringForDetecting);
+                    Log.i("UnkownCode", String.format("%d", message.what));
+                    break;
             }
-        }).start();
+        }
+    };
 
-        return true;
+    Runnable mRunnableWithAPI = new Runnable() {
+        @Override
+        public void run() {
+            Log.i("httpGetWithHeader", String.format("url: %s, assets: %s, relativeAssets: %s", urlString, assetsPath, relativeAssetsPath));
+            Map<String, String> response = ApiHelper.httpGetWithHeader(urlString, assetsPath, relativeAssetsPath);
+
+
+            Message message = mHandlerWithAPI.obtainMessage();
+            message.what = Integer.parseInt(response.get("code").toString());
+            message.obj = response.get("path").toString();
+
+            Log.i("mRunnableWithAPI", String.format("code: %s, path: %s", response.get("code").toString(), response.get("path").toString()));
+
+            /*
+                String[] codes = new String[]{"200", "304"};
+                if (Arrays.asList(codes).contains(response.get("code").toString())) {
+                    message.obj = response.get("path").toString();
+                }
+            */
+
+            mHandlerWithAPI.sendMessage(message);
+        }
+    };
+
+    protected Handler mHandlerWithAPI = new Handler() {
+        public void handleMessage(Message message) {
+            switch (message.what) {
+                case 200:
+                case 304:
+                    String localHtmlPath = String.format("file:///%s", (String) message.obj);
+                    Log.i("localHtmlPath", localHtmlPath);
+                    mWebView.loadUrl(localHtmlPath);
+                    break;
+                default:
+                    String msg = String.format("访问服务器失败（%d)", message.what);
+                    Toast.makeText(BaseActivity.this, msg, Toast.LENGTH_SHORT).show();
+                    break;
+            }
+        }
+    };
+
+    public void showDialogForDetecting(int statusCode) {
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(BaseActivity.this);
+        alertDialog.setTitle("温馨提示");
+        alertDialog.setMessage("网络环境不稳定");
+
+        alertDialog.setPositiveButton(
+                "刷新",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        new Thread(mRunnableForDetecting).start();
+                    }
+                }
+        );
+        alertDialog.setNegativeButton(
+                "先这样",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                }
+        );
+        alertDialog.show();
     }
-
 
     public void longLog(String Tag, String str) {
         if (str.length() > 200) {
@@ -66,5 +175,4 @@ public class BaseActivity extends Activity {
         } else
             Log.i(Tag, str);
     }
-
 }

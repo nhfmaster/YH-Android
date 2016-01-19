@@ -17,8 +17,8 @@ import java.util.Date;
 public class URLs implements Serializable {
 	
 	
-	public final static String HOST = "http://yonghui.idata.mobi";
-	public final static String HOST1  = "http://10.0.3.2:4567";
+	public final static String HOST1 = "http://yonghui.idata.mobi";
+	public final static String HOST  = "http://10.0.3.2:4567";
 
 	//login
     public final static String LOGIN_PATH              = String.format("%s/mobile/login", HOST);
@@ -28,7 +28,7 @@ public class URLs implements Serializable {
     public final static String API_DATA_PATH           = "/api/v1/group/%s/report/%s/attachment";
     public final static String API_COMMENT_PATH        = "/api/v1/user/%d/id/%d/type/%d";
     public final static String API_SCREEN_LOCK_PATH    = "/api/v1/user_device/%s/screen_lock";
-    public final static String API_DEVICE_STATE_PATH   = "/api/v1/user_device/%s/state";
+    public final static String API_DEVICE_STATE_PATH   = "/api/v1/user_device/%d/state";
     public final static String API_RESET_PASSWORD_PATH = "/api/v1/update/%s/password";
 
     public final static String KPI_PATH                = "/mobile/role/%s/group/%s/kpi";

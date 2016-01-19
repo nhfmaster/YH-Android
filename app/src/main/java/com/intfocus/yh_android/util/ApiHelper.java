@@ -107,8 +107,6 @@ public class ApiHelper {
 		Log.i("WriteComment", response.get("body").toString());
 	}
 
-
-
 	public static Map<String, String> httpGetWithHeader(String urlString, String assetsPath, String relativeAssetsPath) {
 		Map<String, String> retMap = new HashMap<String, String>();
 
@@ -125,7 +123,7 @@ public class ApiHelper {
 			String htmlPath = String.format("%s/%s", assetsPath, htmlName);
 			retMap.put("path", htmlPath);
 
-			if (statusCode.compareTo("200") == 0) {
+			if (statusCode.equals("200")) {
 				ApiHelper.storeResponseHeader(urlKey, assetsPath, response);
 
 				String htmlContent = response.get("body").toString();
