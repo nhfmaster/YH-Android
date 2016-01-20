@@ -112,4 +112,33 @@
         <item name="android:text">"___"</item>
     </style>
 
+    <style name="ColorViewStyle">
+        <item name="android:layout_width">5dp</item>
+        <item name="android:layout_height">5dp</item>
+        <item name="android:layout_alignParentRight">true</item>
+        <item name="android:layout_below">@id/setting</item>
+        <item name="android:layout_marginTop">5dp</item>
+    </style>
+
+    <style name="ColorViewStyle0" parent="@style/ColorViewStyle">
+        <item name="android:background">@color/colors1</item>
+        <item name="android:layout_marginRight">36dp</item>
+    </style>
+    <style name="ColorViewStyle1" parent="@style/ColorViewStyle">
+        <item name="android:background">@color/colors1</item>
+        <item name="android:layout_marginRight">29dp</item>
+    </style>
+    <style name="ColorViewStyle2" parent="@style/ColorViewStyle">
+        <item name="android:background">@color/colors2</item>
+        <item name="android:layout_marginRight">22dp</item>
+    </style>
+    <style name="ColorViewStyle3" parent="@style/ColorViewStyle">
+        <item name="android:background">@color/colors3</item>
+        <item name="android:layout_marginRight">15dp</item>
+    </style>
+    <style name="ColorViewStyle4" parent="@style/ColorViewStyle">
+        <item name="android:background">@color/colors4</item>
+        <item name="android:layout_marginRight">8dp</item>
+    </style>
+
 </resources>

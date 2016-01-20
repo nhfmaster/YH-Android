@@ -18,10 +18,15 @@ android {
     }
 }
 
+repositories {
+    mavenCentral()
+}
+
 dependencies {
     compile 'com.android.support:appcompat-v7:19.1.0'
     compile 'com.android.support:support-v4:19.1.0'
     compile 'com.squareup.okhttp:okhttp:2.0.0'
     compile 'com.pgyersdk:sdk:2.2.2'
     compile "commons-io:commons-io:+"
+    compile 'com.makeramen:roundedimageview:2.2.1'
 }

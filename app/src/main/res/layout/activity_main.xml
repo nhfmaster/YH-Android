@@ -18,10 +18,32 @@
             android:layout_centerInParent="true"
             android:src="@mipmap/yonghuilogo" />
 
-        <ImageView
+        <com.makeramen.roundedimageview.RoundedImageView
             android:id="@+id/setting"
             style="@style/ActionRightButton"
             android:src="@mipmap/setting" />
+
+        <com.makeramen.roundedimageview.RoundedImageView
+            android:id="@+id/colorView0"
+            android:layout_width="5dp"
+            android:layout_height="5dp"
+            android:background="@color/colors9"
+            android:layout_below="@id/setting"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="36dp"
+            android:layout_marginTop="5dp" />
+        <com.makeramen.roundedimageview.RoundedImageView
+            android:id="@+id/colorView1"
+            style="@style/ColorViewStyle1" />
+        <com.makeramen.roundedimageview.RoundedImageView
+            android:id="@+id/colorView2"
+            style="@style/ColorViewStyle2" />
+        <com.makeramen.roundedimageview.RoundedImageView
+            android:id="@+id/colorView3"
+            style="@style/ColorViewStyle3" />
+        <com.makeramen.roundedimageview.RoundedImageView
+            android:id="@+id/colorView4"
+            style="@style/ColorViewStyle4" />
 
     </RelativeLayout>
 

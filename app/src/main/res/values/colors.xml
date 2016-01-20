@@ -6,4 +6,15 @@
 
     <color name="actionBar">#53a93f</color>
 
+    <color name="colors0">#ffffff</color>
+    <color name="colors1">#ffcd0a</color>
+    <color name="colors2">#fd9053</color>
+    <color name="colors3">#dd0929</color>
+    <color name="colors4">#016a43</color>
+    <color name="colors5">#9d203c</color>
+    <color name="colors6">#093db5</color>
+    <color name="colors7">#6a3906</color>
+    <color name="colors8">#192162</color>
+    <color name="colors9">#000000</color>
+
 </resources>
