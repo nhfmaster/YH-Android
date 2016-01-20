@@ -75,7 +75,7 @@ public class CommentActivity extends BaseActivity {
         }
     };
 
-    private class JavaScriptInterface {
+    private class JavaScriptInterface extends JavaScriptBase  {
         /*
          * JS 接口，暴露给JS的方法使用@JavascriptInterface装饰
          */

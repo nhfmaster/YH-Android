@@ -5,6 +5,7 @@ import org.OpenUDID.*;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import android.os.Build;
@@ -42,12 +43,15 @@ public class ApiHelper {
 			Map<String, String> response = HttpUtil.httpPost(urlString, params);
 			boolean isValidate = response.get("code").equals("200");
 
-			JSONObject json = new JSONObject(response.get("body").toString());
-			json.put("password", password);
-			json.put("is_login", isValidate);
+			JSONObject responseJSON = new JSONObject(response.get("body").toString());
 
 			String userConfigPath = String.format("%s/%s", FileUtil.basePath(), URLs.USER_CONFIG_FILENAME);
-			FileUtil.writeFile(userConfigPath, json.toString());
+			JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
+			userJSON.put("password", password);
+			userJSON.put("is_login", isValidate);
+
+			userJSON = ApiHelper.merge(userJSON, responseJSON);
+			FileUtil.writeFile(userConfigPath, userJSON.toString());
 
 			if(isValidate) {
 		        // need user info
@@ -55,10 +59,10 @@ public class ApiHelper {
 				Log.i("userConfigPath", userConfigPath);
 				Log.i("settingsConfigPath", settingsConfigPath);
 				
-				FileUtil.writeFile(settingsConfigPath, json.toString());
+				FileUtil.writeFile(settingsConfigPath, userJSON.toString());
 			}
 			else {
-				ret = json.getString("info");
+				ret = responseJSON.getString("info");
 			}
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -219,5 +223,22 @@ public class ApiHelper {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	/*
+	 * 合并两个JSONObject
+	 */
+	public static JSONObject merge(JSONObject obj1, JSONObject obj2) {
+		try {
+			Iterator it = obj2.keys();
+			while (it.hasNext()) {
+				String key = (String) it.next();
+				obj1.put(key, obj2.get(key));
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+
+		return obj1;
 	}
 }

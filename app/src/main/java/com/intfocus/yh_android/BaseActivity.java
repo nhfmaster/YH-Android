@@ -213,21 +213,14 @@ public class BaseActivity extends Activity {
     protected void modifiedUserConfig(JSONObject configJSON) {
         try {
             String userConfigPath = String.format("%s/%s", FileUtil.basePath(), URLs.USER_CONFIG_FILENAME);
-            JSONObject json = FileUtil.readConfigFile(userConfigPath);
+            JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
 
-            Iterator it = configJSON.keys();
-            while (it.hasNext()) {
-                String key = (String) it.next();
-                json.put(key, configJSON.get(key));
-            }
-
-            FileUtil.writeFile(userConfigPath, json.toString());
+            userJSON = ApiHelper.merge(userJSON, configJSON);
+            FileUtil.writeFile(userConfigPath, userJSON.toString());
 
             String settingsConfigPath = FileUtil.dirPath(URLs.CONFIG_DIRNAME, URLs.SETTINGS_CONFIG_FILENAME);
-            FileUtil.writeFile(settingsConfigPath, json.toString());
+            FileUtil.writeFile(settingsConfigPath, userJSON.toString());
         } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
             e.printStackTrace();
         }
     }
