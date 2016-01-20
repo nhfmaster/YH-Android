@@ -28,6 +28,7 @@ import android.net.NetworkInfo;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 
 /**
@@ -228,6 +229,16 @@ public class BaseActivity extends Activity {
             e.printStackTrace();
         } catch (JSONException e) {
             e.printStackTrace();
+        }
+    }
+
+    protected class JavaScriptBase {
+        /*
+         * JS 接口，暴露给JS的方法使用@JavascriptInterface装饰
+         */
+        @JavascriptInterface
+        public void refreshBrowser() {
+            new Thread(mRunnableForDetecting).start();
         }
     }
 }

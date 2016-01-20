@@ -44,6 +44,7 @@ public class LoginActivity extends BaseActivity {
         /*
          * 显示加载中...界面
          */
+        urlStringForLoading = String.format("file:///%s/loading/login.html", FileUtil.sharedPath());
         mWebView.loadUrl(urlStringForLoading);
 
         /*
@@ -92,7 +93,7 @@ public class LoginActivity extends BaseActivity {
 
 
 
-    private class JavaScriptInterface {
+    private class JavaScriptInterface extends JavaScriptBase {
         /*
          * JS 接口，暴露给JS的方法使用@JavascriptInterface装饰
          */
@@ -122,5 +123,4 @@ public class LoginActivity extends BaseActivity {
             }
         }
     }
-
 }
