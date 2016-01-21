@@ -47,6 +47,15 @@
 
     <com.intfocus.yh_android.WebView
         android:id="@+id/webview"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/actionBar" />
+
+
+    <com.joanzapata.pdfview.PDFView
+        android:id="@+id/pdfview"
+        android:visibility="visible"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/actionBar" />

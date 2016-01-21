@@ -16,14 +16,17 @@ import org.json.JSONObject;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
-
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.net.URI;
+import java.net.URL;
+import java.io.InputStream;
+import java.io.FileOutputStream;
+import java.io.File;
+import java.net.URLConnection;
 
 public class HttpUtil {
 
@@ -199,4 +202,5 @@ public class HttpUtil {
 
         return userAgent;
     }
+
 }

@@ -3,6 +3,7 @@ package com.intfocus.yh_android;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Message;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
@@ -24,15 +25,17 @@ import android.util.Log;
 import java.io.File;
 
 import java.io.IOException;
+import java.util.logging.Handler;
+
+import com.joanzapata.pdfview.PDFView;
 
 public class SubjectActivity extends BaseActivity {
-
     private TextView mTitle;
     private ImageView mComment;
-
     private Boolean isInnerLink;
     private String reportID;
-
+    private PDFView mPDFView;
+    private File  pdfFile;
     private String bannerName;
     private int objectID;
     private int objectType;
@@ -47,11 +50,13 @@ public class SubjectActivity extends BaseActivity {
         findViewById(R.id.back_text).setOnClickListener(mOnBackListener);
 
         mTitle = (TextView) findViewById(R.id.title);
+        mPDFView = (PDFView) findViewById(R.id.pdfview);
         mComment = (ImageView) findViewById(R.id.comment);
         mWebView = (WebView) findViewById(R.id.webview);
 
         mWebView.initialize();
         mWebView.requestFocus();
+        mWebView.setVisibility(View.VISIBLE);
         mWebView.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
@@ -96,22 +101,26 @@ public class SubjectActivity extends BaseActivity {
                 }
             }).start();
         } else {
-            try {
+            if(urlString.toLowerCase().endsWith(".pdf")) {
+                new Thread(mRunnableForPDF).start();
+            } else {
+                try {
                 /*
                  * 外部链接传参: userid, timestamp
                  */
-                String appendParams = String.format("?userid=%d&timestamp=%s", user.getInt("user_id"), URLs.TimeStamp);
+                    String appendParams = String.format("?userid=%d&timestamp=%s", user.getInt("user_id"), URLs.TimeStamp);
 
-                if (urlString.indexOf("?") == -1) {
-                    urlString = String.format("%s%s", urlString, appendParams);
-                } else {
-                    urlString = urlString.replace("?", appendParams);
+                    if (urlString.indexOf("?") == -1) {
+                        urlString = String.format("%s%s", urlString, appendParams);
+                    } else {
+                        urlString = urlString.replace("?", appendParams);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
+                Log.i("OutLink", urlString);
+                mWebView.loadUrl(urlString);
             }
-            Log.i("OutLink", urlString);
-            mWebView.loadUrl(urlString);
         }
 
         mComment.setOnClickListener(new View.OnClickListener() {
@@ -126,6 +135,30 @@ public class SubjectActivity extends BaseActivity {
             }
         });
     }
+
+    protected android.os.Handler mHandlerForPDF= new android.os.Handler() {
+        public void handleMessage(Message message) {
+
+            Log.i("PDF", pdfFile.getAbsolutePath());
+            mPDFView.fromFile(pdfFile)
+                    .showMinimap(false)
+                    .enableSwipe(true)
+                    .load();
+            mWebView.setVisibility(View.INVISIBLE);
+            mPDFView.setVisibility(View.VISIBLE);
+        }
+    };
+
+    Runnable mRunnableForPDF = new Runnable() {
+        @Override
+        public void run() {
+            String outputPath = String.format("%s/%s/%s.pdf", URLs.STORAGE_BASE, URLs.CACHED_DIRNAME, URLs.MD5(urlString));
+            pdfFile = new File(outputPath);
+            ApiHelper.downloadFile(urlString, pdfFile);
+
+            mHandlerForPDF.obtainMessage();
+        }
+    };
 
     private View.OnClickListener mOnBackListener = new View.OnClickListener() {
         @Override

@@ -2,8 +2,12 @@ package com.intfocus.yh_android.util;
 
 import org.OpenUDID.*;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -240,5 +244,44 @@ public class ApiHelper {
 		}
 
 		return obj1;
+	}
+
+
+	public static void downloadFile(String urlString, File outputFile) {
+		try {
+			URL url = new URL(urlString);
+
+			String headerPath = String.format("%s/%s/%s", URLs.STORAGE_BASE, URLs.CACHED_DIRNAME, URLs.CACHED_HEADER_FILENAME);
+			JSONObject headerJSON = new JSONObject();
+			if((new File(headerPath)).exists()) {
+				headerJSON = FileUtil.readConfigFile(headerPath);
+			}
+
+			URLConnection conn = url.openConnection();
+			String etag = conn.getHeaderField("ETag");
+
+			if(etag != null && !etag.isEmpty() && headerJSON.has(urlString) && headerJSON.getString(urlString).equals(etag)) {
+				// do nothing
+				Log.i("downloadFile", String.format("%s already exist %s", urlString, etag));
+			} else {
+				InputStream in = url.openStream();
+				FileOutputStream fos = new FileOutputStream(outputFile);
+
+				int length = -1;
+				byte[] buffer = new byte[1024*10];// buffer for portion of data from connection
+				while ((length = in.read(buffer)) > -1) {
+					fos.write(buffer, 0, length);
+				}
+				fos.close();
+				in.close();
+
+				if(etag != null && !etag.isEmpty()) {
+					headerJSON.put(urlString, etag);
+					FileUtil.writeFile(headerPath, headerJSON.toString());
+				}
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

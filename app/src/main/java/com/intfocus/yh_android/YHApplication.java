@@ -41,6 +41,14 @@ public class YHApplication extends Application {
          */
         checkAssets("loading");
         checkAssets("assets");
+
+        /*
+         *  基本目录结构
+         */
+        File cachedFile = new File(String.format("%s/%s", URLs.STORAGE_BASE, URLs.CACHED_DIRNAME));
+        if(!cachedFile.exists()) {
+            cachedFile.mkdir();
+        }
     }
 
     private void checkAssets(String fileName) {

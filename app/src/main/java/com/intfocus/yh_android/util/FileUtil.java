@@ -29,7 +29,7 @@ public class FileUtil {
 	        String userConfigPath = String.format("%s/%s", URLs.STORAGE_BASE, URLs.USER_CONFIG_FILENAME);
 	        JSONObject json = FileUtil.readConfigFile(userConfigPath);
 	        
-			nameSpace = String.format("%s/user-%d", URLs.STORAGE_BASE, json.getInt("user_id"));
+			nameSpace = String.format("%s/User-%d", URLs.STORAGE_BASE, json.getInt("user_id"));
 			
 			File folder = new File(nameSpace);
 			if(!folder.exists() && !folder.isDirectory()) {
