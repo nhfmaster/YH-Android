@@ -54,6 +54,7 @@ public class SubjectActivity extends BaseActivity {
         mComment = (ImageView) findViewById(R.id.comment);
         mWebView = (WebView) findViewById(R.id.webview);
 
+        mPDFView.setVisibility(View.INVISIBLE);
         mWebView.initialize();
         mWebView.requestFocus();
         mWebView.setVisibility(View.VISIBLE);
@@ -141,8 +142,6 @@ public class SubjectActivity extends BaseActivity {
 
             Log.i("PDF", pdfFile.getAbsolutePath());
             mPDFView.fromFile(pdfFile)
-                    .showMinimap(false)
-                    .enableSwipe(true)
                     .load();
             mWebView.setVisibility(View.INVISIBLE);
             mPDFView.setVisibility(View.VISIBLE);
@@ -156,7 +155,8 @@ public class SubjectActivity extends BaseActivity {
             pdfFile = new File(outputPath);
             ApiHelper.downloadFile(urlString, pdfFile);
 
-            mHandlerForPDF.obtainMessage();
+            Message message = mHandlerForPDF.obtainMessage();
+            mHandlerForPDF.sendMessage(message);
         }
     };
 
