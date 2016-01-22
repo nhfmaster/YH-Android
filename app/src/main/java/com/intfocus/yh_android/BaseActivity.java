@@ -4,8 +4,12 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.util.Log;
+import android.webkit.JavascriptInterface;
+import android.widget.Toast;
 
 import com.intfocus.yh_android.util.ApiHelper;
 import com.intfocus.yh_android.util.FileUtil;
@@ -17,19 +21,8 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-
-import android.net.ConnectivityManager;
-import android.content.Context;
-import android.net.NetworkInfo;
-import android.os.Handler;
-import android.os.Message;
-import android.util.Log;
-import android.webkit.JavascriptInterface;
-import android.widget.Toast;
 
 /**
  * Created by lijunjie on 16/1/14.
@@ -49,13 +42,13 @@ public class BaseActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        String userConfigPath = String.format("%s/%s", FileUtil.basePath(), URLs.USER_CONFIG_FILENAME);
-
-        assetsPath = FileUtil.sharedPath();
+        String sharedPath = FileUtil.sharedPath();
+        assetsPath = sharedPath;
         urlStringForDetecting = URLs.HOST;
         relativeAssetsPath = "assets";
-        urlStringForLoading = String.format("file:///%s/loading/login.html", FileUtil.sharedPath());
+        urlStringForLoading = String.format("file:///%s/loading/login.html", sharedPath);
 
+        String userConfigPath = String.format("%s/%s", FileUtil.basePath(), URLs.USER_CONFIG_FILENAME);
         if ((new File(userConfigPath)).exists()) {
             try {
                 user = FileUtil.readConfigFile(userConfigPath);
@@ -64,7 +57,7 @@ public class BaseActivity extends Activity {
                     String urlPath = String.format(URLs.API_DEVICE_STATE_PATH, user.getInt("user_device_id"));
                     urlStringForDetecting = String.format("%s%s", URLs.HOST, urlPath);
                     relativeAssetsPath = "../../Shared/assets";
-                    urlStringForLoading = String.format("file:///%s/loading/loading.html", FileUtil.sharedPath());
+                    urlStringForLoading = String.format("file:///%s/loading/loading.html", sharedPath);
                 }
             } catch (JSONException e) {
                 e.printStackTrace();

@@ -5,29 +5,25 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Message;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.intfocus.yh_android.util.ApiHelper;
 import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.URLs;
-import com.intfocus.yh_android.util.ApiHelper;
+import com.joanzapata.pdfview.PDFView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import static java.lang.String.*;
-
-import android.util.Log;
-
 import java.io.File;
-
 import java.io.IOException;
-import java.util.logging.Handler;
 
-import com.joanzapata.pdfview.PDFView;
+import static java.lang.String.format;
 
 public class SubjectActivity extends BaseActivity {
     private TextView mTitle;
@@ -151,7 +147,7 @@ public class SubjectActivity extends BaseActivity {
     Runnable mRunnableForPDF = new Runnable() {
         @Override
         public void run() {
-            String outputPath = String.format("%s/%s/%s.pdf", URLs.STORAGE_BASE, URLs.CACHED_DIRNAME, URLs.MD5(urlString));
+            String outputPath = FileUtil.dirPath(URLs.CACHED_DIRNAME, URLs.MD5(urlString)+".pdf");
             pdfFile = new File(outputPath);
             ApiHelper.downloadFile(urlString, pdfFile);
 

@@ -17,8 +17,8 @@ import java.util.Date;
 public class URLs implements Serializable {
 	
 	
-	public final static String HOST = "http://yonghui.idata.mobi";
-	public final static String HOST1  = "http://10.0.3.2:4567";
+	public final static String HOST1 = "http://yonghui.idata.mobi";
+	public final static String HOST  = "http://10.0.3.2:4567";
 
 	//login
     public final static String LOGIN_PATH              = String.format("%s/mobile/login", HOST);
@@ -43,8 +43,8 @@ public class URLs implements Serializable {
     public final static String REPORT_DATA_FILENAME    = "template_data_group_%s_report_%s.js";
 
 
-	public final static String STORAGE_BASE              = Environment.getExternalStorageDirectory().getAbsolutePath();
-    public final static String TimeStamp                 = new SimpleDateFormat("yyyyMMddKKmmss").format(new Date());
+	public final static String STORAGE_BASE            = String.format("%s/com.intfocus.yh_android", Environment.getExternalStorageDirectory().getAbsolutePath());
+    public final static String TimeStamp               = new SimpleDateFormat("yyyyMMddKKmmss").format(new Date());
 
     /*
      *  sd path: /storage/emulated/0
@@ -74,8 +74,9 @@ public class URLs implements Serializable {
 	 * @return
 	 */
 	private final static String formatURL(String path) {
-		if(path.startsWith("http://") || path.startsWith("https://"))
-			return path;
+		if(path.startsWith("http://") || path.startsWith("https://")) {
+            return path;
+        }
 		return "http://" + URLEncoder.encode(path);
 	}	
 	
@@ -96,8 +97,9 @@ public class URLs implements Serializable {
         char[] charArray = inStr.toCharArray();
         byte[] byteArray = new byte[charArray.length];
  
-        for (int i = 0; i < charArray.length; i++)
+        for (int i = 0; i < charArray.length; i++) {
             byteArray[i] = (byte) charArray[i];
+        }
  
         byte[] md5Bytes = md5.digest(byteArray);
  

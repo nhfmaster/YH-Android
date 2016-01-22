@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.intfocus.yh_android"
-    android:versionCode="23"
-    android:versionName="0.2.3" >
+    android:versionCode="24"
+    android:versionName="0.2.4" >
 
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.VIBRATE" />
@@ -56,9 +56,13 @@
         <activity
             android:name=".ResetPasswordActivity"
             android:theme="@style/AppTheme" />
-        <activity 
-             android:name=".LockActivity" >
-        </activity>
+        <activity
+            android:name=".screen_lock.InitPassCodeActivity"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".screen_lock.ConfirmPassCodeActivity"
+            android:theme="@style/AppTheme" />
+
 
         <!-- 必选-->
         <meta-data

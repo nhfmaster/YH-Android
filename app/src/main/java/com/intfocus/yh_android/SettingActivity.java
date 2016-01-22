@@ -1,28 +1,30 @@
 package com.intfocus.yh_android;
 
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.content.pm.PackageManager.NameNotFoundException;
+import android.widget.Toast;
+
+import com.intfocus.yh_android.screen_lock.InitPassCodeActivity;
+import com.intfocus.yh_android.util.URLs;
+import com.pgyersdk.javabean.AppBean;
+import com.pgyersdk.update.PgyUpdateManager;
+import com.pgyersdk.update.UpdateManagerListener;
+
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import com.intfocus.yh_android.util.URLs;
-import android.content.pm.PackageInfo;
-import android.text.TextUtils;
-import android.content.Context;
-import android.content.Intent;
-import android.util.Log;
-import android.content.DialogInterface;
-import com.pgyersdk.update.PgyUpdateManager;
-import android.app.AlertDialog;
-import android.widget.Toast;
-import com.pgyersdk.javabean.AppBean;
-import com.pgyersdk.update.UpdateManagerListener;
 
 public class SettingActivity extends BaseActivity {
 
@@ -151,22 +153,19 @@ public class SettingActivity extends BaseActivity {
         @Override
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
             // TODO Auto-generated method stub
+            if(isChecked) {
 
-            try {
-                JSONObject configJSON = new JSONObject();
-                configJSON.put("use_gesture_password", isChecked);
+                startActivity(InitPassCodeActivity.createIntent(getApplicationContext()));
+            } else {
+                try {
+                    JSONObject json = new JSONObject();
+                    json.put("use_gesture_password", false);
 
-                modifiedUserConfig(configJSON);
-            } catch (JSONException e) {
-                e.printStackTrace();
+                    Toast.makeText(SettingActivity.this, "禁用手势锁设置成功", Toast.LENGTH_SHORT).show();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
-
-            String message = String.format("TODO: 锁屏%s", isChecked ? "开启" : "禁用");
-            Toast.makeText(SettingActivity.this, message, Toast.LENGTH_SHORT).show();
-            //if (isChecked) {
-                //Intent intent = new Intent(SettingActivity.this, LockActivity.class);
-                //startActivity(intent);
-            //}
         }
     };
 

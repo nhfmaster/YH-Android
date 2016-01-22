@@ -1,7 +1,14 @@
 package com.intfocus.yh_android.util;
 
-import org.OpenUDID.*;
+import android.os.Build;
+import android.text.TextUtils;
+import android.util.Log;
 
+import org.OpenUDID.OpenUDID_manager;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,18 +18,6 @@ import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
-import android.os.Build;
-import android.text.TextUtils;
-import android.util.Log;
-import android.widget.Toast;
-
-import com.intfocus.yh_android.SettingActivity;
-
-import org.apache.http.HttpResponse;
-import org.json.JSONException;
-import org.json.JSONObject;
-import java.io.File;
 
 public class ApiHelper {
 
@@ -251,7 +246,7 @@ public class ApiHelper {
 		try {
 			URL url = new URL(urlString);
 
-			String headerPath = String.format("%s/%s/%s", URLs.STORAGE_BASE, URLs.CACHED_DIRNAME, URLs.CACHED_HEADER_FILENAME);
+			String headerPath = FileUtil.dirPath(URLs.CACHED_DIRNAME, URLs.CACHED_HEADER_FILENAME);
 			JSONObject headerJSON = new JSONObject();
 			if((new File(headerPath)).exists()) {
 				headerJSON = FileUtil.readConfigFile(headerPath);

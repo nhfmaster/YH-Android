@@ -1,24 +1,32 @@
 package com.intfocus.yh_android;
 
+import android.app.Activity;
+import android.app.Application;
+import android.os.Bundle;
+import android.util.Log;
+
+import com.intfocus.yh_android.screen_lock.ConfirmPassCodeActivity;
 import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.URLs;
 import com.pgyersdk.crash.PgyCrashManager;
-import android.app.Application;
-import android.util.Log;
+
 import org.OpenUDID.OpenUDID_manager;
+import org.apache.commons.io.FileUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.FileInputStream;
-import org.apache.commons.io.FileUtils;
+import java.util.HashSet;
 
 /**
  * Created by lijunjie on 16/1/15.
  */
-public class YHApplication extends Application {
+public class YHApplication extends Application implements Application.ActivityLifecycleCallbacks {
 
+    private HashSet<Integer> activityStack;
+    private boolean isLaunchApp;
     @Override
     public void onCreate() {
         // TODO Auto-generated method stub
@@ -45,10 +53,94 @@ public class YHApplication extends Application {
         /*
          *  基本目录结构
          */
-        File cachedFile = new File(String.format("%s/%s", URLs.STORAGE_BASE, URLs.CACHED_DIRNAME));
+        File cachedFile = new File(FileUtil.dirPath(URLs.CACHED_DIRNAME));
         if(!cachedFile.exists()) {
             cachedFile.mkdir();
         }
+
+        /*
+         *  是否启用锁屏
+         */
+        activityStack = new HashSet<Integer>();
+        registerActivityLifecycleCallbacks(this);
+    }
+
+
+    @Override
+    public void onTerminate() {
+        unregisterActivityLifecycleCallbacks(this);
+        super.onTerminate();
+    }
+
+    @Override
+    public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+
+    }
+
+    @Override
+    public void onActivityStarted(Activity activity) {
+        Log.i("ScreenLock", "activityStack.size() = " + activityStack.size());
+        if (activityStack.size() == 0) {
+            Log.i("ScreenLock", "启动");
+            isLaunchApp = true;
+        }
+        activityStack.add(activity.hashCode());
+        if (isLaunchApp) {
+            isLaunchApp = false;
+            if (checkIsLocked()) {
+                activity.startActivity(ConfirmPassCodeActivity.createIntent(getApplicationContext()));
+            }
+        }
+    }
+
+    @Override
+    public void onActivityResumed(Activity activity) {
+
+    }
+
+    @Override
+    public void onActivityPaused(Activity activity) {
+
+    }
+
+    @Override
+    public void onActivityStopped(Activity activity) {
+        activityStack.remove(activity.hashCode());
+        Log.i("ScreenLock", "activityStack.size() = " + activityStack.size());
+        if (activityStack.size() == 0) {
+            Log.i("ScreenLock", "结束");
+        }
+    }
+
+    @Override
+    public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
+
+    }
+
+    @Override
+    public void onActivityDestroyed(Activity activity) {
+    }
+
+    protected boolean checkIsLocked() {
+        try {
+            String userConfigPath = String.format("%s/%s", FileUtil.basePath(), URLs.USER_CONFIG_FILENAME);
+            if((new File(userConfigPath)).exists()) {
+                JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
+                if(!userJSON.has("use_gesture_password")) {
+                    userJSON.put("use_gesture_password", false);
+
+                    FileUtil.writeFile(userConfigPath, userJSON.toString());
+                }
+
+                return userJSON.getBoolean("use_gesture_password");
+            } else {
+                return false;
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 
     private void checkAssets(String fileName) {

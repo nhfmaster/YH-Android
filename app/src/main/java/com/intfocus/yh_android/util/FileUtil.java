@@ -19,27 +19,24 @@ import java.util.zip.ZipInputStream;
 
 public class FileUtil {
 	public static String basePath() {
-		return URLs.STORAGE_BASE;
+		String basePath = URLs.STORAGE_BASE;
+		FileUtil.makeSureFolderExist(basePath);
+
+		return basePath;
 	}
-	
 
 	public static String userspace() {
-		String nameSpace = "";
+		String spacePath = "";
 		try {
-	        String userConfigPath = String.format("%s/%s", URLs.STORAGE_BASE, URLs.USER_CONFIG_FILENAME);
+	        String userConfigPath = String.format("%s/%s", FileUtil.basePath(), URLs.USER_CONFIG_FILENAME);
 	        JSONObject json = FileUtil.readConfigFile(userConfigPath);
-	        
-			nameSpace = String.format("%s/User-%d", URLs.STORAGE_BASE, json.getInt("user_id"));
-			
-			File folder = new File(nameSpace);
-			if(!folder.exists() && !folder.isDirectory()) {
-				folder.mkdir();
-			}
+
+			spacePath = String.format("%s/User-%d", FileUtil.basePath(), json.getInt("user_id"));
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
 		
-		return nameSpace;
+		return spacePath;
 	}
 
 	/**
@@ -51,16 +48,7 @@ public class FileUtil {
 	 */
 	public static String dirPath(String dirName) {
 		String pathName = String.format("%s/%s", FileUtil.userspace(), dirName);
-		
-		try {
-			File folder = new File(pathName);
-			if(!folder.exists() && !folder.isDirectory()) {
-				//folder.mkdir();
-				folder.mkdirs();
-			}
-		} catch(Exception e) {
-			e.printStackTrace();
-		}
+		FileUtil.makeSureFolderExist(pathName);
 		
 		return pathName;
 	}
@@ -124,7 +112,9 @@ public class FileUtil {
 		Log.i("PathName", pathName);
 		File file = new File(pathName);
 
-		if(file.exists()) { file.delete(); }
+		if(file.exists()) {
+			file.delete();
+		}
 
 		file.createNewFile();
 		FileOutputStream out = new FileOutputStream(file, true);
@@ -139,12 +129,19 @@ public class FileUtil {
 	 *  3. 登录缓存页面
 	 */
 	public static String sharedPath() {
-		String pathName = String.format("%s/%s", URLs.STORAGE_BASE, URLs.SHARED_DIRNAME);
-		File file = new File(pathName);
-
-		if(!file.exists() && !file.isDirectory()) { file.mkdir(); }
+		String pathName = FileUtil.basePath() + "/" + URLs.SHARED_DIRNAME;
+        FileUtil.makeSureFolderExist(pathName);
 
 		return pathName;
+	}
+
+	public static boolean makeSureFolderExist(String pathName) {
+		File folder = new File(pathName);
+		if(folder.exists() && folder.isDirectory()) {
+			return true;
+		} else {
+			return folder.mkdirs();
+		}
 	}
 
 	/*

@@ -2,7 +2,6 @@ package com.intfocus.yh_android;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.media.Image;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;

@@ -4,4 +4,25 @@
     <string name="app_name">永辉生意人</string>
     <string name="title_activity_main">永辉生意人</string>
 
+    <string name="image_error">形象</string>
+    <string name="cansel">cancel</string>
+    <string name="passcode_lock">screen lock</string>
+    <string name="passcode_set">passcode set</string>
+    <string name="passcode_defalt_text">如果忘了路径码的情况请再安装</string>
+    <string name="passcode_input">路径输入码输入</string>
+    <string name="passcode_input_sub">请输入路径码</string>
+    <string name="zero">0</string>
+    <string name="one">1</string>
+    <string name="two">2</string>
+    <string name="three">3</string>
+    <string name="four">4</string>
+    <string name="five">5</string>
+    <string name="six">6</string>
+    <string name="seven">7</string>
+    <string name="eight">8</string>
+    <string name="nine">9</string>
+    <string name="period">.</string>
+    <string name="title_activity_sample1">Sample1Activity</string>
+    <string name="title_activity_sample2">Sample2Activity</string>
+
 </resources>
