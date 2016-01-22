@@ -2,6 +2,7 @@ package com.intfocus.yh_android;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,16 +12,11 @@ import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 
 import com.intfocus.yh_android.util.ApiHelper;
-import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.URLs;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.AlertDialog.Builder;
-
-import java.io.IOException;
-import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -34,6 +30,9 @@ public class ResetPasswordActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reset_password);
 
+
+        findViewById(R.id.back).setOnClickListener(mOnBackListener);
+        findViewById(R.id.back_text).setOnClickListener(mOnBackListener);
         mWebView = (WebView) findViewById(R.id.webview);
 
         mWebView.initialize();
@@ -51,6 +50,13 @@ public class ResetPasswordActivity extends BaseActivity {
         urlString = String.format("%s%s", URLs.HOST, URLs.RESET_PASSWORD_PATH);
         new Thread(mRunnableForDetecting).start();
     }
+
+    private View.OnClickListener mOnBackListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            ResetPasswordActivity.this.onBackPressed();
+        }
+    };
 
     private class JavaScriptInterface extends JavaScriptBase  {
         /*

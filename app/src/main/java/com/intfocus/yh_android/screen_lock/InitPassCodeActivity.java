@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageView;
@@ -29,10 +30,10 @@ import java.io.File;
 public class InitPassCodeActivity extends Activity {
 
     // テキストの定数
-    private final String TEXT_MAIN_CONFIRM = "请输入密码";
-    private final String TEXT_SUB_CONFIRM = "请再次输入密码";
+    private final String TEXT_MAIN_CONFIRM = "已锁屏";
+    private final String TEXT_SUB_CONFIRM = "请输入密码";
     private final String TEXT_MAIN_MISTAKE = "密码有误";
-    private final String TEXT_SUB_MISTAKE = "确认密码有误";
+    private final String TEXT_SUB_MISTAKE = "确认密码输入正确";
     // 入力カウンター
     private byte counter = 0;
     // パスワード照合用変数
@@ -241,6 +242,8 @@ public class InitPassCodeActivity extends Activity {
                         userJSON.put("use_gesture_password", true);
                         userJSON.put("gesture_password", password);
 
+                        Log.i("confirmPassword2", "yes");
+
                         FileUtil.writeFile(userConfigPath, userJSON.toString());
                     } catch(Exception e) {
                         e.printStackTrace();
@@ -256,6 +259,7 @@ public class InitPassCodeActivity extends Activity {
                     initStringBuilder();
                     initCircleColor();
 
+                    Log.i("confirmPassword2", "no");
                 }
                 break;
         }

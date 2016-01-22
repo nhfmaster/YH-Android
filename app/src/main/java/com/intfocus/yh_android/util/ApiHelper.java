@@ -245,19 +245,20 @@ public class ApiHelper {
 	public static void downloadFile(String urlString, File outputFile) {
 		try {
 			URL url = new URL(urlString);
-
 			String headerPath = FileUtil.dirPath(URLs.CACHED_DIRNAME, URLs.CACHED_HEADER_FILENAME);
+
 			JSONObject headerJSON = new JSONObject();
-			if((new File(headerPath)).exists()) {
+			if ((new File(headerPath)).exists()) {
 				headerJSON = FileUtil.readConfigFile(headerPath);
 			}
 
 			URLConnection conn = url.openConnection();
 			String etag = conn.getHeaderField("ETag");
 
-			if(etag != null && !etag.isEmpty() && headerJSON.has(urlString) && headerJSON.getString(urlString).equals(etag)) {
-				// do nothing
-				Log.i("downloadFile", String.format("%s already exist %s", urlString, etag));
+			boolean isDownloaded = outputFile.exists() && headerJSON.has(urlString) && etag != null && !etag.isEmpty() && headerJSON.getString(urlString).equals(etag);
+
+			if(isDownloaded) {
+				Log.i("downloadFile", "exist - " + outputFile.getAbsolutePath());
 			} else {
 				InputStream in = url.openStream();
 				FileOutputStream fos = new FileOutputStream(outputFile);
@@ -270,7 +271,7 @@ public class ApiHelper {
 				fos.close();
 				in.close();
 
-				if(etag != null && !etag.isEmpty()) {
+				if(etag != null && !etag.isEmpty() && headerJSON.getString(urlString).equals(etag)) {
 					headerJSON.put(urlString, etag);
 					FileUtil.writeFile(headerPath, headerJSON.toString());
 				}

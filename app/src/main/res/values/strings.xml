@@ -4,13 +4,13 @@
     <string name="app_name">永辉生意人</string>
     <string name="title_activity_main">永辉生意人</string>
 
-    <string name="image_error">形象</string>
-    <string name="cansel">cancel</string>
-    <string name="passcode_lock">screen lock</string>
-    <string name="passcode_set">passcode set</string>
-    <string name="passcode_defalt_text">如果忘了路径码的情况请再安装</string>
-    <string name="passcode_input">路径输入码输入</string>
-    <string name="passcode_input_sub">请输入路径码</string>
+    <string name="image_error">错误</string>
+    <string name="cansel">取消</string>
+    <string name="passcode_lock">启用锁屏</string>
+    <string name="passcode_set">锁屏设置</string>
+    <string name="passcode_defalt_text">请输入密码</string>
+    <string name="passcode_input">已锁屏</string>
+    <string name="passcode_input_sub">请输入密码</string>
     <string name="zero">0</string>
     <string name="one">1</string>
     <string name="two">2</string>

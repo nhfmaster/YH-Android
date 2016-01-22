@@ -110,6 +110,7 @@ public class LoginActivity extends BaseActivity {
 
                         // 跳转至主界面
                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         LoginActivity.this.startActivity(intent);
                     } else {
                         Toast.makeText(LoginActivity.this, info, Toast.LENGTH_SHORT).show();

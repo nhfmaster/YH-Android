@@ -11,6 +11,7 @@ import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.intfocus.yh_android.util.ApiHelper;
 import com.intfocus.yh_android.util.FileUtil;
@@ -137,17 +138,21 @@ public class SubjectActivity extends BaseActivity {
         public void handleMessage(Message message) {
 
             Log.i("PDF", pdfFile.getAbsolutePath());
-            mPDFView.fromFile(pdfFile)
-                    .load();
-            mWebView.setVisibility(View.INVISIBLE);
-            mPDFView.setVisibility(View.VISIBLE);
+            if(pdfFile.exists()) {
+                mPDFView.fromFile(pdfFile)
+                        .load();
+                mWebView.setVisibility(View.INVISIBLE);
+                mPDFView.setVisibility(View.VISIBLE);
+            } else {
+                Toast.makeText(SubjectActivity.this, "加载PDF失败", Toast.LENGTH_SHORT).show();
+            }
         }
     };
 
     Runnable mRunnableForPDF = new Runnable() {
         @Override
         public void run() {
-            String outputPath = FileUtil.dirPath(URLs.CACHED_DIRNAME, URLs.MD5(urlString)+".pdf");
+            String outputPath = String.format("%s/%s/%s.pdf", FileUtil.basePath(), URLs.CACHED_DIRNAME, URLs.MD5(urlString));
             pdfFile = new File(outputPath);
             ApiHelper.downloadFile(urlString, pdfFile);
 

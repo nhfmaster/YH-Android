@@ -1,7 +1,6 @@
 package com.intfocus.yh_android.screen_lock;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -9,11 +8,13 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.intfocus.yh_android.MainActivity;
 import com.intfocus.yh_android.R;
 import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.URLs;
@@ -27,6 +28,7 @@ public class ConfirmPassCodeActivity extends Activity {
 
     private final String TEXT_MAIN_MISTAKE = "请输入密码";
     private final String TEXT_SUB_MISTAKE = "密码有误";
+    public  String targetActivity;
 
     private int password;
     private StringBuilder stringBuilder;
@@ -40,15 +42,12 @@ public class ConfirmPassCodeActivity extends Activity {
     private Bitmap bitmapBlack = Bitmap.createBitmap(300, 300, Bitmap.Config.ARGB_8888);
     private Bitmap bitmapGlay = Bitmap.createBitmap(300, 300, Bitmap.Config.ARGB_8888);
 
-    public static Intent createIntent(Context context) {
-        Intent intent = new Intent(context, ConfirmPassCodeActivity.class);
-        return intent;
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_confirm_passcode);
+
+        targetActivity = getIntent().getStringExtra("activity");
         stringBuilder = new StringBuilder();
         initViews();
         initCircleCanvas();
@@ -202,15 +201,24 @@ public class ConfirmPassCodeActivity extends Activity {
     private void confirmPassword() {
         try {
             this.password = Integer.parseInt(stringBuilder.toString());
+            Log.i("confirmPassword", "confirmPassword");
 
             String userConfigPath = String.format("%s/%s", FileUtil.basePath(), URLs.USER_CONFIG_FILENAME);
             JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
             if(stringBuilder.toString().compareTo(userJSON.getString("gesture_password")) == 0) {
                 userJSON.put("use_gesture_password", false);
                 FileUtil.writeFile(userConfigPath, userJSON.toString());
+                Log.i("confirmPassword", "yes");
 
-                finish();
+                if(targetActivity.contains("LoginActivity")) {
+                    Intent intent = new Intent(ConfirmPassCodeActivity.this, MainActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    ConfirmPassCodeActivity.this.startActivity(intent);
+                } else {
+                    this.onBackPressed();
+                }
             } else {
+                Log.i("confirmPassword", "no");
                 text_main_pass.setText(TEXT_MAIN_MISTAKE);
                 text_sub_pass.setText(TEXT_SUB_MISTAKE);
                 password = 0;

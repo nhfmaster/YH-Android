@@ -2,10 +2,12 @@ package com.intfocus.yh_android;
 
 import android.app.Activity;
 import android.app.Application;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
 import com.intfocus.yh_android.screen_lock.ConfirmPassCodeActivity;
+import com.intfocus.yh_android.screen_lock.InitPassCodeActivity;
 import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.URLs;
 import com.pgyersdk.crash.PgyCrashManager;
@@ -18,15 +20,12 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashSet;
 
 /**
  * Created by lijunjie on 16/1/15.
  */
 public class YHApplication extends Application implements Application.ActivityLifecycleCallbacks {
 
-    private HashSet<Integer> activityStack;
-    private boolean isLaunchApp;
     @Override
     public void onCreate() {
         // TODO Auto-generated method stub
@@ -50,18 +49,19 @@ public class YHApplication extends Application implements Application.ActivityLi
         checkAssets("loading");
         checkAssets("assets");
 
-        /*
+          /*
          *  基本目录结构
          */
-        File cachedFile = new File(FileUtil.dirPath(URLs.CACHED_DIRNAME));
+        File cachedFile = new File(String.format("%s/%s", FileUtil.basePath(), URLs.CACHED_DIRNAME));
         if(!cachedFile.exists()) {
-            cachedFile.mkdir();
+            cachedFile.mkdirs();
         }
+
+
 
         /*
          *  是否启用锁屏
          */
-        activityStack = new HashSet<Integer>();
         registerActivityLifecycleCallbacks(this);
     }
 
@@ -74,42 +74,45 @@ public class YHApplication extends Application implements Application.ActivityLi
 
     @Override
     public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+        Log.i("YHApplication", "onActivityCreated");
 
     }
 
     @Override
     public void onActivityStarted(Activity activity) {
-        Log.i("ScreenLock", "activityStack.size() = " + activityStack.size());
-        if (activityStack.size() == 0) {
-            Log.i("ScreenLock", "启动");
-            isLaunchApp = true;
+        Log.i("YHApplication", "onActivityStarted - " + activity.getClass());
+
+        if(activity.getClass().toString().contains(ConfirmPassCodeActivity.class.toString()) || activity.getClass().toString().contains(InitPassCodeActivity.class.toString())) {
+            return;
         }
-        activityStack.add(activity.hashCode());
-        if (isLaunchApp) {
-            isLaunchApp = false;
-            if (checkIsLocked()) {
-                activity.startActivity(ConfirmPassCodeActivity.createIntent(getApplicationContext()));
-            }
+        Log.i("YHApplication", "onActivityStarted - after - " + ConfirmPassCodeActivity.class.toString());
+
+        if (checkIsLocked()) {
+            Log.i("screen_lock", "lock it");
+
+            Intent intent = new Intent(this, ConfirmPassCodeActivity.class);
+            intent.putExtra("activity", activity.getClass());
+            this.startActivity(intent);
+        } else {
+            Log.i("screen_lock", "not lock");
         }
     }
 
     @Override
     public void onActivityResumed(Activity activity) {
+        Log.i("YHApplication", "onActivityResumed");
 
     }
 
     @Override
     public void onActivityPaused(Activity activity) {
+        Log.i("YHApplication", "onActivityPaused");
 
     }
 
     @Override
     public void onActivityStopped(Activity activity) {
-        activityStack.remove(activity.hashCode());
-        Log.i("ScreenLock", "activityStack.size() = " + activityStack.size());
-        if (activityStack.size() == 0) {
-            Log.i("ScreenLock", "结束");
-        }
+        Log.i("YHApplication", "onActivityStopped");
     }
 
     @Override
@@ -119,6 +122,7 @@ public class YHApplication extends Application implements Application.ActivityLi
 
     @Override
     public void onActivityDestroyed(Activity activity) {
+        Log.i("YHApplication", "onActivityDestroyed");
     }
 
     protected boolean checkIsLocked() {
@@ -129,11 +133,14 @@ public class YHApplication extends Application implements Application.ActivityLi
                 if(!userJSON.has("use_gesture_password")) {
                     userJSON.put("use_gesture_password", false);
 
+                    Log.i("ScreenLock", "use_gesture_password not set then false");
                     FileUtil.writeFile(userConfigPath, userJSON.toString());
                 }
 
                 return userJSON.getBoolean("use_gesture_password");
             } else {
+                Log.i("ScreenLock", "userConfigPath not exist");
+
                 return false;
             }
         } catch(Exception e) {
