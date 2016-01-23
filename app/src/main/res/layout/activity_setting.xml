@@ -185,6 +185,7 @@
             <TextView
                 android:id="@+id/change_lock"
                 style="@style/SettingButton"
+                android:visibility="gone"
                 android:text="修改锁屏密码" />
         </RelativeLayout>
 

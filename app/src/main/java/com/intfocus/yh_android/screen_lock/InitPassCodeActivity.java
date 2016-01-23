@@ -30,10 +30,10 @@ import java.io.File;
 public class InitPassCodeActivity extends Activity {
 
     // テキストの定数
-    private final String TEXT_MAIN_CONFIRM = "已锁屏";
-    private final String TEXT_SUB_CONFIRM = "请输入密码";
+    private final String TEXT_MAIN_CONFIRM = "确认密码";
+    private final String TEXT_SUB_CONFIRM = "请再次输入密码";
     private final String TEXT_MAIN_MISTAKE = "密码有误";
-    private final String TEXT_SUB_MISTAKE = "确认密码输入正确";
+    private final String TEXT_SUB_MISTAKE = "两次密码不一致";
     // 入力カウンター
     private byte counter = 0;
     // パスワード照合用変数
@@ -210,6 +210,7 @@ public class InitPassCodeActivity extends Activity {
 
     private void confirmPassword() {
         // 確認に失敗したらもう一度最初から入力させる
+        // 如果确认失败了再从头再输入
         switch (counter) {
             case 0:
                 //四つ目の円をしばらく表示するため
@@ -229,7 +230,7 @@ public class InitPassCodeActivity extends Activity {
             default:
                 if (this.password == Integer.parseInt(stringBuilder.toString())) {
                     // パスワード入力が完了したらpasswordをプリファレンスに保存
-                    Toast.makeText(InitPassCodeActivity.this, "设定成功", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(InitPassCodeActivity.this, "设置锁屏成功", Toast.LENGTH_SHORT).show();
                     // PrefUtil.setBool(getApplicationContext(), AppConfig.PREF_KEY_IS_LOCKED, true);
                     // PrefUtil.setInt(getApplicationContext(), AppConfig.PREF_KEY_PASSWORD, password);
 
@@ -245,11 +246,14 @@ public class InitPassCodeActivity extends Activity {
                         Log.i("confirmPassword2", "yes");
 
                         FileUtil.writeFile(userConfigPath, userJSON.toString());
+                        String settingsConfigPath = FileUtil.dirPath(URLs.CONFIG_DIRNAME, URLs.SETTINGS_CONFIG_FILENAME);
+                        FileUtil.writeFile(settingsConfigPath, userJSON.toString());
                     } catch(Exception e) {
                         e.printStackTrace();
                     }
 
                     finish();
+                    this.onBackPressed();
                 } else {
                     // もう一度やり直し
                     text_main_pass.setText(TEXT_MAIN_MISTAKE);

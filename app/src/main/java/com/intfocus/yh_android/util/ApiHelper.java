@@ -40,24 +40,28 @@ public class ApiHelper {
     		params.put("device", device);
     		
 			Map<String, String> response = HttpUtil.httpPost(urlString, params);
-			boolean isValidate = response.get("code").equals("200");
 
 			JSONObject responseJSON = new JSONObject(response.get("body").toString());
 
 			String userConfigPath = String.format("%s/%s", FileUtil.basePath(), URLs.USER_CONFIG_FILENAME);
 			JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
 			userJSON.put("password", password);
-			userJSON.put("is_login", isValidate);
+			userJSON.put("is_login", response.get("code").equals("200"));
 
+			String settingsConfigPath = FileUtil.dirPath(URLs.CONFIG_DIRNAME, URLs.SETTINGS_CONFIG_FILENAME);
+			if((new File(settingsConfigPath)).exists()) {
+				JSONObject settingJSON = FileUtil.readConfigFile(settingsConfigPath);
+				if(settingJSON.has("use_gesture_password")) {
+					userJSON.put("use_gesture_password", settingJSON.get("use_gesture_password"));
+				}
+				if(settingJSON.has("gesture_password")) {
+					userJSON.put("gesture_password", settingJSON.get("gesture_password"));
+				}
+			}
 			userJSON = ApiHelper.merge(userJSON, responseJSON);
 			FileUtil.writeFile(userConfigPath, userJSON.toString());
 
-			if(isValidate) {
-		        // need user info
-				String settingsConfigPath = FileUtil.dirPath(URLs.CONFIG_DIRNAME, URLs.SETTINGS_CONFIG_FILENAME);
-				Log.i("userConfigPath", userConfigPath);
-				Log.i("settingsConfigPath", settingsConfigPath);
-				
+			if(response.get("code").equals("200")) {
 				FileUtil.writeFile(settingsConfigPath, userJSON.toString());
 			}
 			else {

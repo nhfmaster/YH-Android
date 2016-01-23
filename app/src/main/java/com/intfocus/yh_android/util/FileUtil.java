@@ -1,5 +1,11 @@
 package com.intfocus.yh_android.util;
 
+import android.text.TextUtils;
+import android.util.Log;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -8,10 +14,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import org.json.JSONException;
-import org.json.JSONObject;
-import android.util.Log;
-import android.text.TextUtils;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.zip.ZipEntry;
@@ -24,6 +26,39 @@ public class FileUtil {
 
 		return basePath;
 	}
+
+    public  static boolean checkIsLocked() {
+        try {
+            String userConfigPath = String.format("%s/%s", FileUtil.basePath(), URLs.USER_CONFIG_FILENAME);
+            if((new File(userConfigPath)).exists()) {
+                JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
+                if(!userJSON.has("use_gesture_password")) {
+                    userJSON.put("use_gesture_password", false);
+                    Log.i("ScreenLock", "use_gesture_password not set");
+                }
+                if(!userJSON.has("gesture_password")) {
+                    userJSON.put("gesture_password", false);
+                    Log.i("ScreenLock", "gesture_password not set");
+                }
+                if(!userJSON.has("is_login")) {
+                    userJSON.put("is_login", false);
+                    Log.i("ScreenLock", "is_login not set");
+                }
+
+                FileUtil.writeFile(userConfigPath, userJSON.toString());
+
+                return userJSON.getBoolean("use_gesture_password") && userJSON.getBoolean("is_login");
+            } else {
+                Log.i("ScreenLock", "userConfigPath not exist");
+
+                return false;
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
 
 	public static String userspace() {
 		String spacePath = "";
@@ -221,10 +256,6 @@ public class FileUtil {
 
 	/**
 	 * 解压assets的zip压缩文件到指定目录
-	 * @param context上下文对象
-	 * @param assetName压缩文件名
-	 * @param outputDirectory输出目录
-	 * @param isReWrite是否覆盖
 	 * @throws IOException
 	 */
 	public static void unZip(InputStream inputStream, String outputDirectory, boolean isReWrite) throws IOException {

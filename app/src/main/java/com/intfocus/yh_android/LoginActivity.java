@@ -14,11 +14,10 @@ import android.widget.Toast;
 import com.intfocus.yh_android.util.ApiHelper;
 import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.URLs;
+import com.pgyersdk.update.PgyUpdateManager;
 
 import java.io.File;
 import java.io.IOException;
-
-import com.pgyersdk.update.PgyUpdateManager;
 
 public class LoginActivity extends BaseActivity {
 
@@ -112,6 +111,8 @@ public class LoginActivity extends BaseActivity {
                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         LoginActivity.this.startActivity(intent);
+
+                        finish();
                     } else {
                         Toast.makeText(LoginActivity.this, info, Toast.LENGTH_SHORT).show();
                     }

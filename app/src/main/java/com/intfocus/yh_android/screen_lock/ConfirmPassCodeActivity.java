@@ -28,7 +28,6 @@ public class ConfirmPassCodeActivity extends Activity {
 
     private final String TEXT_MAIN_MISTAKE = "请输入密码";
     private final String TEXT_SUB_MISTAKE = "密码有误";
-    public  String targetActivity;
 
     private int password;
     private StringBuilder stringBuilder;
@@ -47,7 +46,6 @@ public class ConfirmPassCodeActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_confirm_passcode);
 
-        targetActivity = getIntent().getStringExtra("activity");
         stringBuilder = new StringBuilder();
         initViews();
         initCircleCanvas();
@@ -206,19 +204,19 @@ public class ConfirmPassCodeActivity extends Activity {
             String userConfigPath = String.format("%s/%s", FileUtil.basePath(), URLs.USER_CONFIG_FILENAME);
             JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
             if(stringBuilder.toString().compareTo(userJSON.getString("gesture_password")) == 0) {
-                userJSON.put("use_gesture_password", false);
-                FileUtil.writeFile(userConfigPath, userJSON.toString());
                 Log.i("confirmPassword", "yes");
 
-                if(targetActivity.contains("LoginActivity")) {
-                    Intent intent = new Intent(ConfirmPassCodeActivity.this, MainActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    ConfirmPassCodeActivity.this.startActivity(intent);
-                } else {
-                    this.onBackPressed();
-                }
+                Intent intent = new Intent(ConfirmPassCodeActivity.this, MainActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                ConfirmPassCodeActivity.this.startActivity(intent);
+
+                finish();
             } else {
                 Log.i("confirmPassword", "no");
+
+                //userJSON.put("use_gesture_password", false);
+                //FileUtil.writeFile(userConfigPath, userJSON.toString());
+
                 text_main_pass.setText(TEXT_MAIN_MISTAKE);
                 text_sub_pass.setText(TEXT_SUB_MISTAKE);
                 password = 0;
@@ -249,7 +247,8 @@ public class ConfirmPassCodeActivity extends Activity {
     }
 
     public void onCancel(View view) {
-        moveTaskToBack(true);
+        //moveTaskToBack(true);
+        finish();
     }
 
     @Override

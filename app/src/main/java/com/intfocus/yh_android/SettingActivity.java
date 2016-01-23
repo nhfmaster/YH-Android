@@ -18,6 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.intfocus.yh_android.screen_lock.InitPassCodeActivity;
+import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.URLs;
 import com.pgyersdk.javabean.AppBean;
 import com.pgyersdk.update.PgyUpdateManager;
@@ -25,6 +26,8 @@ import com.pgyersdk.update.UpdateManagerListener;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.File;
 
 public class SettingActivity extends BaseActivity {
 
@@ -40,6 +43,8 @@ public class SettingActivity extends BaseActivity {
     private Switch mLockSwitch;
     private TextView mChangeLock;
     private Button mLogout;
+
+    private String screenLockInfo;
 
     private View.OnClickListener mOnBackListener = new View.OnClickListener() {
         @Override
@@ -158,10 +163,20 @@ public class SettingActivity extends BaseActivity {
                 startActivity(InitPassCodeActivity.createIntent(getApplicationContext()));
             } else {
                 try {
-                    JSONObject json = new JSONObject();
-                    json.put("use_gesture_password", false);
+                    String userConfigPath = String.format("%s/%s", FileUtil.basePath(), URLs.USER_CONFIG_FILENAME);
+                    if((new File(userConfigPath)).exists()) {
+                        JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
+                        userJSON.put("use_gesture_password", false);
+                        if(!userJSON.has("gesture_password")) {
+                            userJSON.put("gesture_password", "");
+                        }
 
-                    Toast.makeText(SettingActivity.this, "禁用手势锁设置成功", Toast.LENGTH_SHORT).show();
+                        FileUtil.writeFile(userConfigPath, userJSON.toString());
+                        String settingsConfigPath = FileUtil.dirPath(URLs.CONFIG_DIRNAME, URLs.SETTINGS_CONFIG_FILENAME);
+                        FileUtil.writeFile(settingsConfigPath, userJSON.toString());
+                    }
+
+                    Toast.makeText(SettingActivity.this, screenLockInfo, Toast.LENGTH_SHORT).show();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -186,9 +201,11 @@ public class SettingActivity extends BaseActivity {
         mAppVersion = (TextView) findViewById(R.id.app_version);
         mDeviceID = (TextView) findViewById(R.id.device_id);
         mApiDomain = (TextView) findViewById(R.id.api_domain);
-        mLockSwitch = (Switch) findViewById(R.id.lock_switch);
         mChangeLock = (TextView) findViewById(R.id.change_lock);
         mLogout = (Button) findViewById(R.id.logout);
+        mLockSwitch = (Switch) findViewById(R.id.lock_switch);
+        screenLockInfo = "设置锁屏取消";
+        mLockSwitch.setChecked(FileUtil.checkIsLocked());
 
         mChangeLock.setOnClickListener(mChangeLockListener);
         mChangePWD.setOnClickListener(mChangePWDListener);
@@ -197,6 +214,14 @@ public class SettingActivity extends BaseActivity {
         mLockSwitch.setOnCheckedChangeListener(mSwitchLockListener);
 
         initializeUI();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();  // Always call the superclass method first
+        // Get the Camera instance as the activity achieves full user focus
+
+        mLockSwitch.setChecked(FileUtil.checkIsLocked());
     }
 
     private void initializeUI() {
