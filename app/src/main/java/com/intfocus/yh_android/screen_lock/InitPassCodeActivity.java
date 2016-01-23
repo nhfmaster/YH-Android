@@ -17,9 +17,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.intfocus.yh_android.R;
+import com.intfocus.yh_android.util.ApiHelper;
 import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.URLs;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -241,13 +243,25 @@ public class InitPassCodeActivity extends Activity {
                             userJSON = FileUtil.readConfigFile(userConfigPath);
                         }
                         userJSON.put("use_gesture_password", true);
-                        userJSON.put("gesture_password", password);
+                        userJSON.put("gesture_password", stringBuilder.toString());
 
                         Log.i("confirmPassword2", "yes");
 
                         FileUtil.writeFile(userConfigPath, userJSON.toString());
                         String settingsConfigPath = FileUtil.dirPath(URLs.CONFIG_DIRNAME, URLs.SETTINGS_CONFIG_FILENAME);
                         FileUtil.writeFile(settingsConfigPath, userJSON.toString());
+
+                        final JSONObject userInfo = userJSON;
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    ApiHelper.screenLock(userInfo.get("user_device_id").toString(), stringBuilder.toString(), true);
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }).start();;
                     } catch(Exception e) {
                         e.printStackTrace();
                     }

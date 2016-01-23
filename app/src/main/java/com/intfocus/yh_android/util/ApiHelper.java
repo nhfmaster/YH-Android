@@ -284,4 +284,22 @@ public class ApiHelper {
 			e.printStackTrace();
 		}
 	}
+
+	public static void screenLock(String deviceID, String password, boolean state) {
+		String urlPath   = String.format(URLs.API_SCREEN_LOCK_PATH, deviceID);
+		String urlString = String.format("%s%s", URLs.HOST, urlPath);
+
+		try {
+			Map<String, String> params = new HashMap();
+			params.put("screen_lock_state", "1");
+			params.put("screen_lock_type", "4位数字");
+			params.put("screen_lock", password);
+
+			HttpUtil.httpPost(urlString, params);
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+	}
 }
