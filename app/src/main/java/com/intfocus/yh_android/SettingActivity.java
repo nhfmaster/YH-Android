@@ -113,6 +113,13 @@ public class SettingActivity extends BaseActivity {
                     try {
                         JSONObject response = new JSONObject(result);
                         message = response.getString("message");
+                        if(message.isEmpty()) {
+                            JSONObject responseData = response.getJSONObject("data");
+                            if(responseData.has("releaseNote")) {
+                                message = responseData.getString("releaseNote");
+                            }
+
+                        }
                     } catch (JSONException e) {
                         e.printStackTrace();
                         message = e.getMessage();

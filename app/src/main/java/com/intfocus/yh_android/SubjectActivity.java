@@ -17,6 +17,7 @@ import com.intfocus.yh_android.util.ApiHelper;
 import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.URLs;
 import com.joanzapata.pdfview.PDFView;
+import com.joanzapata.pdfview.listener.OnPageChangeListener;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -26,7 +27,7 @@ import java.io.IOException;
 
 import static java.lang.String.format;
 
-public class SubjectActivity extends BaseActivity {
+public class SubjectActivity extends BaseActivity implements OnPageChangeListener {
     private TextView mTitle;
     private ImageView mComment;
     private Boolean isInnerLink;
@@ -140,14 +141,24 @@ public class SubjectActivity extends BaseActivity {
             Log.i("PDF", pdfFile.getAbsolutePath());
             if(pdfFile.exists()) {
                 mPDFView.fromFile(pdfFile)
+                        .showMinimap(true)
+                        .enableSwipe(true)
+                        .swipeVertical(true)
                         .load();
                 mWebView.setVisibility(View.INVISIBLE);
                 mPDFView.setVisibility(View.VISIBLE);
             } else {
                 Toast.makeText(SubjectActivity.this, "加载PDF失败", Toast.LENGTH_SHORT).show();
             }
+
         }
     };
+
+
+    @Override
+    public void onPageChanged(int page, int pageCount) {
+        Log.i("onPageChanged", String.format("page: %d, count: %d", page, pageCount));
+    }
 
     Runnable mRunnableForPDF = new Runnable() {
         @Override

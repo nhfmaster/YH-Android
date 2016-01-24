@@ -48,19 +48,29 @@ public class ApiHelper {
 			userJSON.put("password", password);
 			userJSON.put("is_login", response.get("code").equals("200"));
 
+			// FileUtil.dirPath 需要优先写入登录用户信息
+			userJSON = ApiHelper.merge(userJSON, responseJSON);
+			FileUtil.writeFile(userConfigPath, userJSON.toString());
 			String settingsConfigPath = FileUtil.dirPath(URLs.CONFIG_DIRNAME, URLs.SETTINGS_CONFIG_FILENAME);
 			if((new File(settingsConfigPath)).exists()) {
 				JSONObject settingJSON = FileUtil.readConfigFile(settingsConfigPath);
 				if(settingJSON.has("use_gesture_password")) {
-					userJSON.put("use_gesture_password", settingJSON.get("use_gesture_password"));
+					userJSON.put("use_gesture_password", settingJSON.getBoolean("use_gesture_password"));
+				} else {
+					userJSON.put("use_gesture_password",false);
 				}
 				if(settingJSON.has("gesture_password")) {
-					userJSON.put("gesture_password", settingJSON.get("gesture_password"));
+					userJSON.put("gesture_password", settingJSON.getString("gesture_password"));
+				} else {
+					userJSON.put("gesture_password", "");
 				}
+			} else {
+				userJSON.put("use_gesture_password", false);
+				userJSON.put("gesture_password", "");
 			}
-			userJSON = ApiHelper.merge(userJSON, responseJSON);
 			FileUtil.writeFile(userConfigPath, userJSON.toString());
 
+			Log.i("CurrentUser", userJSON.toString());
 			if(response.get("code").equals("200")) {
 				FileUtil.writeFile(settingsConfigPath, userJSON.toString());
 			}
