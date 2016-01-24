@@ -25,57 +25,31 @@
             style="@style/ActionRightButton"
             android:src="@mipmap/setting" />
 
-        <com.makeramen.roundedimageview.RoundedImageView
-            xmlns:app="http://schemas.android.com/apk/res-auto"
-            android:id="@+id/colorView0"
-            style="@style/ColorViewStyle0"
-            android:scaleType="fitCenter"
-            app:riv_corner_radius="30dip"
-            app:riv_border_width="2dip"
-            app:riv_border_color="#333333"
-            app:riv_mutate_background="false"
-            app:riv_tile_mode="repeat"
-            app:riv_oval="true" />
-        <com.makeramen.roundedimageview.RoundedImageView
-            android:id="@+id/colorView1"
-            style="@style/ColorViewStyle1"
-            android:scaleType="fitCenter"
-            app:riv_corner_radius="30dip"
-            app:riv_border_width="2dip"
-            app:riv_border_color="#333333"
-            app:riv_mutate_background="false"
-            app:riv_tile_mode="repeat"
-            app:riv_oval="true" />
-        <com.makeramen.roundedimageview.RoundedImageView
-            android:id="@+id/colorView2"
-            style="@style/ColorViewStyle2"
-            android:scaleType="fitCenter"
-            app:riv_corner_radius="30dip"
-            app:riv_border_width="2dip"
-            app:riv_border_color="#333333"
-            app:riv_mutate_background="false"
-            app:riv_tile_mode="repeat"
-            app:riv_oval="true" />
-        <com.makeramen.roundedimageview.RoundedImageView
-            android:id="@+id/colorView3"
-            style="@style/ColorViewStyle3"
-            android:scaleType="fitCenter"
-            app:riv_corner_radius="30dip"
-            app:riv_border_width="2dip"
-            app:riv_border_color="#333333"
-            app:riv_mutate_background="false"
-            app:riv_tile_mode="repeat"
-            app:riv_oval="true" />
-        <com.makeramen.roundedimageview.RoundedImageView
-            android:id="@+id/colorView4"
-            style="@style/ColorViewStyle4"
-            android:scaleType="fitCenter"
-            app:riv_corner_radius="30dip"
-            app:riv_border_width="2dip"
-            app:riv_border_color="#333333"
-            app:riv_mutate_background="false"
-            app:riv_tile_mode="repeat"
-            app:riv_oval="true" />
+        <RelativeLayout
+            android:id="@+id/colorViewLayout"
+            android:layout_width="35dp"
+            android:layout_height="5dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginBottom="5dp"
+            android:layout_marginRight="6dp">
+
+            <ImageView
+                android:id="@+id/colorView0"
+                style="@style/ColorViewStyle0" />
+            <ImageView
+                android:id="@+id/colorView1"
+                style="@style/ColorViewStyle1" />
+            <ImageView
+                android:id="@+id/colorView2"
+                style="@style/ColorViewStyle2" />
+            <ImageView
+                android:id="@+id/colorView3"
+                style="@style/ColorViewStyle3" />
+            <ImageView
+                android:id="@+id/colorView4"
+                style="@style/ColorViewStyle4" />
+        </RelativeLayout>
 
     </RelativeLayout>
 

@@ -1,28 +1,22 @@
 package com.intfocus.yh_android;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.webkit.JavascriptInterface;
+import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.intfocus.yh_android.util.ApiHelper;
-import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.URLs;
 
-import org.json.JSONObject;
-
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-
-import static java.lang.String.format;
-import android.content.Intent;
-import android.util.Log;
 
 public class CommentActivity extends BaseActivity {
 
@@ -66,6 +60,15 @@ public class CommentActivity extends BaseActivity {
         urlString = String.format("%s%s", URLs.HOST, urlPath);
 
         new Thread(mRunnableForDetecting).start();
+
+
+        List<ImageView> colorViews = new ArrayList<ImageView>();
+        colorViews.add((ImageView) findViewById(R.id.colorView0));
+        colorViews.add((ImageView) findViewById(R.id.colorView1));
+        colorViews.add((ImageView) findViewById(R.id.colorView2));
+        colorViews.add((ImageView) findViewById(R.id.colorView3));
+        colorViews.add((ImageView) findViewById(R.id.colorView4));
+        initColorView(colorViews);
     }
 
     private View.OnClickListener mOnBackListener = new View.OnClickListener() {

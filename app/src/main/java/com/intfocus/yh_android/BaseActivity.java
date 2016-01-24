@@ -4,11 +4,13 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.intfocus.yh_android.util.ApiHelper;
@@ -22,6 +24,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -31,6 +34,7 @@ public class BaseActivity extends Activity {
 
     protected WebView mWebView;
     protected JSONObject user;
+    protected int userID = 0;
     protected String urlString;
     protected String assetsPath;
     protected String relativeAssetsPath;
@@ -52,7 +56,8 @@ public class BaseActivity extends Activity {
         if ((new File(userConfigPath)).exists()) {
             try {
                 user = FileUtil.readConfigFile(userConfigPath);
-                if (user.getBoolean("is_login")) {
+                if (user.has("is_login") && user.getBoolean("is_login")) {
+                    userID = user.getInt("user_id");
                     assetsPath = FileUtil.dirPath(URLs.HTML_DIRNAME);
                     String urlPath = String.format(URLs.API_DEVICE_STATE_PATH, user.getInt("user_device_id"));
                     urlStringForDetecting = String.format("%s%s", URLs.HOST, urlPath);
@@ -192,6 +197,21 @@ public class BaseActivity extends Activity {
                 }
         );
         alertDialog.show();
+    }
+
+    public void initColorView(List<ImageView> colorViews) {
+        String[] colors =  {"#ffffff", "#ffcd0a", "#fd9053", "#dd0929", "#016a43", "#9d203c", "#093db5", "#6a3906", "#192162", "#000000"};
+        String userIDStr = String.format("%d", userID);
+        int numDiff = colorViews.size() - userIDStr.length();
+        numDiff = numDiff < 0 ? 0 : numDiff;
+
+        for(int i=0; i < colorViews.size(); i++) {
+            int colorIndex = 0;
+            if(i >= numDiff) {
+                colorIndex = Character.getNumericValue(userIDStr.charAt(i - numDiff));
+            }
+            colorViews.get(i).setBackgroundColor(Color.parseColor(colors[colorIndex]));
+        }
     }
 
     public void longLog(String Tag, String str) {

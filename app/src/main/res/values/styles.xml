@@ -115,25 +115,27 @@
     <style name="ColorViewStyle">
         <item name="android:layout_width">5dp</item>
         <item name="android:layout_height">5dp</item>
-        <item name="android:layout_alignParentRight">true</item>
-        <item name="android:layout_below">@id/setting</item>
-        <item name="android:layout_marginTop">5dp</item>
     </style>
 
     <style name="ColorViewStyle0" parent="@style/ColorViewStyle">
-        <item name="android:layout_marginRight">36dp</item>
+        <item name="android:layout_marginLeft">0dp</item>
+        <item name="android:background">@color/colors0</item>
     </style>
     <style name="ColorViewStyle1" parent="@style/ColorViewStyle">
-        <item name="android:layout_marginRight">29dp</item>
+        <item name="android:layout_marginLeft">7dp</item>
+        <item name="android:background">@color/colors1</item>
     </style>
     <style name="ColorViewStyle2" parent="@style/ColorViewStyle">
-        <item name="android:layout_marginRight">22dp</item>
+        <item name="android:layout_marginLeft">14dp</item>
+        <item name="android:background">@color/colors2</item>
     </style>
     <style name="ColorViewStyle3" parent="@style/ColorViewStyle">
-        <item name="android:layout_marginRight">15dp</item>
+        <item name="android:layout_marginLeft">21dp</item>
+        <item name="android:background">@color/colors3</item>
     </style>
     <style name="ColorViewStyle4" parent="@style/ColorViewStyle">
-        <item name="android:layout_marginRight">8dp</item>
+        <item name="android:layout_marginLeft">28dp</item>
+        <item name="android:background">@color/colors4</item>
     </style>
 
 </resources>

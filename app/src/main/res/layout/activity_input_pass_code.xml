@@ -107,13 +107,13 @@
         <View
             android:layout_width="wrap_content"
             android:layout_height="1dp"
-            android:background="@color/pass_number"/>
+            android:background="@color/lightgray"/>
 
         <View
             android:layout_width="wrap_content"
             android:layout_height="1dp"
             android:layout_marginTop="5dp"
-            android:background="@color/pass_number"/>
+            android:background="@color/lightgray"/>
     </LinearLayout>
 
     <LinearLayout

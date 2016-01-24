@@ -8,6 +8,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.widget.ImageView;
+
 import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.URLs;
 
@@ -16,7 +17,6 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
-import android.graphics.Color;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -67,31 +67,13 @@ public class MainActivity extends BaseActivity {
 
         initTab();
 
-        String[] colors =  {"#ffffff", "#ffcd0a", "#fd9053", "#dd0929", "#016a43", "#9d203c", "#093db5", "#6a3906", "#192162", "#000000"};
-
         List<ImageView> colorViews = new ArrayList<ImageView>();
         colorViews.add((ImageView) findViewById(R.id.colorView0));
         colorViews.add((ImageView) findViewById(R.id.colorView1));
         colorViews.add((ImageView) findViewById(R.id.colorView2));
         colorViews.add((ImageView) findViewById(R.id.colorView3));
         colorViews.add((ImageView) findViewById(R.id.colorView4));
-
-        try {
-            String userID = String.format("%d", user.getInt("user_id"));
-            int numDiff = colorViews.size() - userID.length();
-            numDiff = numDiff < 0 ? 0 : numDiff;
-
-            for(int i=0; i < colorViews.size(); i++) {
-                int colorIndex = 0;
-                if(i >= numDiff) {
-                    colorIndex = Character.getNumericValue(userID.charAt(i - numDiff));
-                }
-                colorViews.get(i).setBackgroundColor(Color.parseColor(colors[colorIndex]));
-            }
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        initColorView(colorViews);
     }
 
 
