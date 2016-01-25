@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.intfocus.yh_android"
-    android:versionCode="36"
-    android:versionName="1.0.6" >
+    android:versionCode="38"
+    android:versionName="1.0.8" >
 
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.VIBRATE" />
@@ -21,7 +21,7 @@
     <application
         android:name=".YHApplication"
         android:allowBackup="true"
-        android:icon="@drawable/app_icon"
+        android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <service android:name="org.OpenUDID.OpenUDID_service" >
