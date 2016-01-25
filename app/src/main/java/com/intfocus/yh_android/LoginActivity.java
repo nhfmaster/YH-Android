@@ -11,6 +11,7 @@ import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 
+import com.intfocus.yh_android.screen_lock.ConfirmPassCodeActivity;
 import com.intfocus.yh_android.util.ApiHelper;
 import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.URLs;
@@ -39,12 +40,24 @@ public class LoginActivity extends BaseActivity {
         });
         mWebView.addJavascriptInterface(new JavaScriptInterface(), "AndroidJSBridge");
 
-
         /*
          * 显示加载中...界面
          */
         urlStringForLoading = String.format("file:///%s/loading/login.html", FileUtil.sharedPath());
         mWebView.loadUrl(urlStringForLoading);
+
+                /*
+         *  是否启用锁屏
+         */
+        if (FileUtil.checkIsLocked()) {
+            Log.i("screen_lock", "lock it");
+
+            Intent intent = new Intent(this, ConfirmPassCodeActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            this.startActivity(intent);
+        } else {
+            Log.i("screen_lock", "not lock");
+        }
 
         /*
          * 检测登录界面，版本是否升级

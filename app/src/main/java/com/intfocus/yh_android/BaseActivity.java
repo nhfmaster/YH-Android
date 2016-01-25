@@ -23,6 +23,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,11 +41,14 @@ public class BaseActivity extends Activity {
     protected String relativeAssetsPath;
     protected String urlStringForDetecting;
     protected String urlStringForLoading;
+    private static ArrayList<Activity> mActivities = new ArrayList<Activity>();
 
     @Override
     @SuppressLint("SetJavaScriptEnabled")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mActivities.add(this);
+        finishLoginActivityWhenInMainAcitivty(this);
 
         String sharedPath = FileUtil.sharedPath();
         assetsPath = sharedPath;
@@ -70,6 +74,28 @@ public class BaseActivity extends Activity {
         }
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mActivities.remove(this);
+    }
+
+    public static void finishAll() {
+        for(Activity activity:mActivities) {
+            activity.finish();
+        }
+    }
+
+    private void finishLoginActivityWhenInMainAcitivty(Activity activity) {
+        if(activity.getClass().toString().contains("MainActivity")) {
+            for(Activity a:mActivities) {
+                if(a.getClass().toString().contains("LoginActivity")) {
+                    a.finish();
+                    Log.i("finishLoginActivity", mActivities.toString());
+                }
+            }
+        }
+    }
 
     Runnable mRunnableForDetecting = new Runnable() {
         @Override

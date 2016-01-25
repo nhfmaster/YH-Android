@@ -2,11 +2,9 @@ package com.intfocus.yh_android;
 
 import android.app.Activity;
 import android.app.Application;
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.intfocus.yh_android.screen_lock.ConfirmPassCodeActivity;
 import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.URLs;
 import com.pgyersdk.crash.PgyCrashManager;
@@ -56,22 +54,7 @@ public class YHApplication extends Application implements Application.ActivityLi
             cachedFile.mkdirs();
         }
 
-        /*
-         *  是否启用锁屏
-         */
-        if (FileUtil.checkIsLocked()) {
-            Log.i("screen_lock", "lock it");
-
-            Intent intent = new Intent(this, ConfirmPassCodeActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            this.startActivity(intent);
-        } else {
-            Log.i("screen_lock", "not lock");
-        }
-
         registerActivityLifecycleCallbacks(this);
-
-
     }
 
     @Override
