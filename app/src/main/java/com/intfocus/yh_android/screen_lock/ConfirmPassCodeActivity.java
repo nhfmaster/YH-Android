@@ -1,6 +1,7 @@
 package com.intfocus.yh_android.screen_lock;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -14,6 +15,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.intfocus.yh_android.LoginActivity;
 import com.intfocus.yh_android.MainActivity;
 import com.intfocus.yh_android.R;
 import com.intfocus.yh_android.util.FileUtil;
@@ -25,6 +27,8 @@ import org.json.JSONObject;
  * Created by lijunjie on 16/1/22.
  */
 public class ConfirmPassCodeActivity extends Activity {
+
+    private boolean is_from_login;
 
     private final String TEXT_MAIN_MISTAKE = "请输入密码";
     private final String TEXT_SUB_MISTAKE = "密码有误";
@@ -40,7 +44,10 @@ public class ConfirmPassCodeActivity extends Activity {
 
     private Bitmap bitmapBlack = Bitmap.createBitmap(300, 300, Bitmap.Config.ARGB_8888);
     private Bitmap bitmapGlay = Bitmap.createBitmap(300, 300, Bitmap.Config.ARGB_8888);
-
+    public static Intent createIntent(Context context) {
+        Intent intent = new Intent(context, ConfirmPassCodeActivity.class);
+        return intent;
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,6 +56,8 @@ public class ConfirmPassCodeActivity extends Activity {
         stringBuilder = new StringBuilder();
         initViews();
         initCircleCanvas();
+
+        is_from_login = getIntent().getBooleanExtra("is_from_login", false);
     }
 
     private void initViews() {
@@ -206,9 +215,17 @@ public class ConfirmPassCodeActivity extends Activity {
             if(stringBuilder.toString().compareTo(userJSON.getString("gesture_password")) == 0) {
                 Log.i("confirmPassword", "yes");
 
-                Intent intent = new Intent(ConfirmPassCodeActivity.this, MainActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                ConfirmPassCodeActivity.this.startActivity(intent);
+                /*
+                 * 出现验证界面，是由于两种原因
+                 * 1. 打开app时，之前已登录用户设置了锁屏功能;验证成功，直接跳转至主界面
+                 * 2. 已打开app, 手机待机后再激活时，进入app；验证成功，不作任何处理
+                 *
+                 */
+                if(is_from_login) {
+                    Intent intent = new Intent(ConfirmPassCodeActivity.this, MainActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    ConfirmPassCodeActivity.this.startActivity(intent);
+                }
 
                 finish();
             } else {
@@ -246,8 +263,27 @@ public class ConfirmPassCodeActivity extends Activity {
         }
     }
 
+    /*
+     * 验证界面，取消进入登录界面
+     */
     public void onCancel(View view) {
         //moveTaskToBack(true);
+        try {
+            String userConfigPath = String.format("%s/%s", FileUtil.basePath(), URLs.USER_CONFIG_FILENAME);
+            JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
+            userJSON.put("is_login", false);
+            FileUtil.writeFile(userConfigPath, userJSON.toString());
+
+            String settingsConfigPath = FileUtil.dirPath(URLs.CONFIG_DIRNAME, URLs.SETTINGS_CONFIG_FILENAME);
+            FileUtil.writeFile(settingsConfigPath, userJSON.toString());
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+
+        Intent intent = new Intent(ConfirmPassCodeActivity.this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        ConfirmPassCodeActivity.this.startActivity(intent);
+
         finish();
     }
 

@@ -259,7 +259,7 @@ public class ApiHelper {
 	public static void downloadFile(String urlString, File outputFile) {
 		try {
 			URL url = new URL(urlString);
-			String headerPath = FileUtil.dirPath(URLs.CACHED_DIRNAME, URLs.CACHED_HEADER_FILENAME);
+			String headerPath = String.format("%s/%s/%s", FileUtil.basePath(), URLs.CACHED_DIRNAME, URLs.CACHED_HEADER_FILENAME);
 
 			JSONObject headerJSON = new JSONObject();
 			if ((new File(headerPath)).exists()) {
@@ -285,7 +285,7 @@ public class ApiHelper {
 				fos.close();
 				in.close();
 
-				if(etag != null && !etag.isEmpty() && headerJSON.getString(urlString).equals(etag)) {
+				if(etag != null && !etag.isEmpty()) {
 					headerJSON.put(urlString, etag);
 					FileUtil.writeFile(headerPath, headerJSON.toString());
 				}

@@ -53,6 +53,7 @@ public class LoginActivity extends BaseActivity {
             Log.i("screen_lock", "lock it");
 
             Intent intent = new Intent(this, ConfirmPassCodeActivity.class);
+            intent.putExtra("is_from_login", true);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             this.startActivity(intent);
         } else {

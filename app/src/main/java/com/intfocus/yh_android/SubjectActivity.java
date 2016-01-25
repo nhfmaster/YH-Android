@@ -3,6 +3,7 @@ package com.intfocus.yh_android;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
@@ -146,7 +147,7 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
         initColorView(colorViews);
     }
 
-    protected android.os.Handler mHandlerForPDF= new android.os.Handler() {
+    protected Handler mHandlerForPDF= new Handler() {
         public void handleMessage(Message message) {
 
             Log.i("PDF", pdfFile.getAbsolutePath());
