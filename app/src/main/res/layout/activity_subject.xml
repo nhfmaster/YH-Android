@@ -17,7 +17,7 @@
             android:layout_height="20dp"
             android:layout_centerVertical="true"
             android:layout_marginLeft="5dp"
-            android:src="@mipmap/back" />
+            android:src="@drawable/back" />
 
         <TextView
             android:id="@+id/back_text"
@@ -41,7 +41,7 @@
         <ImageView
             android:id="@+id/comment"
             style="@style/ActionRightButton"
-            android:src="@mipmap/comment" />
+            android:src="@drawable/comment" />
 
 
         <RelativeLayout

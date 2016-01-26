@@ -17,7 +17,7 @@
             android:layout_height="20dp"
             android:layout_centerVertical="true"
             android:layout_marginLeft="5dp"
-            android:src="@mipmap/back" />
+            android:src="@drawable/back" />
 
         <TextView
             android:id="@+id/back_text"

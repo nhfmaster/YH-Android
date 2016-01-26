@@ -16,14 +16,14 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_centerInParent="true"
-            android:src="@mipmap/yonghuilogo"
+            android:src="@drawable/yonghuilogo"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp" />
 
         <ImageView
             android:id="@+id/setting"
             style="@style/ActionRightButton"
-            android:src="@mipmap/setting" />
+            android:src="@drawable/setting" />
 
         <RelativeLayout
             android:id="@+id/colorViewLayout"
@@ -64,29 +64,29 @@
         <com.intfocus.yh_android.TabView
             android:id="@+id/tab_kpi"
             style="@style/ToolBarTab"
-            app:active_src="@mipmap/tab_kpi_s"
-            app:src="@mipmap/tab_kpi"
+            app:active_src="@drawable/tab_kpi_s"
+            app:src="@drawable/tab_kpi"
             app:text="仪表盘" />
 
         <com.intfocus.yh_android.TabView
             android:id="@+id/tab_analysis"
             style="@style/ToolBarTab"
-            app:active_src="@mipmap/tab_analysis_s"
-            app:src="@mipmap/tab_analysis"
+            app:active_src="@drawable/tab_analysis_s"
+            app:src="@drawable/tab_analysis"
             app:text="分析" />
 
         <com.intfocus.yh_android.TabView
             android:id="@+id/tab_app"
             style="@style/ToolBarTab"
-            app:active_src="@mipmap/tab_app_s"
-            app:src="@mipmap/tab_app"
+            app:active_src="@drawable/tab_app_s"
+            app:src="@drawable/tab_app"
             app:text="应用" />
 
         <com.intfocus.yh_android.TabView
             android:id="@+id/tab_message"
             style="@style/ToolBarTab"
-            app:active_src="@mipmap/tab_message_s"
-            app:src="@mipmap/tab_message"
+            app:active_src="@drawable/tab_message_s"
+            app:src="@drawable/tab_message"
             app:text="消息" />
 
     </LinearLayout>
