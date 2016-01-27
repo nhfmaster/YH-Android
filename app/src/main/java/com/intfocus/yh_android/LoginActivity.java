@@ -28,8 +28,8 @@ public class LoginActivity extends BaseActivity {
         setContentView(R.layout.activity_login);
 
         pullToRefreshWebView = (PullToRefreshWebView) findViewById(R.id.webview);
-        setPullToRefreshWebView(true);
-        initWebView();
+        initRefreshWebView();
+        setPullToRefreshWebView(false);
 
         mWebView.requestFocus();
         mWebView.addJavascriptInterface(new JavaScriptInterface(), "AndroidJSBridge");

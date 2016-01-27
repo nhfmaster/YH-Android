@@ -46,6 +46,75 @@ public class SettingActivity extends BaseActivity {
 
     private String screenLockInfo;
 
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_setting);
+
+        findViewById(R.id.back).setOnClickListener(mOnBackListener);
+        findViewById(R.id.back_text).setOnClickListener(mOnBackListener);
+
+        mUserID = (TextView) findViewById(R.id.user_id);
+        mRoleID = (TextView) findViewById(R.id.role_id);
+        mGroupID = (TextView) findViewById(R.id.group_id);
+        mChangePWD = (TextView) findViewById(R.id.change_pwd);
+        mCheckUpgrade = (TextView) findViewById(R.id.check_upgrade);
+        mAppName = (TextView) findViewById(R.id.app_name);
+        mAppVersion = (TextView) findViewById(R.id.app_version);
+        mDeviceID = (TextView) findViewById(R.id.device_id);
+        mApiDomain = (TextView) findViewById(R.id.api_domain);
+        mChangeLock = (TextView) findViewById(R.id.change_lock);
+        mLogout = (Button) findViewById(R.id.logout);
+        mLockSwitch = (Switch) findViewById(R.id.lock_switch);
+        screenLockInfo = "设置锁屏取消";
+        mLockSwitch.setChecked(FileUtil.checkIsLocked());
+
+        mChangeLock.setOnClickListener(mChangeLockListener);
+        mChangePWD.setOnClickListener(mChangePWDListener);
+        mLogout.setOnClickListener(mLogoutListener);
+        mCheckUpgrade.setOnClickListener(mCheckUpgradeListener);
+        mLockSwitch.setOnCheckedChangeListener(mSwitchLockListener);
+
+        initializeUI();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();  // Always call the superclass method first
+        // Get the Camera instance as the activity achieves full user focus
+
+        mLockSwitch.setChecked(FileUtil.checkIsLocked());
+    }
+
+    private void initializeUI() {
+        /*
+         * 初始化界面内容
+         */
+        try {
+            mUserID.setText(user.getString("user_name"));
+            mRoleID.setText(user.getString("role_name"));
+            mGroupID.setText(user.getString("group_name"));
+
+            mAppName.setText(getApplicationName(SettingActivity.this));
+            try {
+                PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+                mAppVersion.setText(packageInfo.versionName);
+            } catch (NameNotFoundException e) {
+                e.printStackTrace();
+            }
+            mDeviceID.setText(TextUtils.split(android.os.Build.MODEL, " - ")[0]);
+            mApiDomain.setText(URLs.HOST.replace("http://", ""));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static String getApplicationName(Context context) {
+        int stringId = context.getApplicationInfo().labelRes;
+        return context.getString(stringId);
+    }
+
     private View.OnClickListener mOnBackListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -190,73 +259,4 @@ public class SettingActivity extends BaseActivity {
             }
         }
     };
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_setting);
-
-        findViewById(R.id.back).setOnClickListener(mOnBackListener);
-        findViewById(R.id.back_text).setOnClickListener(mOnBackListener);
-
-        mUserID = (TextView) findViewById(R.id.user_id);
-        mRoleID = (TextView) findViewById(R.id.role_id);
-        mGroupID = (TextView) findViewById(R.id.group_id);
-        mChangePWD = (TextView) findViewById(R.id.change_pwd);
-        mCheckUpgrade = (TextView) findViewById(R.id.check_upgrade);
-        mAppName = (TextView) findViewById(R.id.app_name);
-        mAppVersion = (TextView) findViewById(R.id.app_version);
-        mDeviceID = (TextView) findViewById(R.id.device_id);
-        mApiDomain = (TextView) findViewById(R.id.api_domain);
-        mChangeLock = (TextView) findViewById(R.id.change_lock);
-        mLogout = (Button) findViewById(R.id.logout);
-        mLockSwitch = (Switch) findViewById(R.id.lock_switch);
-        screenLockInfo = "设置锁屏取消";
-        mLockSwitch.setChecked(FileUtil.checkIsLocked());
-
-        mChangeLock.setOnClickListener(mChangeLockListener);
-        mChangePWD.setOnClickListener(mChangePWDListener);
-        mLogout.setOnClickListener(mLogoutListener);
-        mCheckUpgrade.setOnClickListener(mCheckUpgradeListener);
-        mLockSwitch.setOnCheckedChangeListener(mSwitchLockListener);
-
-        initializeUI();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();  // Always call the superclass method first
-        // Get the Camera instance as the activity achieves full user focus
-
-        mLockSwitch.setChecked(FileUtil.checkIsLocked());
-    }
-
-    private void initializeUI() {
-        /*
-         * 初始化界面内容
-         */
-        try {
-            mUserID.setText(user.getString("user_name"));
-            mRoleID.setText(user.getString("role_name"));
-            mGroupID.setText(user.getString("group_name"));
-
-            mAppName.setText(getApplicationName(SettingActivity.this));
-            try {
-                PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
-                mAppVersion.setText(packageInfo.versionName);
-            } catch (NameNotFoundException e) {
-                e.printStackTrace();
-            }
-            mDeviceID.setText(TextUtils.split(android.os.Build.MODEL, " - ")[0]);
-            mApiDomain.setText(URLs.HOST.replace("http://", ""));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static String getApplicationName(Context context) {
-        int stringId = context.getApplicationInfo().labelRes;
-        return context.getString(stringId);
-    }
-
 }

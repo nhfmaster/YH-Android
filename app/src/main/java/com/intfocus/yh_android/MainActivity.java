@@ -37,8 +37,8 @@ public class MainActivity extends BaseActivity {
         setContentView(R.layout.activity_main);
 
         pullToRefreshWebView = (PullToRefreshWebView) findViewById(R.id.webview);
+        initRefreshWebView();
         setPullToRefreshWebView(true);
-        initWebView();
 
         mWebView.requestFocus();
         mWebView.addJavascriptInterface(new JavaScriptInterface(), "AndroidJSBridge");

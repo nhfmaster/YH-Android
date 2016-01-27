@@ -38,8 +38,8 @@ public class CommentActivity extends BaseActivity {
         mTitle = (TextView) findViewById(R.id.title);
 
         pullToRefreshWebView = (PullToRefreshWebView) findViewById(R.id.webview);
+        initRefreshWebView();
         setPullToRefreshWebView(true);
-        initWebView();
 
         mWebView.requestFocus();
         mWebView.addJavascriptInterface(new JavaScriptInterface(), "AndroidJSBridge");

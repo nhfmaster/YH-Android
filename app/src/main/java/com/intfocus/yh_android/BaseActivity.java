@@ -9,6 +9,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -113,7 +114,9 @@ public class BaseActivity extends Activity {
      * WebView Setting
      * ********************
      */
-    public android.webkit.WebView initWebView() {
+    public android.webkit.WebView initRefreshWebView() {
+        pullToRefreshWebView.setMode(PullToRefreshBase.Mode.PULL_FROM_START);
+
         mWebView = pullToRefreshWebView.getRefreshableView();
         WebSettings webSettings = mWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
@@ -158,8 +161,10 @@ public class BaseActivity extends Activity {
 
     public void setPullToRefreshWebView(boolean isAllow) {
         if(!isAllow) {
+            pullToRefreshWebView.setMode(PullToRefreshBase.Mode.DISABLED);
             return;
         }
+
         // 刷新监听事件
         pullToRefreshWebView.setOnRefreshListener(new PullToRefreshBase.OnRefreshListener<android.webkit.WebView>() {
             @Override
@@ -182,6 +187,13 @@ public class BaseActivity extends Activity {
         protected Void doInBackground(Void... params) {
             // 如果这个地方不使用线程休息的话，刷新就不会显示在那个 PullToRefreshListView 的 UpdatedLabel 上面
 
+            /*
+             *  下拉浏览器刷新时，删除响应头文件，相当于无缓存刷新
+             */
+            if(urlString != null && !urlString.isEmpty()) {
+                String urlKey = urlString.indexOf("?") != -1 ? TextUtils.split(urlString, "?")[0] : urlString;
+                ApiHelper.clearResponseHeader(urlKey, assetsPath);
+            }
             new Thread(mRunnableForDetecting).start();
 
             return null;

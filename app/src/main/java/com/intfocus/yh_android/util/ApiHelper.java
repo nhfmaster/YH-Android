@@ -88,19 +88,19 @@ public class ApiHelper {
 	 *  获取报表网页数据
 	 */
 	public static void reportData(String groupID, String reportID) {
+		String assetsPath = FileUtil.sharedPath();
 		String urlPath   = String.format(URLs.API_DATA_PATH, groupID, reportID);
 		String urlString = String.format("%s%s", URLs.HOST, urlPath);
 
 		String fileName  = String.format(URLs.REPORT_DATA_FILENAME, groupID, reportID);
-		String filePath  = String.format("%s/assets/javascripts/%s", FileUtil.sharedPath(), fileName);
+		String filePath  = String.format("%s/assets/javascripts/%s", assetsPath, fileName);
 
-
-		Map<String, String> headers = ApiHelper.checkResponseHeader(urlString, FileUtil.sharedPath());
+		Map<String, String> headers = ApiHelper.checkResponseHeader(urlString, assetsPath);
 		Map<String, String> response = HttpUtil.httpGet(urlString, headers);
 
 		if(response.get("code").equals("200")) {
 			try {
-				ApiHelper.storeResponseHeader(urlString, FileUtil.sharedPath(), response);
+				ApiHelper.storeResponseHeader(urlString, assetsPath, response);
 
 				FileUtil.writeFile(filePath, response.get("body").toString());
 			} catch (IOException e) {
@@ -178,10 +178,28 @@ public class ApiHelper {
 	 * assistant methods
 	 */
 	public static void clearResponseHeader(String urlKey, String assetsPath) {
+//		File file = new File(headersFilePath);
+//		if(file.exists()) {
+//			file.delete();
+//		}
+
 		String headersFilePath = String.format("%s/%s", assetsPath, URLs.CACHED_HEADER_FILENAME);
-		File file = new File(headersFilePath);
-		if(file.exists()) {
-			file.delete();
+		if(!(new File(headersFilePath)).exists()) {
+			return;
+		}
+
+		JSONObject headersJSON = FileUtil.readConfigFile(headersFilePath);
+
+		if(headersJSON.has(urlKey)) {
+			headersJSON.remove(urlKey);
+
+			Log.i("clearResponseHeader", headersFilePath);
+			Log.i("clearResponseHeader", urlKey);
+			try {
+				FileUtil.writeFile(headersFilePath, headersJSON.toString());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	public static Map<String, String> checkResponseHeader(String urlKey, String assetsPath) {

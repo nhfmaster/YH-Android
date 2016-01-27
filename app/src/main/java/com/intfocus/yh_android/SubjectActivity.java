@@ -2,6 +2,7 @@ package com.intfocus.yh_android;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -9,22 +10,22 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.webkit.JavascriptInterface;
+import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import com.handmark.pulltorefresh.library.PullToRefreshBase;
 import com.handmark.pulltorefresh.library.PullToRefreshWebView;
 import com.intfocus.yh_android.util.ApiHelper;
 import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.URLs;
 import com.joanzapata.pdfview.PDFView;
 import com.joanzapata.pdfview.listener.OnPageChangeListener;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,10 +37,12 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
     private Boolean isInnerLink;
     private String reportID;
     private PDFView mPDFView;
-    private File  pdfFile;
+    private File pdfFile;
     private String bannerName;
     private int objectID;
     private int objectType;
+
+    private int groupID, userID;
 
     @Override
     @SuppressLint("SetJavaScriptEnabled")
@@ -50,71 +53,87 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
         findViewById(R.id.back).setOnClickListener(mOnBackListener);
         findViewById(R.id.back_text).setOnClickListener(mOnBackListener);
 
+        /*
+         * JSON Data
+         */
+        try {
+            groupID = user.getInt("group_id");
+            userID = user.getInt("user_id");
+        } catch (JSONException e) {
+            e.printStackTrace();
+            userID = -2;
+            groupID = -2;
+        }
+
         mTitle = (TextView) findViewById(R.id.title);
         mPDFView = (PDFView) findViewById(R.id.pdfview);
         mComment = (ImageView) findViewById(R.id.comment);
         mPDFView.setVisibility(View.INVISIBLE);
 
         pullToRefreshWebView = (PullToRefreshWebView) findViewById(R.id.webview);
-        setPullToRefreshWebView(true);
-        initWebView();
+        initRefreshWebView();
 
         mWebView.requestFocus();
-        mWebView.setVisibility(View.VISIBLE);
+        pullToRefreshWebView.setVisibility(View.VISIBLE);
         mWebView.addJavascriptInterface(new JavaScriptInterface(), "AndroidJSBridge");
         mWebView.loadUrl(urlStringForLoading);
 
-        try {
-            Intent intent = getIntent();
-            String link = intent.getStringExtra("link");
 
-            bannerName = intent.getStringExtra("bannerName");
-            objectID = intent.getIntExtra("objectID", -1);
-            objectType = intent.getIntExtra("objectType", -1);
-            isInnerLink = !(link.startsWith("http://") || link.startsWith("https://"));
-            urlString = link;
+        /*
+         * Intent Data || JSON Data
+         */
+        Intent intent = getIntent();
+        String link = intent.getStringExtra("link");
 
-            if (isInnerLink) {
-                String urlPath = format(link.replace("%@", "%d"), user.getInt("group_id"));
-                urlString = String.format("%s%s", URLs.HOST, urlPath);
-                reportID = TextUtils.split(link, "/")[3];
-            }
+        bannerName = intent.getStringExtra("bannerName");
+        objectID = intent.getIntExtra("objectID", -1);
+        objectType = intent.getIntExtra("objectType", -1);
+        isInnerLink = !(link.startsWith("http://") || link.startsWith("https://"));
+        urlString = link;
 
-            mTitle.setText(bannerName);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        mTitle.setText(bannerName);
 
         if (isInnerLink) {
+            String urlPath = format(link.replace("%@", "%d"), groupID);
+            urlString = String.format("%s%s", URLs.HOST, urlPath);
+            reportID = TextUtils.split(link, "/")[3];
+
+            // 刷新监听事件
+            pullToRefreshWebView.setOnRefreshListener(new PullToRefreshBase.OnRefreshListener<WebView>() {
+                @Override
+                public void onRefresh(PullToRefreshBase<WebView> refreshView) {
+                    // 模拟加载任务
+                    new pullToRefreshTask().execute();
+
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    String label = simpleDateFormat.format(System.currentTimeMillis());
+                    // 显示最后更新的时间
+                    refreshView.getLoadingLayoutProxy()
+                            .setLastUpdatedLabel(label);
+                }
+            });
+
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    try {
-                        ApiHelper.reportData(String.format("%d", user.getInt("group_id")), reportID);
+                    ApiHelper.reportData(String.format("%d", groupID), reportID);
 
-                        new Thread(mRunnableForDetecting).start();
-                    } catch(JSONException e) {
-                        e.printStackTrace();
-                    }
+                    new Thread(mRunnableForDetecting).start();
                 }
             }).start();
         } else {
-            if(urlString.toLowerCase().endsWith(".pdf")) {
+            if (urlString.toLowerCase().endsWith(".pdf")) {
                 new Thread(mRunnableForPDF).start();
             } else {
-                try {
                 /*
                  * 外部链接传参: userid, timestamp
                  */
-                    String appendParams = String.format("?userid=%d&timestamp=%s", user.getInt("user_id"), URLs.TimeStamp);
+                String appendParams = String.format("?userid=%d&timestamp=%s", userID, URLs.TimeStamp);
 
-                    if (urlString.indexOf("?") == -1) {
-                        urlString = String.format("%s%s", urlString, appendParams);
-                    } else {
-                        urlString = urlString.replace("?", appendParams);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
+                if (urlString.indexOf("?") == -1) {
+                    urlString = String.format("%s%s", urlString, appendParams);
+                } else {
+                    urlString = urlString.replace("?", appendParams);
                 }
                 Log.i("OutLink", urlString);
                 mWebView.loadUrl(urlString);
@@ -143,11 +162,11 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
         initColorView(colorViews);
     }
 
-    protected Handler mHandlerForPDF= new Handler() {
+    protected Handler mHandlerForPDF = new Handler() {
         public void handleMessage(Message message) {
 
             Log.i("PDF", pdfFile.getAbsolutePath());
-            if(pdfFile.exists()) {
+            if (pdfFile.exists()) {
                 mPDFView.fromFile(pdfFile)
                         .showMinimap(true)
                         .enableSwipe(true)
@@ -187,8 +206,38 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
         }
     };
 
+    private class pullToRefreshTask extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... params) {
+            // 如果这个地方不使用线程休息的话，刷新就不会显示在那个 PullToRefreshListView 的 UpdatedLabel 上面
 
-    private class JavaScriptInterface extends JavaScriptBase  {
+            /*
+             *  下拉浏览器刷新时，删除响应头文件，相当于无缓存刷新
+             */
+            String urlKey;
+            if (urlString != null && !urlString.isEmpty()) {
+                urlKey = urlString.indexOf("?") != -1 ? TextUtils.split(urlString, "?")[0] : urlString;
+                ApiHelper.clearResponseHeader(urlKey, assetsPath);
+            }
+            String urlPath = String.format(URLs.API_DATA_PATH, groupID, reportID);
+            urlKey = String.format("%s%s", URLs.HOST, urlPath);
+            ApiHelper.clearResponseHeader(urlKey, FileUtil.sharedPath());
+
+            ApiHelper.reportData(String.format("%d", groupID), reportID);
+            new Thread(mRunnableForDetecting).start();
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            // Call onRefreshComplete when the list has been refreshed. 如果没有下面的函数那么刷新将不会停
+            pullToRefreshWebView.onRefreshComplete();
+        }
+    }
+
+    private class JavaScriptInterface extends JavaScriptBase {
         /*
          * JS 接口，暴露给JS的方法使用@JavascriptInterface装饰
          */
