@@ -30,4 +30,5 @@ dependencies {
     compile "commons-io:commons-io:+"
     compile 'com.makeramen:roundedimageview:2.2.1'
     compile 'com.joanzapata.pdfview:android-pdfview:1.0.4@aar'
+    compile project(':lib:pull-to-refresh')
 }

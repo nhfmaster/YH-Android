@@ -6,11 +6,10 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.KeyEvent;
-import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 
+import com.handmark.pulltorefresh.library.PullToRefreshWebView;
 import com.intfocus.yh_android.screen_lock.ConfirmPassCodeActivity;
 import com.intfocus.yh_android.util.ApiHelper;
 import com.intfocus.yh_android.util.FileUtil;
@@ -28,16 +27,11 @@ public class LoginActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        mWebView = (WebView) findViewById(R.id.webview);
-        mWebView.initialize();
-        mWebView.requestFocus();
+        pullToRefreshWebView = (PullToRefreshWebView) findViewById(R.id.webview);
+        setPullToRefreshWebView(true);
+        initWebView();
 
-        mWebView.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                return false;
-            }
-        });
+        mWebView.requestFocus();
         mWebView.addJavascriptInterface(new JavaScriptInterface(), "AndroidJSBridge");
 
         /*

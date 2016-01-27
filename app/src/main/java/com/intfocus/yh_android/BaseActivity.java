@@ -5,14 +5,23 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.KeyEvent;
+import android.view.View;
 import android.webkit.JavascriptInterface;
+import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
+import android.webkit.WebViewClient;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.handmark.pulltorefresh.library.ILoadingLayout;
+import com.handmark.pulltorefresh.library.PullToRefreshBase;
+import com.handmark.pulltorefresh.library.PullToRefreshWebView;
 import com.intfocus.yh_android.util.ApiHelper;
 import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.HttpUtil;
@@ -23,6 +32,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,7 +43,8 @@ import java.util.Map;
  */
 public class BaseActivity extends Activity {
 
-    protected WebView mWebView;
+    protected PullToRefreshWebView pullToRefreshWebView;
+    protected android.webkit.WebView mWebView;
     protected JSONObject user;
     protected int userID = 0;
     protected String urlString;
@@ -97,6 +108,98 @@ public class BaseActivity extends Activity {
         }
     }
 
+    /*
+     * ********************
+     * WebView Setting
+     * ********************
+     */
+    public android.webkit.WebView initWebView() {
+        mWebView = pullToRefreshWebView.getRefreshableView();
+        WebSettings webSettings = mWebView.getSettings();
+        webSettings.setJavaScriptEnabled(true);
+        webSettings.setDefaultTextEncodingName("utf-8");
+        webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+
+        mWebView.setWebChromeClient(new WebChromeClient());
+        mWebView.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(android.webkit.WebView view, String url) {
+                //返回值是true的时候控制去WebView打开，为false调用系统浏览器或第三方浏览器
+                view.loadUrl(url);
+                return true;
+            }
+        });
+
+        mWebView.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                return false;
+            }
+        });
+
+        initIndicator(pullToRefreshWebView);
+
+        return mWebView;
+    }
+
+    private void initIndicator(PullToRefreshWebView pullToRefreshWebView) {
+        ILoadingLayout startLabels = pullToRefreshWebView
+                .getLoadingLayoutProxy(true, false);
+        startLabels.setPullLabel("请继续下拉...");// 刚下拉时，显示的提示
+        startLabels.setRefreshingLabel("正在刷新...");// 刷新时
+        startLabels.setReleaseLabel("放了我，我就刷新...");// 下来达到一定距离时，显示的提示
+
+        ILoadingLayout endLabels = pullToRefreshWebView.getLoadingLayoutProxy(
+                false, true);
+        endLabels.setPullLabel("请继续下拉");// 刚下拉时，显示的提示
+        endLabels.setRefreshingLabel("正在刷新");// 刷新时
+        endLabels.setReleaseLabel("放了我，我就刷新");// 下来达到一定距离时，显示的提示
+    }
+
+    public void setPullToRefreshWebView(boolean isAllow) {
+        if(!isAllow) {
+            return;
+        }
+        // 刷新监听事件
+        pullToRefreshWebView.setOnRefreshListener(new PullToRefreshBase.OnRefreshListener<android.webkit.WebView>() {
+            @Override
+            public void onRefresh(PullToRefreshBase<android.webkit.WebView> refreshView) {
+                // 模拟加载任务
+                new pullToRefreshTask().execute();
+
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                String label = simpleDateFormat.format(System.currentTimeMillis());
+                // 显示最后更新的时间
+                refreshView.getLoadingLayoutProxy()
+                        .setLastUpdatedLabel(label);
+            }
+        });
+    }
+
+
+    private class pullToRefreshTask extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... params) {
+            // 如果这个地方不使用线程休息的话，刷新就不会显示在那个 PullToRefreshListView 的 UpdatedLabel 上面
+
+            new Thread(mRunnableForDetecting).start();
+
+            return null;
+        }
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            // Call onRefreshComplete when the list has been refreshed. 如果没有下面的函数那么刷新将不会停
+            pullToRefreshWebView.onRefreshComplete();
+        }
+    }
+
+
+    /*
+     * ********************
+     * WebView display UI
+     * ********************
+     */
     Runnable mRunnableForDetecting = new Runnable() {
         @Override
         public void run() {

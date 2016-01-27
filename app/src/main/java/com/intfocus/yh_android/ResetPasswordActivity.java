@@ -6,11 +6,11 @@ import android.app.AlertDialog.Builder;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 
+import com.handmark.pulltorefresh.library.PullToRefreshWebView;
 import com.intfocus.yh_android.util.ApiHelper;
 import com.intfocus.yh_android.util.URLs;
 
@@ -33,16 +33,12 @@ public class ResetPasswordActivity extends BaseActivity {
 
         findViewById(R.id.back).setOnClickListener(mOnBackListener);
         findViewById(R.id.back_text).setOnClickListener(mOnBackListener);
-        mWebView = (WebView) findViewById(R.id.webview);
 
-        mWebView.initialize();
+        pullToRefreshWebView = (PullToRefreshWebView) findViewById(R.id.webview);
+        setPullToRefreshWebView(false);
+        initWebView();
+
         mWebView.requestFocus();
-        mWebView.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                return false;
-            }
-        });
         mWebView.addJavascriptInterface(new JavaScriptInterface(), "AndroidJSBridge");
         mWebView.loadUrl(urlStringForLoading);
 

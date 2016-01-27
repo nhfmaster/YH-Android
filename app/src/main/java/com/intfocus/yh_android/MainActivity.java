@@ -4,11 +4,11 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.widget.ImageView;
 
+import com.handmark.pulltorefresh.library.PullToRefreshWebView;
 import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.URLs;
 
@@ -29,21 +29,18 @@ public class MainActivity extends BaseActivity {
     private TabView mCurrentTab;
     private int objectType;
 
+
     @Override
     @SuppressLint("SetJavaScriptEnabled")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mWebView = (WebView) findViewById(R.id.webview);
-        mWebView.initialize();
+        pullToRefreshWebView = (PullToRefreshWebView) findViewById(R.id.webview);
+        setPullToRefreshWebView(true);
+        initWebView();
+
         mWebView.requestFocus();
-        mWebView.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                return false;
-            }
-        });
         mWebView.addJavascriptInterface(new JavaScriptInterface(), "AndroidJSBridge");
         mWebView.loadUrl(urlStringForLoading);
 
@@ -145,7 +142,6 @@ public class MainActivity extends BaseActivity {
             }
         }
     };
-
 
     private class JavaScriptInterface extends JavaScriptBase {
         /*

@@ -7,13 +7,13 @@ import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.handmark.pulltorefresh.library.PullToRefreshWebView;
 import com.intfocus.yh_android.util.ApiHelper;
 import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.URLs;
@@ -53,18 +53,14 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
         mTitle = (TextView) findViewById(R.id.title);
         mPDFView = (PDFView) findViewById(R.id.pdfview);
         mComment = (ImageView) findViewById(R.id.comment);
-        mWebView = (WebView) findViewById(R.id.webview);
-
         mPDFView.setVisibility(View.INVISIBLE);
-        mWebView.initialize();
+
+        pullToRefreshWebView = (PullToRefreshWebView) findViewById(R.id.webview);
+        setPullToRefreshWebView(true);
+        initWebView();
+
         mWebView.requestFocus();
         mWebView.setVisibility(View.VISIBLE);
-        mWebView.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                return false;
-            }
-        });
         mWebView.addJavascriptInterface(new JavaScriptInterface(), "AndroidJSBridge");
         mWebView.loadUrl(urlStringForLoading);
 

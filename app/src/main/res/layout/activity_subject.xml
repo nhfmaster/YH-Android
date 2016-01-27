@@ -72,7 +72,7 @@
 
     </RelativeLayout>
 
-    <com.intfocus.yh_android.WebView
+    <com.handmark.pulltorefresh.library.PullToRefreshWebView
         android:id="@+id/webview"
         android:visibility="gone"
         android:layout_width="match_parent"

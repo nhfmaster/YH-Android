@@ -6,8 +6,13 @@ import android.webkit.WebSettings;
 import android.webkit.WebViewClient;
 import android.webkit.WebChromeClient;
 
+import com.handmark.pulltorefresh.library.ILoadingLayout;
+import com.handmark.pulltorefresh.library.PullToRefreshWebView;
+
 /**
  * Created by wiky on 1/11/16.
+ * android.webkit.WebView
+ * com.handmark.pulltorefresh.library.PullToRefreshWebView
  */
 public class WebView extends android.webkit.WebView {
     public WebView(Context context) {
@@ -22,7 +27,8 @@ public class WebView extends android.webkit.WebView {
         super(context, attrs, defStyle);
     }
 
-    public void initialize() {
+
+    public void initialize(PullToRefreshWebView pullToRefreshWebView) {
         WebSettings webSettings = getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setDefaultTextEncodingName("utf-8");
@@ -37,5 +43,21 @@ public class WebView extends android.webkit.WebView {
                 return true;
             }
         });
+
+        initIndicator(pullToRefreshWebView);
+    }
+
+    private void initIndicator(PullToRefreshWebView pullToRefreshWebView) {
+        ILoadingLayout startLabels = pullToRefreshWebView
+                .getLoadingLayoutProxy(true, false);
+        startLabels.setPullLabel("请继续下拉...");// 刚下拉时，显示的提示
+        startLabels.setRefreshingLabel("正在刷新...");// 刷新时
+        startLabels.setReleaseLabel("放了我，我就刷新...");// 下来达到一定距离时，显示的提示
+
+        ILoadingLayout endLabels = pullToRefreshWebView.getLoadingLayoutProxy(
+                false, true);
+        endLabels.setPullLabel("请继续下拉");// 刚下拉时，显示的提示
+        endLabels.setRefreshingLabel("正在刷新");// 刷新时
+        endLabels.setReleaseLabel("放了我，我就刷新");// 下来达到一定距离时，显示的提示
     }
 }
