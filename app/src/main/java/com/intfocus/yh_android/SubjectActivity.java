@@ -40,7 +40,7 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
     private String reportID;
     private PDFView mPDFView;
     private File pdfFile;
-    private String bannerName;
+    private String bannerName, link;
     private int objectID;
     private int objectType;
 
@@ -99,13 +99,12 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
          * Intent Data || JSON Data
          */
         Intent intent = getIntent();
-        String link = intent.getStringExtra("link");
+        link = intent.getStringExtra("link");
 
         bannerName = intent.getStringExtra("bannerName");
         objectID = intent.getIntExtra("objectID", -1);
         objectType = intent.getIntExtra("objectType", -1);
         isInnerLink = !(link.startsWith("http://") || link.startsWith("https://"));
-        urlString = link;
 
         mTitle.setText(bannerName);
         dealWithURL();
@@ -134,11 +133,9 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
 
     private void dealWithURL() {
         if (isInnerLink) {
-            String urlPath = format(urlString.replace("%@", "%d"), groupID);
-            if(!urlString.startsWith("http://") && !urlString.startsWith("https://")) {
-                urlString = String.format("%s%s", URLs.HOST, urlPath);
-            }
-            reportID = TextUtils.split(urlString, "/")[3];
+            reportID = TextUtils.split(link, "/")[3];
+            String urlPath = format(link.replace("%@", "%d"), groupID);
+            urlString = String.format("%s%s", URLs.HOST, urlPath);
 
             new Thread(new Runnable() {
                 @Override
@@ -149,6 +146,7 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
                 }
             }).start();
         } else {
+            urlString = link;
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
