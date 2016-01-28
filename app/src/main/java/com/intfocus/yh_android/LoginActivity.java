@@ -37,13 +37,13 @@ public class LoginActivity extends BaseActivity {
         /*
          * 显示加载中...界面
          */
-        urlStringForLoading = String.format("file:///%s/loading/login.html", FileUtil.sharedPath());
+        urlStringForLoading = String.format("file:///%s/loading/login.html", FileUtil.sharedPath(mContext));
         mWebView.loadUrl(urlStringForLoading);
 
         /*
          *  是否启用锁屏
          */
-        if (FileUtil.checkIsLocked()) {
+        if (FileUtil.checkIsLocked(mContext)) {
             Log.i("screen_lock", "lock it");
 
             Intent intent = new Intent(this, ConfirmPassCodeActivity.class);
@@ -61,17 +61,19 @@ public class LoginActivity extends BaseActivity {
             PgyUpdateManager.register(this);
         }
 
+        urlString = URLs.LOGIN_PATH;
+        urlStringForDetecting = URLs.HOST;
+        assetsPath = FileUtil.sharedPath(mContext);
+        relativeAssetsPath = "assets";
+
         /*
          * 检测登录界面，版本是否升级
          */
-        checkVersionUpgrade(FileUtil.sharedPath());
+        checkVersionUpgrade(assetsPath);
 
         /*
          *  加载服务器网页
          */
-        urlString = URLs.LOGIN_PATH;
-        urlStringForDetecting = URLs.HOST;
-        relativeAssetsPath = "assets";
         new Thread(mRunnableForDetecting).start();
 
     }
@@ -117,11 +119,11 @@ public class LoginActivity extends BaseActivity {
         public void login(final String username, String password) {
             if (username.length() > 0 && password.length() > 0) {
                 try {
-                    String info = ApiHelper.authentication(username, URLs.MD5(password));
+                    String info = ApiHelper.authentication(mContext, username, URLs.MD5(password));
                     if (info.compareTo("success") == 0) {
 
                         // 检测用户空间，版本是否升级
-                        assetsPath = FileUtil.dirPath(URLs.HTML_DIRNAME);
+                        assetsPath = FileUtil.dirPath(mContext, URLs.HTML_DIRNAME);
                         checkVersionUpgrade(assetsPath);
 
                         // 跳转至主界面
@@ -131,14 +133,14 @@ public class LoginActivity extends BaseActivity {
 
                         finish();
                     } else {
-                        Toast.makeText(LoginActivity.this, info, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(mContext, info, Toast.LENGTH_SHORT).show();
                     }
 
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             } else {
-                Toast.makeText(LoginActivity.this, "请输入用户名与密码", Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext, "请输入用户名与密码", Toast.LENGTH_SHORT).show();
             }
         }
     }

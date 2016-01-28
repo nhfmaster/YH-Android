@@ -1,5 +1,6 @@
 package com.intfocus.yh_android.util;
 
+import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -20,16 +21,16 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 public class FileUtil {
-	public static String basePath() {
-		String basePath = URLs.STORAGE_BASE;
+	public static String basePath(Context context) {
+		String basePath = URLs.storage_base(context);
 		FileUtil.makeSureFolderExist(basePath);
 
 		return basePath;
 	}
 
-    public  static boolean checkIsLocked() {
+    public  static boolean checkIsLocked(Context context) {
         try {
-            String userConfigPath = String.format("%s/%s", FileUtil.basePath(), URLs.USER_CONFIG_FILENAME);
+            String userConfigPath = String.format("%s/%s", FileUtil.basePath(context), URLs.USER_CONFIG_FILENAME);
             if((new File(userConfigPath)).exists()) {
                 JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
                 if(!userJSON.has("use_gesture_password")) {
@@ -60,13 +61,13 @@ public class FileUtil {
         return false;
     }
 
-	public static String userspace() {
+	public static String userspace(Context context) {
 		String spacePath = "";
 		try {
-	        String userConfigPath = String.format("%s/%s", FileUtil.basePath(), URLs.USER_CONFIG_FILENAME);
+	        String userConfigPath = String.format("%s/%s", FileUtil.basePath(context), URLs.USER_CONFIG_FILENAME);
 	        JSONObject json = FileUtil.readConfigFile(userConfigPath);
 
-			spacePath = String.format("%s/User-%d", FileUtil.basePath(), json.getInt("user_id"));
+			spacePath = String.format("%s/User-%d", FileUtil.basePath(context), json.getInt("user_id"));
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -81,22 +82,22 @@ public class FileUtil {
 	 *
 	 *  @return 沙盒中的绝对路径
 	 */
-	public static String dirPath(String dirName) {
-		String pathName = String.format("%s/%s", FileUtil.userspace(), dirName);
+	public static String dirPath(Context context, String dirName) {
+		String pathName = String.format("%s/%s", FileUtil.userspace(context), dirName);
 		FileUtil.makeSureFolderExist(pathName);
 		
 		return pathName;
 	}
 	
-	public static String dirPath(String dirName, String fileName) {
-		String pathName = FileUtil.dirPath(dirName);
+	public static String dirPath(Context context, String dirName, String fileName) {
+		String pathName = FileUtil.dirPath(context, dirName);
 		
 		return String.format("%s/%s", pathName, fileName);
 	}
 
-	public static String dirsPath(String[] dirNames) {
+	public static String dirsPath(Context context, String[] dirNames) {
 
-		return FileUtil.dirPath(TextUtils.join("/", dirNames));
+		return FileUtil.dirPath(context, TextUtils.join("/", dirNames));
 	}
 
 	/*
@@ -163,8 +164,8 @@ public class FileUtil {
 	 *  2. loading页面
 	 *  3. 登录缓存页面
 	 */
-	public static String sharedPath() {
-		String pathName = FileUtil.basePath() + "/" + URLs.SHARED_DIRNAME;
+	public static String sharedPath(Context context) {
+		String pathName = FileUtil.basePath(context) + "/" + URLs.SHARED_DIRNAME;
         FileUtil.makeSureFolderExist(pathName);
 
 		return pathName;
@@ -182,12 +183,12 @@ public class FileUtil {
 	/*
 	 * 共享资源中的文件（夹）（忽略是否存在）
 	 */
-	public static String sharedPath(String folderName) {
+	public static String sharedPath(Context context, String folderName) {
 		if(!folderName.startsWith("/")) {
 			folderName = String.format("/%s", folderName);
 		}
 
-		String pathName = String.format("%s%s", FileUtil.sharedPath(), folderName);
+		String pathName = String.format("%s%s", FileUtil.sharedPath(context), folderName);
 		return pathName;
 	}
 

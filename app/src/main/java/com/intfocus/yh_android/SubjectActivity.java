@@ -10,10 +10,10 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.webkit.JavascriptInterface;
-import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.handmark.pulltorefresh.library.PullToRefreshBase;
 import com.handmark.pulltorefresh.library.PullToRefreshWebView;
 import com.intfocus.yh_android.util.ApiHelper;
@@ -21,8 +21,10 @@ import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.URLs;
 import com.joanzapata.pdfview.PDFView;
 import com.joanzapata.pdfview.listener.OnPageChangeListener;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -78,6 +80,20 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
         mWebView.addJavascriptInterface(new JavaScriptInterface(), "AndroidJSBridge");
         mWebView.loadUrl(urlStringForLoading);
 
+        // 刷新监听事件
+        pullToRefreshWebView.setOnRefreshListener(new PullToRefreshBase.OnRefreshListener<android.webkit.WebView>() {
+            @Override
+            public void onRefresh(PullToRefreshBase<android.webkit.WebView> refreshView) {
+                // 模拟加载任务
+                new pullToRefreshTask().execute();
+
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                String label = simpleDateFormat.format(System.currentTimeMillis());
+                // 显示最后更新的时间
+                refreshView.getLoadingLayoutProxy()
+                        .setLastUpdatedLabel(label);
+            }
+        });
 
         /*
          * Intent Data || JSON Data
@@ -92,53 +108,7 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
         urlString = link;
 
         mTitle.setText(bannerName);
-
-        if (isInnerLink) {
-            String urlPath = format(link.replace("%@", "%d"), groupID);
-            urlString = String.format("%s%s", URLs.HOST, urlPath);
-            reportID = TextUtils.split(link, "/")[3];
-
-            // 刷新监听事件
-            pullToRefreshWebView.setOnRefreshListener(new PullToRefreshBase.OnRefreshListener<WebView>() {
-                @Override
-                public void onRefresh(PullToRefreshBase<WebView> refreshView) {
-                    // 模拟加载任务
-                    new pullToRefreshTask().execute();
-
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                    String label = simpleDateFormat.format(System.currentTimeMillis());
-                    // 显示最后更新的时间
-                    refreshView.getLoadingLayoutProxy()
-                            .setLastUpdatedLabel(label);
-                }
-            });
-
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    ApiHelper.reportData(String.format("%d", groupID), reportID);
-
-                    new Thread(mRunnableForDetecting).start();
-                }
-            }).start();
-        } else {
-            if (urlString.toLowerCase().endsWith(".pdf")) {
-                new Thread(mRunnableForPDF).start();
-            } else {
-                /*
-                 * 外部链接传参: userid, timestamp
-                 */
-                String appendParams = String.format("?userid=%d&timestamp=%s", userID, URLs.TimeStamp);
-
-                if (urlString.indexOf("?") == -1) {
-                    urlString = String.format("%s%s", urlString, appendParams);
-                } else {
-                    urlString = urlString.replace("?", appendParams);
-                }
-                Log.i("OutLink", urlString);
-                mWebView.loadUrl(urlString);
-            }
-        }
+        dealWithURL();
 
         mComment.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -162,6 +132,46 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
         initColorView(colorViews);
     }
 
+    private void dealWithURL() {
+        if (isInnerLink) {
+            String urlPath = format(urlString.replace("%@", "%d"), groupID);
+            if(!urlString.startsWith("http://") && !urlString.startsWith("https://")) {
+                urlString = String.format("%s%s", URLs.HOST, urlPath);
+            }
+            reportID = TextUtils.split(urlString, "/")[3];
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    ApiHelper.reportData(mContext, String.format("%d", groupID), reportID);
+
+                    new Thread(mRunnableForDetecting).start();
+                }
+            }).start();
+        } else {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (urlString.toLowerCase().endsWith(".pdf")) {
+                        new Thread(mRunnableForPDF).start();
+                    } else {
+                        /*
+                         * 外部链接传参: userid, timestamp
+                         */
+                        String appendParams = String.format("?userid=%d&timestamp=%s", userID, URLs.TimeStamp);
+
+                        if (urlString.indexOf("?") == -1) {
+                            urlString = String.format("%s%s", urlString, appendParams);
+                        } else {
+                            urlString = urlString.replace("?", appendParams);
+                        }
+                        Log.i("OutLink", urlString);
+                        mWebView.loadUrl(urlString);
+                    }
+                }
+            });
+        }
+    }
     protected Handler mHandlerForPDF = new Handler() {
         public void handleMessage(Message message) {
 
@@ -190,9 +200,9 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
     Runnable mRunnableForPDF = new Runnable() {
         @Override
         public void run() {
-            String outputPath = String.format("%s/%s/%s.pdf", FileUtil.basePath(), URLs.CACHED_DIRNAME, URLs.MD5(urlString));
+            String outputPath = String.format("%s/%s/%s.pdf", FileUtil.basePath(mContext), URLs.CACHED_DIRNAME, URLs.MD5(urlString));
             pdfFile = new File(outputPath);
-            ApiHelper.downloadFile(urlString, pdfFile);
+            ApiHelper.downloadFile(mContext, urlString, pdfFile);
 
             Message message = mHandlerForPDF.obtainMessage();
             mHandlerForPDF.sendMessage(message);
@@ -214,17 +224,20 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
             /*
              *  下拉浏览器刷新时，删除响应头文件，相当于无缓存刷新
              */
-            String urlKey;
-            if (urlString != null && !urlString.isEmpty()) {
-                urlKey = urlString.indexOf("?") != -1 ? TextUtils.split(urlString, "?")[0] : urlString;
-                ApiHelper.clearResponseHeader(urlKey, assetsPath);
-            }
-            String urlPath = String.format(URLs.API_DATA_PATH, groupID, reportID);
-            urlKey = String.format("%s%s", URLs.HOST, urlPath);
-            ApiHelper.clearResponseHeader(urlKey, FileUtil.sharedPath());
+            if(isInnerLink) {
+                String urlKey;
+                if (urlString != null && !urlString.isEmpty()) {
+                    urlKey = urlString.indexOf("?") != -1 ? TextUtils.split(urlString, "?")[0] : urlString;
+                    ApiHelper.clearResponseHeader(urlKey, assetsPath);
+                }
+                String urlPath = String.format(URLs.API_DATA_PATH, groupID, reportID);
+                urlKey = String.format("%s%s", URLs.HOST, urlPath);
+                ApiHelper.clearResponseHeader(urlKey, FileUtil.sharedPath(mContext));
 
-            ApiHelper.reportData(String.format("%d", groupID), reportID);
-            new Thread(mRunnableForDetecting).start();
+                ApiHelper.reportData(mContext, String.format("%d", groupID), reportID);
+                new Thread(mRunnableForDetecting).start();
+            }
+            dealWithURL();
 
             return null;
         }
@@ -244,7 +257,7 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
         @JavascriptInterface
         public void storeTabIndex(final String pageName, final int tabIndex) {
             try {
-                String filePath = FileUtil.dirPath(URLs.CONFIG_DIRNAME, URLs.TABINDEX_CONFIG_FILENAME);
+                String filePath = FileUtil.dirPath(mContext, URLs.CONFIG_DIRNAME, URLs.TABINDEX_CONFIG_FILENAME);
 
                 JSONObject config = new JSONObject();
                 if ((new File(filePath).exists())) {
@@ -265,7 +278,7 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
         public int restoreTabIndex(final String pageName) {
             int tabIndex = 0;
             try {
-                String filePath = FileUtil.dirPath(URLs.CONFIG_DIRNAME, URLs.TABINDEX_CONFIG_FILENAME);
+                String filePath = FileUtil.dirPath(mContext, URLs.CONFIG_DIRNAME, URLs.TABINDEX_CONFIG_FILENAME);
 
                 JSONObject config = new JSONObject();
                 if ((new File(filePath).exists())) {

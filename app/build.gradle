@@ -25,10 +25,10 @@ repositories {
 dependencies {
     compile 'com.android.support:appcompat-v7:19.1.0'
     compile 'com.android.support:support-v4:19.1.0'
-    compile 'com.squareup.okhttp:okhttp:2.0.0'
     compile 'com.pgyersdk:sdk:2.2.2'
     compile "commons-io:commons-io:+"
-    compile 'com.makeramen:roundedimageview:2.2.1'
     compile 'com.joanzapata.pdfview:android-pdfview:1.0.4@aar'
     compile project(':lib:pull-to-refresh')
+    // compile 'com.makeramen:roundedimageview:2.2.1'
+    // compile 'com.squareup.okhttp:okhttp:2.0.0'
 }

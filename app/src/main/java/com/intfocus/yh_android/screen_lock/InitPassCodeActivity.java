@@ -31,26 +31,24 @@ import java.io.File;
  */
 public class InitPassCodeActivity extends Activity {
 
-    // テキストの定数
+    private Context mContext;
+
     private final String TEXT_MAIN_CONFIRM = "确认密码";
     private final String TEXT_SUB_CONFIRM = "请再次输入密码";
     private final String TEXT_MAIN_MISTAKE = "密码有误";
     private final String TEXT_SUB_MISTAKE = "两次密码不一致";
-    // 入力カウンター
+
     private byte counter = 0;
-    // パスワード照合用変数
     private int password;
-    // パスワードの入力、削除を処理するオブジェクト
     private StringBuilder stringBuilder;
-    // パスコードを入力する毎に変わるTextView
     private TextView text_main_pass;
     private TextView text_sub_pass;
-    // CircleのImageView
+
     private ImageView circle1;
     private ImageView circle2;
     private ImageView circle3;
     private ImageView circle4;
-    // Canvas用のBitmap生成
+
     private Bitmap bitmapBlack = Bitmap.createBitmap(300, 300,
             Bitmap.Config.ARGB_8888);
     private Bitmap bitmapGlay = Bitmap.createBitmap(300, 300,
@@ -65,7 +63,10 @@ public class InitPassCodeActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_input_pass_code);
+
+        mContext = InitPassCodeActivity.this;
         stringBuilder = new StringBuilder();
+
         initViews();
         initCircleCanvas();
     }
@@ -237,7 +238,7 @@ public class InitPassCodeActivity extends Activity {
                     // PrefUtil.setInt(getApplicationContext(), AppConfig.PREF_KEY_PASSWORD, password);
 
                     try {
-                        String userConfigPath = String.format("%s/%s", FileUtil.basePath(), URLs.USER_CONFIG_FILENAME);
+                        String userConfigPath = String.format("%s/%s", FileUtil.basePath(mContext), URLs.USER_CONFIG_FILENAME);
                         JSONObject userJSON = new JSONObject();
                         if ((new File(userConfigPath)).exists()) {
                             userJSON = FileUtil.readConfigFile(userConfigPath);
@@ -248,7 +249,7 @@ public class InitPassCodeActivity extends Activity {
                         Log.i("confirmPassword2", "yes");
 
                         FileUtil.writeFile(userConfigPath, userJSON.toString());
-                        String settingsConfigPath = FileUtil.dirPath(URLs.CONFIG_DIRNAME, URLs.SETTINGS_CONFIG_FILENAME);
+                        String settingsConfigPath = FileUtil.dirPath(mContext, URLs.CONFIG_DIRNAME, URLs.SETTINGS_CONFIG_FILENAME);
                         FileUtil.writeFile(settingsConfigPath, userJSON.toString());
 
                         final JSONObject userInfo = userJSON;

@@ -152,6 +152,18 @@
                 android:text="域名" />
         </RelativeLayout>
 
+        <RelativeLayout style="@style/SettingGroup">
+
+            <TextView
+                style="@style/SettingKey"
+                android:text="文件存储" />
+
+            <TextView
+                android:id="@+id/storage_type"
+                style="@style/SettingValue"
+                android:text="SD卡" />
+        </RelativeLayout>
+
 
         <RelativeLayout style="@style/SettingGroup">
 

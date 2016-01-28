@@ -1,5 +1,6 @@
 package com.intfocus.yh_android.util;
 
+import android.content.Context;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
@@ -25,7 +26,7 @@ public class ApiHelper {
 	 * 用户登录验证
 	 * params: {device: {name, platform, os, os_version, uuid}}
 	 */
-	public static String authentication(String username, String password) {
+	public static String authentication(Context context, String username, String password) {
 		String ret = "success";
 
 		String urlString = String.format(URLs.API_USER_PATH, URLs.HOST, "android", username, password);
@@ -43,7 +44,7 @@ public class ApiHelper {
 
 			JSONObject responseJSON = new JSONObject(response.get("body").toString());
 
-			String userConfigPath = String.format("%s/%s", FileUtil.basePath(), URLs.USER_CONFIG_FILENAME);
+			String userConfigPath = String.format("%s/%s", FileUtil.basePath(context), URLs.USER_CONFIG_FILENAME);
 			JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
 			userJSON.put("password", password);
 			userJSON.put("is_login", response.get("code").equals("200"));
@@ -51,7 +52,7 @@ public class ApiHelper {
 			// FileUtil.dirPath 需要优先写入登录用户信息
 			userJSON = ApiHelper.merge(userJSON, responseJSON);
 			FileUtil.writeFile(userConfigPath, userJSON.toString());
-			String settingsConfigPath = FileUtil.dirPath(URLs.CONFIG_DIRNAME, URLs.SETTINGS_CONFIG_FILENAME);
+			String settingsConfigPath = FileUtil.dirPath(context, URLs.CONFIG_DIRNAME, URLs.SETTINGS_CONFIG_FILENAME);
 			if((new File(settingsConfigPath)).exists()) {
 				JSONObject settingJSON = FileUtil.readConfigFile(settingsConfigPath);
 				if(settingJSON.has("use_gesture_password")) {
@@ -87,8 +88,8 @@ public class ApiHelper {
 	/*
 	 *  获取报表网页数据
 	 */
-	public static void reportData(String groupID, String reportID) {
-		String assetsPath = FileUtil.sharedPath();
+	public static void reportData(Context context, String groupID, String reportID) {
+		String assetsPath = FileUtil.sharedPath(context);
 		String urlPath   = String.format(URLs.API_DATA_PATH, groupID, reportID);
 		String urlString = String.format("%s%s", URLs.HOST, urlPath);
 
@@ -274,10 +275,10 @@ public class ApiHelper {
 	}
 
 
-	public static void downloadFile(String urlString, File outputFile) {
+	public static void downloadFile(Context context, String urlString, File outputFile) {
 		try {
 			URL url = new URL(urlString);
-			String headerPath = String.format("%s/%s/%s", FileUtil.basePath(), URLs.CACHED_DIRNAME, URLs.CACHED_HEADER_FILENAME);
+			String headerPath = String.format("%s/%s/%s", FileUtil.basePath(context), URLs.CACHED_DIRNAME, URLs.CACHED_HEADER_FILENAME);
 
 			JSONObject headerJSON = new JSONObject();
 			if ((new File(headerPath)).exists()) {

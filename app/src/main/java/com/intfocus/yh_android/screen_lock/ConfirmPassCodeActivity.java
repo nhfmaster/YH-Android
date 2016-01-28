@@ -29,6 +29,7 @@ import org.json.JSONObject;
 public class ConfirmPassCodeActivity extends Activity {
 
     private boolean is_from_login;
+    private Context mContext;
 
     private final String TEXT_MAIN_MISTAKE = "请输入密码";
     private final String TEXT_SUB_MISTAKE = "密码有误";
@@ -53,6 +54,7 @@ public class ConfirmPassCodeActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_confirm_passcode);
 
+        mContext = ConfirmPassCodeActivity.this;
         stringBuilder = new StringBuilder();
         initViews();
         initCircleCanvas();
@@ -210,7 +212,7 @@ public class ConfirmPassCodeActivity extends Activity {
             this.password = Integer.parseInt(stringBuilder.toString());
             Log.i("confirmPassword", "confirmPassword");
 
-            String userConfigPath = String.format("%s/%s", FileUtil.basePath(), URLs.USER_CONFIG_FILENAME);
+            String userConfigPath = String.format("%s/%s", FileUtil.basePath(mContext), URLs.USER_CONFIG_FILENAME);
             JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
             if(stringBuilder.toString().compareTo(userJSON.getString("gesture_password")) == 0) {
                 Log.i("confirmPassword", "yes");
@@ -269,12 +271,12 @@ public class ConfirmPassCodeActivity extends Activity {
     public void onCancel(View view) {
         //moveTaskToBack(true);
         try {
-            String userConfigPath = String.format("%s/%s", FileUtil.basePath(), URLs.USER_CONFIG_FILENAME);
+            String userConfigPath = String.format("%s/%s", FileUtil.basePath(mContext), URLs.USER_CONFIG_FILENAME);
             JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
             userJSON.put("is_login", false);
             FileUtil.writeFile(userConfigPath, userJSON.toString());
 
-            String settingsConfigPath = FileUtil.dirPath(URLs.CONFIG_DIRNAME, URLs.SETTINGS_CONFIG_FILENAME);
+            String settingsConfigPath = FileUtil.dirPath(mContext, URLs.CONFIG_DIRNAME, URLs.SETTINGS_CONFIG_FILENAME);
             FileUtil.writeFile(settingsConfigPath, userJSON.toString());
         } catch(Exception e) {
             e.printStackTrace();

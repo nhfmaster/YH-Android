@@ -3,6 +3,7 @@ package com.intfocus.yh_android;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.AsyncTask;
@@ -55,6 +56,8 @@ public class BaseActivity extends Activity {
     protected String urlStringForLoading;
     private static ArrayList<Activity> mActivities = new ArrayList<Activity>();
 
+    protected Context mContext;
+
     @Override
     @SuppressLint("SetJavaScriptEnabled")
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,19 +65,20 @@ public class BaseActivity extends Activity {
         mActivities.add(this);
         finishLoginActivityWhenInMainAcitivty(this);
 
-        String sharedPath = FileUtil.sharedPath();
+        mContext = BaseActivity.this;
+        String sharedPath = FileUtil.sharedPath(mContext);
         assetsPath = sharedPath;
         urlStringForDetecting = URLs.HOST;
         relativeAssetsPath = "assets";
         urlStringForLoading = String.format("file:///%s/loading/login.html", sharedPath);
 
-        String userConfigPath = String.format("%s/%s", FileUtil.basePath(), URLs.USER_CONFIG_FILENAME);
+        String userConfigPath = String.format("%s/%s", FileUtil.basePath(mContext), URLs.USER_CONFIG_FILENAME);
         if ((new File(userConfigPath)).exists()) {
             try {
                 user = FileUtil.readConfigFile(userConfigPath);
                 if (user.has("is_login") && user.getBoolean("is_login")) {
                     userID = user.getInt("user_id");
-                    assetsPath = FileUtil.dirPath(URLs.HTML_DIRNAME);
+                    assetsPath = FileUtil.dirPath(mContext, URLs.HTML_DIRNAME);
                     String urlPath = String.format(URLs.API_DEVICE_STATE_PATH, user.getInt("user_device_id"));
                     urlStringForDetecting = String.format("%s%s", URLs.HOST, urlPath);
                     relativeAssetsPath = "../../Shared/assets";
@@ -182,7 +186,7 @@ public class BaseActivity extends Activity {
     }
 
 
-    private class pullToRefreshTask extends AsyncTask<Void, Void, Void> {
+    protected class pullToRefreshTask extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void... params) {
             // 如果这个地方不使用线程休息的话，刷新就不会显示在那个 PullToRefreshListView 的 UpdatedLabel 上面
@@ -359,20 +363,21 @@ public class BaseActivity extends Activity {
         if (str.length() > 200) {
             Log.i(Tag, str.substring(0, 200));
             longLog(Tag, str.substring(200));
-        } else
+        } else {
             Log.i(Tag, str);
+        }
     }
 
 
     protected void modifiedUserConfig(JSONObject configJSON) {
         try {
-            String userConfigPath = String.format("%s/%s", FileUtil.basePath(), URLs.USER_CONFIG_FILENAME);
+            String userConfigPath = String.format("%s/%s", FileUtil.basePath(mContext), URLs.USER_CONFIG_FILENAME);
             JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
 
             userJSON = ApiHelper.merge(userJSON, configJSON);
             FileUtil.writeFile(userConfigPath, userJSON.toString());
 
-            String settingsConfigPath = FileUtil.dirPath(URLs.CONFIG_DIRNAME, URLs.SETTINGS_CONFIG_FILENAME);
+            String settingsConfigPath = FileUtil.dirPath(mContext, URLs.CONFIG_DIRNAME, URLs.SETTINGS_CONFIG_FILENAME);
             FileUtil.writeFile(settingsConfigPath, userJSON.toString());
         } catch (IOException e) {
             e.printStackTrace();

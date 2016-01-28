@@ -1,5 +1,6 @@
 package com.intfocus.yh_android.util;
 
+import android.content.Context;
 import android.os.Environment;
 
 import java.io.Serializable;
@@ -43,7 +44,7 @@ public class URLs implements Serializable {
     public final static String REPORT_DATA_FILENAME    = "template_data_group_%s_report_%s.js";
 
 
-	public final static String STORAGE_BASE            = String.format("%s/com.intfocus.yh_android", Environment.getExternalStorageDirectory().getAbsolutePath());
+//	public final static String STORAGE_BASE            = String.format("%s/com.intfocus.yh_android", Environment.getExternalStorageDirectory().getAbsolutePath());
     public final static String TimeStamp               = new SimpleDateFormat("yyyyMMddKKmmss").format(new Date());
 
     /*
@@ -67,7 +68,15 @@ public class URLs implements Serializable {
 	
 
 	
-	
+	public final static String storage_base(Context context) {
+        String path = "";
+        if(Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+            path = String.format("%s/com.intfocus.yh_android", Environment.getExternalStorageDirectory().getAbsolutePath());
+        } else {
+            path =String.format("%s/com.intfocus.yh_android", context.getApplicationContext().getFilesDir());
+        }
+        return path;
+    }
 	/**
 	 * 对URL进行格式处理
 	 * @param path

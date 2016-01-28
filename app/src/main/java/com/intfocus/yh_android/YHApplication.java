@@ -7,18 +7,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
-
 import com.intfocus.yh_android.screen_lock.ConfirmPassCodeActivity;
 import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.URLs;
 import com.pgyersdk.crash.PgyCrashManager;
-
 import org.OpenUDID.OpenUDID_manager;
 import org.apache.commons.io.FileUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,6 +27,7 @@ import java.io.InputStream;
 public class YHApplication extends Application implements Application.ActivityLifecycleCallbacks {
 
     private Activity currentActivity;
+    private Context mContext;
 
     //Create broadcast object
     BroadcastReceiver mybroadcast = new BroadcastReceiver() {
@@ -42,7 +41,7 @@ public class YHApplication extends Application implements Application.ActivityLi
             if(intent.getAction().equals(Intent.ACTION_SCREEN_ON)){
                 Log.i("[BroadcastReceiver]", "Screen ON");
                 if(currentActivity != null && !currentActivity.getClass().toString().contains("ConfirmPassCodeActivity")) {
-                    if(FileUtil.checkIsLocked()) {
+                    if(FileUtil.checkIsLocked(mContext)) {
 
                         Intent i = new Intent(getApplicationContext(), ConfirmPassCodeActivity.class);
                         i.putExtra("is_from_login", false);
@@ -68,6 +67,8 @@ public class YHApplication extends Application implements Application.ActivityLi
         // TODO Auto-generated method stub
         super.onCreate();
 
+        mContext = YHApplication.this;
+
         /*
          *  蒲公英平台，收集闪退日志
          */
@@ -89,7 +90,7 @@ public class YHApplication extends Application implements Application.ActivityLi
           /*
          *  基本目录结构
          */
-        File cachedFile = new File(String.format("%s/%s", FileUtil.basePath(), URLs.CACHED_DIRNAME));
+        File cachedFile = new File(String.format("%s/%s", FileUtil.basePath(mContext), URLs.CACHED_DIRNAME));
         if(!cachedFile.exists()) {
             cachedFile.mkdirs();
         }
@@ -98,6 +99,11 @@ public class YHApplication extends Application implements Application.ActivityLi
 
         registerReceiver(mybroadcast, new IntentFilter(Intent.ACTION_SCREEN_ON));
         registerReceiver(mybroadcast, new IntentFilter(Intent.ACTION_SCREEN_OFF));
+        Log.i("SD", "---------------");
+        // mounted
+        Log.i("SD", Environment.getExternalStorageState());
+        Log.i("SD", FileUtil.basePath(mContext));
+        Log.i("SD", "---------------");
     }
 
     @Override
@@ -167,7 +173,7 @@ public class YHApplication extends Application implements Application.ActivityLi
             String MD5String = FileUtil.MD5(zipStream);
             String keyName = String.format("%s_md5", fileName);
 
-            String userConfigPath = String.format("%s/%s", FileUtil.basePath(), URLs.USER_CONFIG_FILENAME);
+            String userConfigPath = String.format("%s/%s", FileUtil.basePath(mContext), URLs.USER_CONFIG_FILENAME);
             boolean isShouldUnZip = true;
             JSONObject userJSON = new JSONObject();
             if((new File(userConfigPath)).exists()) {
@@ -178,14 +184,14 @@ public class YHApplication extends Application implements Application.ActivityLi
             }
 
             if(isShouldUnZip) {
-                File file = new File(String.format("%s/%s", FileUtil.sharedPath(), fileName));
+                File file = new File(String.format("%s/%s", FileUtil.sharedPath(mContext), fileName));
                 if(file.exists()) {
                     Log.i("deleteDirectory", file.getAbsolutePath());
                     FileUtils.deleteDirectory(file);
                 }
 
                 zipStream = getApplicationContext().getAssets().open(zipName);
-                FileUtil.unZip(zipStream, FileUtil.sharedPath(), true);
+                FileUtil.unZip(zipStream, FileUtil.sharedPath(mContext), true);
                 Log.i("unZip", String.format("%s, %s", zipName, MD5String));
 
                 userJSON.put(keyName, MD5String);

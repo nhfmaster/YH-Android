@@ -109,7 +109,7 @@ public class MainActivity extends BaseActivity {
             mCurrentTab = (TabView) v;
             mCurrentTab.setActive(true);
 
-            mWebView.loadUrl(String.format("file:///%s/loading/loading.html", FileUtil.sharedPath()));
+            mWebView.loadUrl(String.format("file:///%s/loading/loading.html", FileUtil.sharedPath(mContext)));
 
             try {
                 String urlPath;
@@ -165,13 +165,10 @@ public class MainActivity extends BaseActivity {
             });
         }
 
-        /*
-         * JS 接口，暴露给JS的方法使用@JavascriptInterface装饰
-         */
         @JavascriptInterface
         public void storeTabIndex(final String pageName, final int tabIndex) {
             try {
-                String filePath = FileUtil.dirPath(URLs.CONFIG_DIRNAME, URLs.TABINDEX_CONFIG_FILENAME);
+                String filePath = FileUtil.dirPath(mContext, URLs.CONFIG_DIRNAME, URLs.TABINDEX_CONFIG_FILENAME);
 
                 JSONObject config = new JSONObject();
                 if ((new File(filePath).exists())) {
@@ -192,7 +189,7 @@ public class MainActivity extends BaseActivity {
         public int restoreTabIndex(final String pageName) {
             int tabIndex = 0;
             try {
-                String filePath = FileUtil.dirPath(URLs.CONFIG_DIRNAME, URLs.TABINDEX_CONFIG_FILENAME);
+                String filePath = FileUtil.dirPath(mContext, URLs.CONFIG_DIRNAME, URLs.TABINDEX_CONFIG_FILENAME);
 
                 JSONObject config = new JSONObject();
                 if ((new File(filePath).exists())) {

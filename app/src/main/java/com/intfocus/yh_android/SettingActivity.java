@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
+import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -40,6 +41,7 @@ public class SettingActivity extends BaseActivity {
     private TextView mAppVersion;
     private TextView mDeviceID;
     private TextView mApiDomain;
+    private TextView mStorageType;
     private Switch mLockSwitch;
     private TextView mChangeLock;
     private Button mLogout;
@@ -65,10 +67,11 @@ public class SettingActivity extends BaseActivity {
         mDeviceID = (TextView) findViewById(R.id.device_id);
         mApiDomain = (TextView) findViewById(R.id.api_domain);
         mChangeLock = (TextView) findViewById(R.id.change_lock);
+        mStorageType = (TextView) findViewById(R.id.storage_type);
         mLogout = (Button) findViewById(R.id.logout);
         mLockSwitch = (Switch) findViewById(R.id.lock_switch);
         screenLockInfo = "设置锁屏取消";
-        mLockSwitch.setChecked(FileUtil.checkIsLocked());
+        mLockSwitch.setChecked(FileUtil.checkIsLocked(mContext));
 
         mChangeLock.setOnClickListener(mChangeLockListener);
         mChangePWD.setOnClickListener(mChangePWDListener);
@@ -84,7 +87,7 @@ public class SettingActivity extends BaseActivity {
         super.onResume();  // Always call the superclass method first
         // Get the Camera instance as the activity achieves full user focus
 
-        mLockSwitch.setChecked(FileUtil.checkIsLocked());
+        mLockSwitch.setChecked(FileUtil.checkIsLocked(mContext));
     }
 
     private void initializeUI() {
@@ -105,6 +108,8 @@ public class SettingActivity extends BaseActivity {
             }
             mDeviceID.setText(TextUtils.split(android.os.Build.MODEL, " - ")[0]);
             mApiDomain.setText(URLs.HOST.replace("http://", ""));
+
+            mStorageType.setText(Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED) ? "SD卡" : "手机");
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -239,7 +244,7 @@ public class SettingActivity extends BaseActivity {
                 startActivity(InitPassCodeActivity.createIntent(getApplicationContext()));
             } else {
                 try {
-                    String userConfigPath = String.format("%s/%s", FileUtil.basePath(), URLs.USER_CONFIG_FILENAME);
+                    String userConfigPath = String.format("%s/%s", FileUtil.basePath(mContext), URLs.USER_CONFIG_FILENAME);
                     if((new File(userConfigPath)).exists()) {
                         JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
                         userJSON.put("use_gesture_password", false);
@@ -248,7 +253,7 @@ public class SettingActivity extends BaseActivity {
                         }
 
                         FileUtil.writeFile(userConfigPath, userJSON.toString());
-                        String settingsConfigPath = FileUtil.dirPath(URLs.CONFIG_DIRNAME, URLs.SETTINGS_CONFIG_FILENAME);
+                        String settingsConfigPath = FileUtil.dirPath(mContext, URLs.CONFIG_DIRNAME, URLs.SETTINGS_CONFIG_FILENAME);
                         FileUtil.writeFile(settingsConfigPath, userJSON.toString());
                     }
 
