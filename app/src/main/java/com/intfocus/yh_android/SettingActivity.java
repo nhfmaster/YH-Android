@@ -1,9 +1,7 @@
 package com.intfocus.yh_android;
 
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -20,9 +18,6 @@ import android.widget.Toast;
 import com.intfocus.yh_android.screen_lock.InitPassCodeActivity;
 import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.URLs;
-import com.pgyersdk.javabean.AppBean;
-import com.pgyersdk.update.PgyUpdateManager;
-import com.pgyersdk.update.UpdateManagerListener;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -203,77 +198,6 @@ public class SettingActivity extends BaseActivity {
         }
     };
 
-    /*
-     * 检测版本更新
-     * {"code":0,"message":"","data":{"lastBuild":"10","downloadURL":"","versionCode":"15","versionName":"0.1.5","appUrl":"http:\/\/www.pgyer.com\/yh-a","build":"10","releaseNote":"\u66f4\u65b0\u5230\u7248\u672c: 0.1.5(build10)"}}
-     */
-    private View.OnClickListener mCheckUpgradeListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            UpdateManagerListener updateManagerListener = new UpdateManagerListener() {
-
-                @Override
-                public void onUpdateAvailable(final String result) {
-
-                    String message = "服务器获取信息失败。";
-                    try {
-                        JSONObject response = new JSONObject(result);
-                        message = response.getString("message");
-                        if(message.isEmpty()) {
-                            JSONObject responseData = response.getJSONObject("data");
-                            if(responseData.has("releaseNote")) {
-                                message = responseData.getString("releaseNote");
-                            }
-
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                        message = e.getMessage();
-                    }
-
-                    // 将新版本信息封装到AppBean中
-                    final AppBean appBean = getAppBeanFromString(result);
-                    new AlertDialog.Builder(SettingActivity.this)
-                            .setTitle("版本更新")
-                            .setMessage(message.isEmpty() ? "没有升级简介" : message)
-                            .setPositiveButton(
-                                    "确定",
-                                    new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            startDownloadTask(SettingActivity.this, appBean.getDownloadURL());
-                                        }
-                                    })
-                            .setNegativeButton("取消",
-                                    new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            dialog.dismiss();
-                                        }
-                                    })
-                            .show();
-                }
-
-                @Override
-                public void onNoUpdateAvailable() {
-                    Toast.makeText(SettingActivity.this, "已是最新版本", Toast.LENGTH_SHORT).show();
-                }
-            };
-
-            PgyUpdateManager.register(SettingActivity.this, updateManagerListener);
-
-            /*
-             * 用户行为记录, 单独异常处理，不可影响用户体验
-             */
-            try {
-                logParams = new JSONObject();
-                logParams.put("action", "点击/设置页面/检测更新");
-                new Thread(mRunnableForLogger).start();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    };
 
     /*
      *  Switch 锁屏开关

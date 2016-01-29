@@ -28,6 +28,9 @@ import com.intfocus.yh_android.util.ApiHelper;
 import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.HttpUtil;
 import com.intfocus.yh_android.util.URLs;
+import com.pgyersdk.javabean.AppBean;
+import com.pgyersdk.update.PgyUpdateManager;
+import com.pgyersdk.update.UpdateManagerListener;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -404,6 +407,95 @@ public class BaseActivity extends Activity {
             e.printStackTrace();
         }
     }
+
+
+    /*
+     * 检测版本更新
+     * {"code":0,"message":"","data":{"lastBuild":"10","downloadURL":"","versionCode":"15","versionName":"0.1.5","appUrl":"http:\/\/www.pgyer.com\/yh-a","build":"10","releaseNote":"\u66f4\u65b0\u5230\u7248\u672c: 0.1.5(build10)"}}
+     */
+    protected View.OnClickListener mCheckUpgradeListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            checkUpgrade(true);
+
+            /*
+             * 用户行为记录, 单独异常处理，不可影响用户体验
+             */
+            try {
+                logParams = new JSONObject();
+                logParams.put("action", "点击/设置页面/检测更新");
+                new Thread(mRunnableForLogger).start();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
+    protected void checkUpgrade(final boolean isShowToast) {
+        UpdateManagerListener updateManagerListener = new UpdateManagerListener() {
+
+            @Override
+            public void onUpdateAvailable(final String result) {
+                Log.i("PGYER", result);
+
+                String message = "服务器获取信息失败。";
+                String versionCode = "-1", versionName = "-1";
+                try {
+                    JSONObject response = new JSONObject(result);
+                    message = response.getString("message");
+                    if(message.isEmpty()) {
+                        JSONObject responseData = response.getJSONObject("data");
+                        message = responseData.getString("releaseNote");
+                        versionCode = responseData.getString("versionCode");
+                        versionName = responseData.getString("versionName");
+
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    message = e.getMessage();
+                }
+
+                // 偶数时为正式版本
+                if(Integer.parseInt(versionCode) % 2 == 1) {
+                    if(isShowToast) {
+                        Toast.makeText(mContext, "已是最新版本", Toast.LENGTH_SHORT).show();
+                    }
+                    return ;
+                }
+
+
+                // 将新版本信息封装到AppBean中
+                final AppBean appBean = getAppBeanFromString(result);
+                new AlertDialog.Builder(mContext)
+                        .setTitle("版本更新")
+                        .setMessage(message.isEmpty() ? "没有升级简介" : message)
+                        .setPositiveButton(
+                                "确定",
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        startDownloadTask(BaseActivity.this, appBean.getDownloadURL());
+                                    }
+                                })
+                        .setNegativeButton("取消",
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                    }
+                                })
+                        .show();
+            }
+
+            @Override
+            public void onNoUpdateAvailable() {
+                Toast.makeText(mContext, "已是最新版本", Toast.LENGTH_SHORT).show();
+            }
+        };
+
+        PgyUpdateManager.register(BaseActivity.this, updateManagerListener);
+    }
+
 
     protected class JavaScriptBase {
         /*
