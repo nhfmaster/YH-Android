@@ -57,8 +57,19 @@ public class MainActivity extends BaseActivity {
         findViewById(R.id.setting).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, SettingActivity.class);
-                MainActivity.this.startActivity(intent);
+                Intent intent = new Intent(mContext, SettingActivity.class);
+                mContext.startActivity(intent);
+
+                /*
+                 * 用户行为记录, 单独异常处理，不可影响用户体验
+                 */
+                try {
+                    logParams = new JSONObject();
+                    logParams.put("action", "点击/主页面/设置");
+                    new Thread(mRunnableForLogger).start();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -140,6 +151,18 @@ public class MainActivity extends BaseActivity {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
+            /*
+             * 用户行为记录, 单独异常处理，不可影响用户体验
+             */
+            try {
+                logParams = new JSONObject();
+                logParams.put("action", "点击/主页面/标签栏");
+                logParams.put("obj_type", objectType);
+                new Thread(mRunnableForLogger).start();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     };
 
@@ -149,6 +172,7 @@ public class MainActivity extends BaseActivity {
          */
         @JavascriptInterface
         public void pageLink(final String bannerName, final String link, final int objectID) {
+
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -160,9 +184,23 @@ public class MainActivity extends BaseActivity {
                     intent.putExtra("link", link);
                     intent.putExtra("objectID", objectID);
                     intent.putExtra("objectType", objectType);
-                    MainActivity.this.startActivity(intent);
+                    mContext.startActivity(intent);
                 }
             });
+
+            /*
+             * 用户行为记录, 单独异常处理，不可影响用户体验
+             */
+            try {
+                logParams = new JSONObject();
+                logParams.put("action", "点击/主页面/浏览器");
+                logParams.put("obj_id", objectID);
+                logParams.put("obj_type", objectType);
+                logParams.put("obj_title", bannerName);
+                new Thread(mRunnableForLogger).start();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         @JavascriptInterface

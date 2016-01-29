@@ -13,6 +13,10 @@ import com.handmark.pulltorefresh.library.PullToRefreshWebView;
 import com.intfocus.yh_android.util.ApiHelper;
 import com.intfocus.yh_android.util.URLs;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -70,6 +74,17 @@ public class CommentActivity extends BaseActivity {
     private View.OnClickListener mOnBackListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            /*
+             * 用户行为记录, 单独异常处理，不可影响用户体验
+             */
+            try {
+                logParams = new JSONObject();
+                logParams.put("action", "返回/评论页面");
+                new Thread(mRunnableForLogger).start();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
             CommentActivity.this.onBackPressed();
         }
     };
@@ -89,16 +104,28 @@ public class CommentActivity extends BaseActivity {
                         params.put("user_name", user.getString("user_name"));
                         params.put("content", content);
                         Log.i("PARAMS", params.toString());
-                        ApiHelper.writeComment(user.getInt("user_id"), objectType, objectID, params);
-
+                        ApiHelper.writeComment(userID, objectType, objectID, params);
 
                         new Thread(mRunnableForDetecting).start();
-                    }
-                    catch (Exception e) {
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }
                 }
             }).start();
+
+            /*
+             * 用户行为记录, 单独异常处理，不可影响用户体验
+             */
+            try {
+                logParams = new JSONObject();
+                logParams.put("action", "发表/评论");
+                logParams.put("obj_title", bannerName);
+                new Thread(mRunnableForLogger).start();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 }

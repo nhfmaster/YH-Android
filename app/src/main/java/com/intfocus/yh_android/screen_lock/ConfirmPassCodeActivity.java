@@ -18,9 +18,11 @@ import android.widget.TextView;
 import com.intfocus.yh_android.LoginActivity;
 import com.intfocus.yh_android.MainActivity;
 import com.intfocus.yh_android.R;
+import com.intfocus.yh_android.util.ApiHelper;
 import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.URLs;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
@@ -224,10 +226,23 @@ public class ConfirmPassCodeActivity extends Activity {
                  *
                  */
                 if(is_from_login) {
-                    Intent intent = new Intent(ConfirmPassCodeActivity.this, MainActivity.class);
+                    Intent intent = new Intent(mContext, MainActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    ConfirmPassCodeActivity.this.startActivity(intent);
+                    mContext.startActivity(intent);
                 }
+
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            JSONObject params = new JSONObject();
+                            params.put("action", "解屏");
+                            ApiHelper.actionLog(mContext, params);
+                        } catch(JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }).start();
 
                 finish();
             } else {

@@ -89,11 +89,6 @@ public class HttpUtil {
     /**
      * ִ执行一个HTTP POST请求，返回请求响应的HTML
      *
-     * @param url         请求的URL地址
-     * @param params      请求的查询参数,可以为null
-     * @param charset     字符集
-     * @param pretty      是否美化
-     * @return            返回请求响应的HTML
      */
     //@throws UnsupportedEncodingException
     //@throws JSONException
@@ -172,6 +167,65 @@ public class HttpUtil {
             retMap.put("body", "{\"info\": \"用户名或密码错误\"}");
         }
         finally {
+        }
+        return retMap;
+    }
+
+
+    /**
+     * ִ执行一个HTTP POST请求，返回请求响应的HTML
+     *
+     */
+    public static Map<String, String> httpPost(String urlString, JSONObject params) {
+        Log.i("HttpMethod#Post2", urlString);
+
+        HttpParams httpParameters = new BasicHttpParams();
+        // Set the timeout in milliseconds until a connection is established.
+        // The default value is zero, that means the timeout is not used.
+        int timeoutConnection = 3000;
+        HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
+        // Set the default socket timeout (SO_TIMEOUT)
+        // in milliseconds which is the timeout for waiting for data.
+        int timeoutSocket = 5000;
+        HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
+
+        DefaultHttpClient client = new DefaultHttpClient(httpParameters);
+        HttpPost request = new HttpPost(urlString);
+
+        Map<String, String> retMap = new HashMap();
+        HttpResponse response = null;
+        if(params != null) {
+            try {
+                StringEntity se = new StringEntity(params.toString(), HTTP.UTF_8);
+                request.setEntity(se);
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
+        try {
+            request.setHeader("Accept", "application/json");
+            request.setHeader("Content-type", "application/json");
+            request.setHeader("User-Agent", HttpUtil.webViewUserAgent());
+            response = client.execute(request);
+
+            Header[] headers = response.getAllHeaders();
+            for (Header header : headers) {
+                retMap.put(header.getName(), header.getValue());
+                // Log.i("HEADER", String.format("Key : %s, Value: %s", header.getName(), header.getValue()));
+            }
+
+            int code = response.getStatusLine().getStatusCode();
+            retMap.put("code", String.format("%d", code));
+
+            ResponseHandler<String> handler = new BasicResponseHandler();
+            String responseBody = handler.handleResponse(response);
+            retMap.put("body", responseBody);
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+
+            retMap.put("code", "401");
+            retMap.put("body", "{\"info\": \"用户名或密码错误\"}");
         }
         return retMap;
     }

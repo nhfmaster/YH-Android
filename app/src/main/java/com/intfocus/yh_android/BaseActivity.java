@@ -54,6 +54,7 @@ public class BaseActivity extends Activity {
     protected String relativeAssetsPath;
     protected String urlStringForDetecting;
     protected String urlStringForLoading;
+    protected JSONObject logParams;
     private static ArrayList<Activity> mActivities = new ArrayList<Activity>();
 
     protected Context mContext;
@@ -200,6 +201,19 @@ public class BaseActivity extends Activity {
             }
             new Thread(mRunnableForDetecting).start();
 
+
+
+            /*
+             * 用户行为记录, 单独异常处理，不可影响用户体验
+             */
+            try {
+                logParams.put("action", "刷新/浏览器");
+                logParams.put("obj_title", urlString);
+                new Thread(mRunnableForLogger).start();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
             return null;
         }
         @Override
@@ -296,6 +310,13 @@ public class BaseActivity extends Activity {
                     Toast.makeText(BaseActivity.this, msg, Toast.LENGTH_SHORT).show();
                     break;
             }
+        }
+    };
+
+    Runnable mRunnableForLogger = new Runnable() {
+        @Override
+        public void run() {
+            ApiHelper.actionLog(mContext, logParams);
         }
     };
 

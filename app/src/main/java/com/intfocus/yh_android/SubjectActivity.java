@@ -112,15 +112,25 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
         mComment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(SubjectActivity.this, CommentActivity.class);
+                Intent intent = new Intent(mContext, CommentActivity.class);
                 intent.putExtra("bannerName", bannerName);
                 intent.putExtra("objectID", objectID);
                 intent.putExtra("objectType", objectType);
 
-                SubjectActivity.this.startActivity(intent);
+                mContext.startActivity(intent);
+
+                /*
+                 * 用户行为记录, 单独异常处理，不可影响用户体验
+                 */
+                try {
+                    logParams = new JSONObject();
+                    logParams.put("action", "点击/主题页面/评论");
+                    new Thread(mRunnableForLogger).start();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
-
 
         List<ImageView> colorViews = new ArrayList<ImageView>();
         colorViews.add((ImageView) findViewById(R.id.colorView0));
@@ -210,6 +220,18 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
     private View.OnClickListener mOnBackListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+
+            /*
+             * 用户行为记录, 单独异常处理，不可影响用户体验
+             */
+            try {
+                logParams = new JSONObject();
+                logParams.put("action", "返回/主题页面");
+                new Thread(mRunnableForLogger).start();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
             SubjectActivity.this.onBackPressed();
         }
     };
@@ -234,6 +256,19 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
 
                 ApiHelper.reportData(mContext, String.format("%d", groupID), reportID);
                 new Thread(mRunnableForDetecting).start();
+
+
+                /*
+                 * 用户行为记录, 单独异常处理，不可影响用户体验
+                 */
+                try {
+                    logParams = new JSONObject();
+                    logParams.put("action", "刷新/浏览器");
+                    logParams.put("obj_title", urlString);
+                    new Thread(mRunnableForLogger).start();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
             dealWithURL();
 

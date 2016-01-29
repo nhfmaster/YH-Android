@@ -258,6 +258,10 @@ public class InitPassCodeActivity extends Activity {
                             public void run() {
                                 try {
                                     ApiHelper.screenLock(userInfo.get("user_device_id").toString(), stringBuilder.toString(), true);
+
+                                    JSONObject params = new JSONObject();
+                                    params.put("action", "设置锁屏");
+                                    ApiHelper.actionLog(mContext, params);
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }

@@ -16,6 +16,8 @@ import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.URLs;
 import com.pgyersdk.update.PgyUpdateManager;
 
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -127,15 +129,26 @@ public class LoginActivity extends BaseActivity {
                         checkVersionUpgrade(assetsPath);
 
                         // 跳转至主界面
-                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                        Intent intent = new Intent(mContext, MainActivity.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        LoginActivity.this.startActivity(intent);
+                        mContext.startActivity(intent);
 
                         finish();
                     } else {
                         Toast.makeText(mContext, info, Toast.LENGTH_SHORT).show();
                     }
 
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                /*
+                 * 用户行为记录, 单独异常处理，不可影响用户体验
+                 */
+                try {
+                    logParams = new JSONObject();
+                    logParams.put("action", "登录");
+                    new Thread(mRunnableForLogger).start();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

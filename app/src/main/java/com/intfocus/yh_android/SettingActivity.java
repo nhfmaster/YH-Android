@@ -10,7 +10,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -70,7 +69,7 @@ public class SettingActivity extends BaseActivity {
         mStorageType = (TextView) findViewById(R.id.storage_type);
         mLogout = (Button) findViewById(R.id.logout);
         mLockSwitch = (Switch) findViewById(R.id.lock_switch);
-        screenLockInfo = "设置锁屏取消";
+        screenLockInfo = "取消锁屏成功";
         mLockSwitch.setChecked(FileUtil.checkIsLocked(mContext));
 
         mChangeLock.setOnClickListener(mChangeLockListener);
@@ -123,6 +122,17 @@ public class SettingActivity extends BaseActivity {
     private View.OnClickListener mOnBackListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            /*
+             * 用户行为记录, 单独异常处理，不可影响用户体验
+             */
+            try {
+                logParams = new JSONObject();
+                logParams.put("action", "返回/设置页面");
+                new Thread(mRunnableForLogger).start();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
             SettingActivity.this.onBackPressed();
         }
     };
@@ -146,6 +156,18 @@ public class SettingActivity extends BaseActivity {
             intent.setClass(SettingActivity.this, LoginActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);//它可以关掉所要到的界面中间的activity
             startActivity(intent);
+
+
+            /*
+             * 用户行为记录, 单独异常处理，不可影响用户体验
+             */
+            try {
+                logParams = new JSONObject();
+                logParams.put("action", "退出登录");
+                new Thread(mRunnableForLogger).start();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     };
 
@@ -155,8 +177,19 @@ public class SettingActivity extends BaseActivity {
     private View.OnClickListener mChangePWDListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            Intent intent = new Intent(SettingActivity.this, ResetPasswordActivity.class);
-            SettingActivity.this.startActivity(intent);
+            Intent intent = new Intent(mContext, ResetPasswordActivity.class);
+            mContext.startActivity(intent);
+
+            /*
+             * 用户行为记录, 单独异常处理，不可影响用户体验
+             */
+            try {
+                logParams = new JSONObject();
+                logParams.put("action", "点击/设置页面/修改密码");
+                new Thread(mRunnableForLogger).start();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     };
 
@@ -181,7 +214,6 @@ public class SettingActivity extends BaseActivity {
 
                 @Override
                 public void onUpdateAvailable(final String result) {
-                    Log.i("Upgrade", result);
 
                     String message = "服务器获取信息失败。";
                     try {
@@ -229,6 +261,17 @@ public class SettingActivity extends BaseActivity {
             };
 
             PgyUpdateManager.register(SettingActivity.this, updateManagerListener);
+
+            /*
+             * 用户行为记录, 单独异常处理，不可影响用户体验
+             */
+            try {
+                logParams = new JSONObject();
+                logParams.put("action", "点击/设置页面/检测更新");
+                new Thread(mRunnableForLogger).start();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     };
 
@@ -241,7 +284,7 @@ public class SettingActivity extends BaseActivity {
             // TODO Auto-generated method stub
             if(isChecked) {
 
-                startActivity(InitPassCodeActivity.createIntent(getApplicationContext()));
+                startActivity(InitPassCodeActivity.createIntent(mContext));
             } else {
                 try {
                     String userConfigPath = String.format("%s/%s", FileUtil.basePath(mContext), URLs.USER_CONFIG_FILENAME);
@@ -257,10 +300,21 @@ public class SettingActivity extends BaseActivity {
                         FileUtil.writeFile(settingsConfigPath, userJSON.toString());
                     }
 
-                    Toast.makeText(SettingActivity.this, screenLockInfo, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, screenLockInfo, Toast.LENGTH_SHORT).show();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+            }
+
+            /*
+             * 用户行为记录, 单独异常处理，不可影响用户体验
+             */
+            try {
+                logParams = new JSONObject();
+                logParams.put("action", String.format("点击/设置页面/%s锁屏", isChecked ? "开启" : "禁用"));
+                new Thread(mRunnableForLogger).start();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     };

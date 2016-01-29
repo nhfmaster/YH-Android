@@ -331,4 +331,28 @@ public class ApiHelper {
 			e.printStackTrace();
 		}
 	}
+
+	public static void actionLog(Context context, JSONObject param) {
+		try {
+			String userConfigPath = String.format("%s/%s", FileUtil.basePath(context), URLs.USER_CONFIG_FILENAME);
+			JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
+
+			param.put("user_id", userJSON.getInt("user_id"));
+			param.put("user_name", userJSON.getString("user_name"));
+			param.put("user_device_id", userJSON.getInt("user_device_id"));
+
+			JSONObject params = new JSONObject();
+			params.put("action_log", param);
+
+			JSONObject userParams = new JSONObject();
+			userParams.put("user_name", userJSON.getString("user_name"));
+			userParams.put("user_pass", userJSON.getString("password"));
+			params.put("user", userParams);
+
+			String urlString = String.format("%s%s", URLs.HOST, URLs.API_ACTION_LOG__PATH);
+			HttpUtil.httpPost(urlString, params);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+	}
 }
