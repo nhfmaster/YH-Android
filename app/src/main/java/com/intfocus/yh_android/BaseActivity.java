@@ -489,7 +489,9 @@ public class BaseActivity extends Activity {
 
             @Override
             public void onNoUpdateAvailable() {
-                Toast.makeText(mContext, "已是最新版本", Toast.LENGTH_SHORT).show();
+                if(isShowToast) {
+                    Toast.makeText(mContext, "已是最新版本", Toast.LENGTH_SHORT).show();
+                }
             }
         };
 

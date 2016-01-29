@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
-import android.os.Environment;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
@@ -23,6 +22,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.IOException;
 
 public class SettingActivity extends BaseActivity {
 
@@ -35,7 +35,7 @@ public class SettingActivity extends BaseActivity {
     private TextView mAppVersion;
     private TextView mDeviceID;
     private TextView mApiDomain;
-    private TextView mStorageType;
+    private TextView mCheckAssets;
     private Switch mLockSwitch;
     private TextView mChangeLock;
     private Button mLogout;
@@ -61,11 +61,12 @@ public class SettingActivity extends BaseActivity {
         mDeviceID = (TextView) findViewById(R.id.device_id);
         mApiDomain = (TextView) findViewById(R.id.api_domain);
         mChangeLock = (TextView) findViewById(R.id.change_lock);
-        mStorageType = (TextView) findViewById(R.id.storage_type);
+        mCheckAssets = (TextView) findViewById(R.id.check_assets);
         mLogout = (Button) findViewById(R.id.logout);
         mLockSwitch = (Switch) findViewById(R.id.lock_switch);
         screenLockInfo = "取消锁屏成功";
         mLockSwitch.setChecked(FileUtil.checkIsLocked(mContext));
+        mCheckAssets.setOnClickListener(mCheckAssetsListener);
 
         mChangeLock.setOnClickListener(mChangeLockListener);
         mChangePWD.setOnClickListener(mChangePWDListener);
@@ -102,8 +103,6 @@ public class SettingActivity extends BaseActivity {
             }
             mDeviceID.setText(TextUtils.split(android.os.Build.MODEL, " - ")[0]);
             mApiDomain.setText(URLs.HOST.replace("http://", ""));
-
-            mStorageType.setText(Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED) ? "SD卡" : "手机");
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -114,6 +113,9 @@ public class SettingActivity extends BaseActivity {
         return context.getString(stringId);
     }
 
+    /*
+     * 返回
+     */
     private View.OnClickListener mOnBackListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -195,6 +197,36 @@ public class SettingActivity extends BaseActivity {
         @Override
         public void onClick(View v) {
             Toast.makeText(SettingActivity.this, "TODO: 修改锁屏密码", Toast.LENGTH_SHORT).show();
+        }
+    };
+
+    /*
+     * 校正静态文件
+     */
+    private View.OnClickListener mCheckAssetsListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            try {
+                String userConfigPath = String.format("%s/%s", FileUtil.basePath(mContext), URLs.USER_CONFIG_FILENAME);
+                JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
+                userJSON.remove("loading_md5");
+                userJSON.remove("assets_md5");
+                FileUtil.writeFile(userConfigPath, userJSON.toString());
+
+                /*
+                 * 用户报表数据js文件存放在公共区域
+                 */
+                String headerPath = String.format("%s/%s", FileUtil.sharedPath(mContext), URLs.CACHED_HEADER_FILENAME);
+                new File(headerPath).delete();
+
+                FileUtil.checkAssets(mContext, "loading");
+                FileUtil.checkAssets(mContext, "assets");
+
+
+                Toast.makeText(mContext, "校正完成", Toast.LENGTH_SHORT).show();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     };
 

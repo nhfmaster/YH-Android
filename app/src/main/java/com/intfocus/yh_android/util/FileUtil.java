@@ -4,6 +4,7 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
+import org.apache.commons.io.FileUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -301,5 +302,46 @@ public class FileUtil {
 			zipEntry = zipInputStream.getNextEntry();
 		}
 		zipInputStream.close();
+	}
+
+
+	public static void checkAssets(Context mContext, String fileName) {
+		try {
+			String zipName = String.format("%s.zip", fileName);
+			InputStream zipStream = mContext.getApplicationContext().getAssets().open(zipName);
+			String MD5String = FileUtil.MD5(zipStream);
+			String keyName = String.format("%s_md5", fileName);
+
+			String userConfigPath = String.format("%s/%s", FileUtil.basePath(mContext), URLs.USER_CONFIG_FILENAME);
+			boolean isShouldUnZip = true;
+			JSONObject userJSON = new JSONObject();
+			if((new File(userConfigPath)).exists()) {
+				userJSON = FileUtil.readConfigFile(userConfigPath);
+				if(userJSON.has(keyName) && userJSON.getString(keyName).compareTo(MD5String) == 0) {
+					isShouldUnZip = false;
+				}
+			}
+
+			if(isShouldUnZip) {
+				File file = new File(String.format("%s/%s", FileUtil.sharedPath(mContext), fileName));
+				if(file.exists()) {
+					Log.i("deleteDirectory", file.getAbsolutePath());
+					FileUtils.deleteDirectory(file);
+				}
+
+				zipStream = mContext.getApplicationContext().getAssets().open(zipName);
+				FileUtil.unZip(zipStream, FileUtil.sharedPath(mContext), true);
+				Log.i("unZip", String.format("%s, %s", zipName, MD5String));
+
+				userJSON.put(keyName, MD5String);
+				FileUtil.writeFile(userConfigPath, userJSON.toString());
+			}
+
+			zipStream.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
 	}
 }

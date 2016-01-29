@@ -40,180 +40,188 @@
 
     </RelativeLayout>
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/actionBar"
-        android:orientation="vertical"
-        android:paddingBottom="18dp"
-        android:paddingLeft="8dp"
-        android:paddingRight="8dp"
-        android:paddingTop="18dp">
+        android:id="@+id/scrollView" >
 
-        <TextView
-            style="@style/SettingTitle"
-            android:text="用户信息" />
-
-        <RelativeLayout style="@style/SettingGroup">
-
-            <TextView
-                style="@style/SettingKey"
-                android:text="名称" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="18dp"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:paddingTop="18dp">
 
             <TextView
-                android:id="@+id/user_id"
-                style="@style/SettingValue"
-                android:text="用户名称/用户ID" />
-        </RelativeLayout>
+                style="@style/SettingTitle"
+                android:text="用户信息" />
 
-        <RelativeLayout style="@style/SettingGroup">
+            <RelativeLayout style="@style/SettingGroup">
 
-            <TextView
-                style="@style/SettingKey"
-                android:text="角色" />
+                <TextView
+                    style="@style/SettingKey"
+                    android:text="名称" />
 
-            <TextView
-                android:id="@+id/role_id"
-                style="@style/SettingValue"
-                android:text="角色ID" />
-        </RelativeLayout>
+                <TextView
+                    android:id="@+id/user_id"
+                    style="@style/SettingValue"
+                    android:text="用户名称/用户ID" />
+            </RelativeLayout>
 
-        <RelativeLayout style="@style/SettingGroup">
+            <RelativeLayout style="@style/SettingGroup">
 
-            <TextView
-                style="@style/SettingKey"
-                android:text="群组" />
+                <TextView
+                    style="@style/SettingKey"
+                    android:text="角色" />
 
-            <TextView
-                android:id="@+id/group_id"
-                style="@style/SettingValue"
-                android:text="群组ID" />
-        </RelativeLayout>
+                <TextView
+                    android:id="@+id/role_id"
+                    style="@style/SettingValue"
+                    android:text="角色ID" />
+            </RelativeLayout>
 
-        <RelativeLayout style="@style/SettingGroup">
+            <RelativeLayout style="@style/SettingGroup">
 
-            <TextView
-                android:id="@+id/change_pwd"
-                style="@style/SettingButton"
-                android:text="修改登陆密码" />
-        </RelativeLayout>
+                <TextView
+                    style="@style/SettingKey"
+                    android:text="群组" />
 
-        <View style="@style/Divider" />
+                <TextView
+                    android:id="@+id/group_id"
+                    style="@style/SettingValue"
+                    android:text="群组ID" />
+            </RelativeLayout>
 
-        <TextView
-            style="@style/SettingTitle"
-            android:text="应用信息" />
+            <RelativeLayout style="@style/SettingGroup">
 
-        <RelativeLayout style="@style/SettingGroup">
+                <TextView
+                    android:id="@+id/change_pwd"
+                    style="@style/SettingButton"
+                    android:text="修改登陆密码" />
+            </RelativeLayout>
 
-            <TextView
-                style="@style/SettingKey"
-                android:text="名称" />
-
-            <TextView
-                android:id="@+id/app_name"
-                style="@style/SettingValue"
-                android:text="应用名称" />
-        </RelativeLayout>
-
-        <RelativeLayout style="@style/SettingGroup">
+            <View style="@style/Divider" />
 
             <TextView
-                style="@style/SettingKey"
-                android:text="版本号" />
+                style="@style/SettingTitle"
+                android:text="应用信息" />
+
+            <RelativeLayout style="@style/SettingGroup">
+
+                <TextView
+                    style="@style/SettingKey"
+                    android:text="名称" />
+
+                <TextView
+                    android:id="@+id/app_name"
+                    style="@style/SettingValue"
+                    android:text="应用名称" />
+            </RelativeLayout>
+
+            <RelativeLayout style="@style/SettingGroup">
+
+                <TextView
+                    style="@style/SettingKey"
+                    android:text="版本号" />
+
+                <TextView
+                    android:id="@+id/app_version"
+                    style="@style/SettingValue"
+                    android:text="v1.0" />
+            </RelativeLayout>
+
+            <RelativeLayout style="@style/SettingGroup">
+
+                <TextView
+                    style="@style/SettingKey"
+                    android:text="设备型号" />
+
+                <TextView
+                    android:id="@+id/device_id"
+                    style="@style/SettingValue"
+                    android:text="设备型号" />
+            </RelativeLayout>
+
+            <RelativeLayout style="@style/SettingGroup">
+
+                <TextView
+                    style="@style/SettingKey"
+                    android:text="数据接口" />
+
+                <TextView
+                    android:id="@+id/api_domain"
+                    style="@style/SettingValue"
+                    android:text="域名" />
+            </RelativeLayout>
+
+            <RelativeLayout style="@style/SettingGroup">
+
+                <TextView
+                    android:id="@+id/check_assets"
+                    style="@style/SettingButton"
+                    android:text="校正" />
+
+                <TextView
+                    style="@style/SettingValue"
+                    android:layout_marginTop="5dp"
+                    android:textColor="@color/gray"
+                    android:textSize="12dp"
+                    android:text="若界面显示异常，可进行校正" />
+            </RelativeLayout>
+
+
+            <RelativeLayout style="@style/SettingGroup">
+
+                <TextView
+                    android:id="@+id/check_upgrade"
+                    style="@style/SettingButton"
+                    android:text="检测版本更新" />
+            </RelativeLayout>
+
+            <View style="@style/Divider" />
 
             <TextView
-                android:id="@+id/app_version"
-                style="@style/SettingValue"
-                android:text="v1.0" />
-        </RelativeLayout>
+                style="@style/SettingTitle"
+                android:text="安全策略" />
 
-        <RelativeLayout style="@style/SettingGroup">
+            <RelativeLayout style="@style/SettingGroup">
 
-            <TextView
-                style="@style/SettingKey"
-                android:text="设备型号" />
+                <TextView
+                    style="@style/SettingKey"
+                    android:text="启用锁屏" />
 
-            <TextView
-                android:id="@+id/device_id"
-                style="@style/SettingValue"
-                android:text="设备型号" />
-        </RelativeLayout>
+                <Switch
+                    android:id="@+id/lock_switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true" />
+            </RelativeLayout>
 
-        <RelativeLayout style="@style/SettingGroup">
+            <RelativeLayout style="@style/SettingGroup">
 
-            <TextView
-                style="@style/SettingKey"
-                android:text="数据接口" />
+                <TextView
+                    android:id="@+id/change_lock"
+                    style="@style/SettingButton"
+                    android:visibility="gone"
+                    android:text="修改锁屏密码" />
+            </RelativeLayout>
 
-            <TextView
-                android:id="@+id/api_domain"
-                style="@style/SettingValue"
-                android:text="域名" />
-        </RelativeLayout>
-
-        <RelativeLayout style="@style/SettingGroup">
-
-            <TextView
-                style="@style/SettingKey"
-                android:text="文件存储" />
-
-            <TextView
-                android:id="@+id/storage_type"
-                style="@style/SettingValue"
-                android:text="SD卡" />
-        </RelativeLayout>
-
-
-        <RelativeLayout style="@style/SettingGroup">
-
-            <TextView
-                android:id="@+id/check_upgrade"
-                style="@style/SettingButton"
-                android:text="检测版本更新" />
-        </RelativeLayout>
-
-        <View style="@style/Divider" />
-
-        <TextView
-            style="@style/SettingTitle"
-            android:text="安全策略" />
-
-        <RelativeLayout style="@style/SettingGroup">
-
-            <TextView
-                style="@style/SettingKey"
-                android:text="启用锁屏" />
-
-            <Switch
-                android:id="@+id/lock_switch"
-                android:layout_width="wrap_content"
+            <View
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentRight="true" />
-        </RelativeLayout>
+                android:layout_weight="1" />
 
-        <RelativeLayout style="@style/SettingGroup">
-
-            <TextView
-                android:id="@+id/change_lock"
-                style="@style/SettingButton"
-                android:visibility="gone"
-                android:text="修改锁屏密码" />
-        </RelativeLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1" />
-
-        <Button
-            android:id="@+id/logout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/logout_background"
-            android:text="退出登录"
-            android:textColor="@color/white" />
-
-    </LinearLayout>
+            <Button
+                android:id="@+id/logout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/logout_background"
+                android:text="退出登录"
+                android:textColor="@color/white" />
+        </LinearLayout>
+    </ScrollView>
 
 </RelativeLayout>
