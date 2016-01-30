@@ -217,8 +217,6 @@ public class ConfirmPassCodeActivity extends Activity {
             String userConfigPath = String.format("%s/%s", FileUtil.basePath(mContext), URLs.USER_CONFIG_FILENAME);
             JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
             if(stringBuilder.toString().compareTo(userJSON.getString("gesture_password")) == 0) {
-                Log.i("confirmPassword", "yes");
-
                 /*
                  * 出现验证界面，是由于两种原因
                  * 1. 打开app时，之前已登录用户设置了锁屏功能;验证成功，直接跳转至主界面
@@ -227,6 +225,7 @@ public class ConfirmPassCodeActivity extends Activity {
                  */
                 if(is_from_login) {
                     Intent intent = new Intent(mContext, MainActivity.class);
+                    intent.putExtra("fromActivity", this.getClass().toString());
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     mContext.startActivity(intent);
                 }

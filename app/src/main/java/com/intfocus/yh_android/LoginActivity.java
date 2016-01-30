@@ -129,6 +129,7 @@ public class LoginActivity extends BaseActivity {
 
                         // 跳转至主界面
                         Intent intent = new Intent(mContext, MainActivity.class);
+                        intent.putExtra("fromActivity", this.getClass().toString());
                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         mContext.startActivity(intent);
 

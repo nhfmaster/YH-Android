@@ -82,6 +82,12 @@ public class MainActivity extends BaseActivity {
         colorViews.add((ImageView) findViewById(R.id.colorView3));
         colorViews.add((ImageView) findViewById(R.id.colorView4));
         initColorView(colorViews);
+
+        Intent intent = getIntent();
+        if(intent.hasExtra("fromActivity") && intent.getStringExtra("fromActivity").contains("ConfirmPassCodeActivity")) {
+            Log.i("FromActivity", intent.getStringExtra("fromActivity"));
+            checkUpgrade(false);
+        }
     }
 
 
