@@ -87,17 +87,16 @@ public class InitPassCodeActivity extends Activity {
     }
 
     private void initCircleCanvas() {
-        // Canvasの作成:描画先のBitmapを与える
         Canvas canvas;
         canvas = new Canvas(bitmapBlack);
-        // 円（青）の描画
+
         Paint paint;
         paint = new Paint();
         paint.setColor(Color.BLACK);
         paint.setStyle(Paint.Style.FILL);
         paint.setAntiAlias(true);
         canvas.drawCircle(150, 150, 148, paint);
-        // 円（灰）の描画
+
         Canvas canvas2;
         canvas2 = new Canvas(bitmapGlay);
         Paint paint2;
@@ -212,11 +211,9 @@ public class InitPassCodeActivity extends Activity {
     }
 
     private void confirmPassword() {
-        // 確認に失敗したらもう一度最初から入力させる
         // 如果确认失败了再从头再输入
         switch (counter) {
             case 0:
-                //四つ目の円をしばらく表示するため
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -232,7 +229,7 @@ public class InitPassCodeActivity extends Activity {
                 break;
             default:
                 if (this.password == Integer.parseInt(stringBuilder.toString())) {
-                    // パスワード入力が完了したらpasswordをプリファレンスに保存
+
                     Toast.makeText(InitPassCodeActivity.this, "设置锁屏成功", Toast.LENGTH_SHORT).show();
                     // PrefUtil.setBool(getApplicationContext(), AppConfig.PREF_KEY_IS_LOCKED, true);
                     // PrefUtil.setInt(getApplicationContext(), AppConfig.PREF_KEY_PASSWORD, password);
@@ -274,7 +271,6 @@ public class InitPassCodeActivity extends Activity {
                     finish();
                     this.onBackPressed();
                 } else {
-                    // もう一度やり直し
                     text_main_pass.setText(TEXT_MAIN_MISTAKE);
                     text_sub_pass.setText(TEXT_SUB_MISTAKE);
                     counter = 0;

@@ -93,6 +93,17 @@ public class ResetPasswordActivity extends BaseActivity {
                                 }
                         );
                         alertDialog.show();
+
+                        /*
+                         * 用户行为记录, 单独异常处理，不可影响用户体验
+                         */
+                        try {
+                            logParams = new JSONObject();
+                            logParams.put("action", "重置密码");
+                            new Thread(mRunnableForLogger).start();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     } else {
                         alertDialog.setNegativeButton(
                                 "好的",
@@ -115,6 +126,21 @@ public class ResetPasswordActivity extends BaseActivity {
                 Toast.makeText(ResetPasswordActivity.this, "请退出，重新登录，再尝试", Toast.LENGTH_SHORT).show();
             }
 
+        }
+
+        @JavascriptInterface
+        public void jsException(final String ex) {
+            /*
+             * 用户行为记录, 单独异常处理，不可影响用户体验
+             */
+            try {
+                logParams = new JSONObject();
+                logParams.put("action", "JS异常");
+                logParams.put("obj_title", String.format("重置密码页面/%s", ex));
+                new Thread(mRunnableForLogger).start();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 }

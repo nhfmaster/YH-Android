@@ -102,6 +102,21 @@ public class LoginActivity extends BaseActivity {
             if (isUpgrade) {
                 ApiHelper.clearResponseHeader(URLs.LOGIN_PATH, assetsPath);
                 FileUtil.writeFile(versionConfigPath, packageInfo.versionName);
+
+                String userConfigPath = String.format("%s/%s", FileUtil.basePath(mContext), URLs.USER_CONFIG_FILENAME);
+                JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
+                userJSON.remove("loading_md5");
+                userJSON.remove("assets_md5");
+                FileUtil.writeFile(userConfigPath, userJSON.toString());
+
+                /*
+                 * 用户报表数据js文件存放在公共区域
+                 */
+                String headerPath = String.format("%s/%s", FileUtil.sharedPath(mContext), URLs.CACHED_HEADER_FILENAME);
+                new File(headerPath).delete();
+
+                FileUtil.checkAssets(mContext, "loading");
+                FileUtil.checkAssets(mContext, "assets");
             }
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
@@ -154,6 +169,21 @@ public class LoginActivity extends BaseActivity {
                 }
             } else {
                 Toast.makeText(mContext, "请输入用户名与密码", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        @JavascriptInterface
+        public void jsException(final String ex) {
+            /*
+             * 用户行为记录, 单独异常处理，不可影响用户体验
+             */
+            try {
+                logParams = new JSONObject();
+                logParams.put("action", "JS异常");
+                logParams.put("obj_title", String.format("登录页面/%s", ex));
+                new Thread(mRunnableForLogger).start();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }

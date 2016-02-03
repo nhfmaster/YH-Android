@@ -127,5 +127,22 @@ public class CommentActivity extends BaseActivity {
                 e.printStackTrace();
             }
         }
+
+        @JavascriptInterface
+        public void jsException(final String ex) {
+            /*
+             * 用户行为记录, 单独异常处理，不可影响用户体验
+             */
+            try {
+                logParams = new JSONObject();
+                logParams.put("action", "JS异常");
+                logParams.put("obj_id", objectID);
+                logParams.put("obj_type", objectType);
+                logParams.put("obj_title", String.format("评论页面/%s/%s", bannerName, ex));
+                new Thread(mRunnableForLogger).start();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

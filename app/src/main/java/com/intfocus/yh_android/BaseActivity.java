@@ -507,5 +507,6 @@ public class BaseActivity extends Activity {
         public void refreshBrowser() {
             new Thread(mRunnableForDetecting).start();
         }
+
     }
 }

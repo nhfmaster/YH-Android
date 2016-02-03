@@ -248,5 +248,21 @@ public class MainActivity extends BaseActivity {
 
             return tabIndex < 0 ? 0 : tabIndex;
         }
+
+        @JavascriptInterface
+        public void jsException(final String ex) {
+            /*
+             * 用户行为记录, 单独异常处理，不可影响用户体验
+             */
+            try {
+                logParams = new JSONObject();
+                logParams.put("action", "JS异常");
+                logParams.put("obj_type", objectType);
+                logParams.put("obj_title", String.format("主页面/%s", ex));
+                new Thread(mRunnableForLogger).start();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
