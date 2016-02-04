@@ -137,7 +137,6 @@ public class LoginActivity extends BaseActivity {
                 try {
                     String info = ApiHelper.authentication(mContext, username, URLs.MD5(password));
                     if (info.compareTo("success") == 0) {
-
                         // 检测用户空间，版本是否升级
                         assetsPath = FileUtil.dirPath(mContext, URLs.HTML_DIRNAME);
                         checkVersionUpgrade(assetsPath);

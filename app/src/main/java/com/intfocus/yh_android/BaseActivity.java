@@ -58,7 +58,7 @@ public class BaseActivity extends Activity {
     protected String urlStringForDetecting;
     protected String urlStringForLoading;
     protected JSONObject logParams;
-    private static ArrayList<Activity> mActivities = new ArrayList<Activity>();
+    protected static ArrayList<Activity> mActivities = new ArrayList<Activity>();
 
     protected Context mContext;
 

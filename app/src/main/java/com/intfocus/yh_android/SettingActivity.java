@@ -119,17 +119,6 @@ public class SettingActivity extends BaseActivity {
     private View.OnClickListener mOnBackListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            /*
-             * 用户行为记录, 单独异常处理，不可影响用户体验
-             */
-            try {
-                logParams = new JSONObject();
-                logParams.put("action", "返回/设置页面");
-                new Thread(mRunnableForLogger).start();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
             SettingActivity.this.onBackPressed();
         }
     };

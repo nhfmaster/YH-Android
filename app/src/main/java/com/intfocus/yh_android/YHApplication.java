@@ -38,19 +38,24 @@ public class YHApplication extends Application implements Application.ActivityLi
 
             if(intent.getAction().equals(Intent.ACTION_SCREEN_ON)){
                 Log.i("[BroadcastReceiver]", "Screen ON");
-                if(currentActivity != null && !currentActivity.getClass().toString().contains("ConfirmPassCodeActivity")) {
-                    if(FileUtil.checkIsLocked(mContext)) {
+                Log.i("mActivities", String.format("%d", BaseActivity.mActivities.size()));
 
-                        Intent i = new Intent(getApplicationContext(), ConfirmPassCodeActivity.class);
-                        i.putExtra("is_from_login", false);
-                        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(i);
-                    } else {
-                        Log.i("[BroadcastReceiver]", "no setup screen lock function");
-                    }
-
+                if(BaseActivity.mActivities.size() == 0) {
+                    Log.i("[BroadcastReceiver]", "Do Nothing");
                 } else {
-                    Log.i("[BroadcastReceiver]", "already in ConfirmPassCodeActivity view");
+                    if (currentActivity != null && !currentActivity.getClass().toString().contains("ConfirmPassCodeActivity")) {
+                        if (FileUtil.checkIsLocked(mContext)) {
+                            Intent i = new Intent(getApplicationContext(), ConfirmPassCodeActivity.class);
+                            i.putExtra("is_from_login", false);
+                            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(i);
+                        } else {
+                            Log.i("[BroadcastReceiver]", "no setup screen lock function");
+                        }
+
+                    } else {
+                        Log.i("[BroadcastReceiver]", "already in ConfirmPassCodeActivity view");
+                    }
                 }
             }
             else if(intent.getAction().equals(Intent.ACTION_SCREEN_OFF)){

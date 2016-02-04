@@ -237,6 +237,17 @@ public class ConfirmPassCodeActivity extends Activity {
                             JSONObject params = new JSONObject();
                             params.put("action", "解屏");
                             ApiHelper.actionLog(mContext, params);
+
+                            String userConfigPath = String.format("%s/%s", FileUtil.basePath(mContext), URLs.USER_CONFIG_FILENAME);
+                            JSONObject user = FileUtil.readConfigFile(userConfigPath);
+
+                            String info = ApiHelper.authentication(mContext, user.getString("user_num"), user.getString("password"));
+                            if (info.compareTo("success") != 0) {
+                                Intent intent = new Intent();
+                                intent.setClass(ConfirmPassCodeActivity.this, LoginActivity.class);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);//它可以关掉所要到的界面中间的activity
+                                startActivity(intent);
+                            }
                         } catch(JSONException e) {
                             e.printStackTrace();
                         }

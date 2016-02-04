@@ -43,7 +43,6 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
     private String bannerName, link;
     private int objectID;
     private int objectType;
-
     private int groupID, userID;
 
     @Override
@@ -220,18 +219,6 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
     private View.OnClickListener mOnBackListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-
-            /*
-             * 用户行为记录, 单独异常处理，不可影响用户体验
-             */
-            try {
-                logParams = new JSONObject();
-                logParams.put("action", "返回/主题页面");
-                new Thread(mRunnableForLogger).start();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
             SubjectActivity.this.onBackPressed();
         }
     };
@@ -336,7 +323,7 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
                 logParams.put("action", "JS异常");
                 logParams.put("obj_id", objectID);
                 logParams.put("obj_type", objectType);
-                logParams.put("obj_title", String.format("%s/%s", bannerName, ex));
+                logParams.put("obj_title", String.format("主题页面/%s/%s", bannerName, ex));
                 new Thread(mRunnableForLogger).start();
             } catch (Exception e) {
                 e.printStackTrace();
