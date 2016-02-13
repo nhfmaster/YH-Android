@@ -1,66 +1,83 @@
-## 签名
+[Android 开发实践：屏幕旋转的处理](http://www.linuxidc.com/Linux/2013-09/90534.htm)
 
-* 签名档: ./yh.key-store
-* 密码: 123456
-* 别名: yh
-* 密码: 123456
+1. 不做任何处理的情况下
 
-## 蒲公英
+    默认情况下，当用户手机的重力感应器打开后，旋转屏幕方向，会导致 app 的当前 activity 发生 onDestroy-> onCreate，会重新构造当前 activity 和界面布局，很多横屏 / 竖屏的布局如果没有很好的设计的话，转换为竖屏 / 横屏后，会显示地很难看。
 
-* [安装链接](http://www.pgyer.com/yh-a)
-* 扫码安装
+    如果想很好地支持屏幕旋转，则建议在 res 中建立 layout-land 和 layout-port 两个文件夹，把横屏和竖屏的布局文件放入对应的 layout 文件夹中。
 
-	![QR Code](http://static.pgyer.com/app/qrcode/yh-a)
+2. 如何设置固定的屏幕方向
 
-## 更新日志
+    在 AndroidManifest.xml 对应的 activity 属性中，添加：
 
-* 16/02/13
+        android:screenOrientation="landscape" // 横屏
+        android:screenOrientation="portrait"  // 竖屏
 
-	* Add: 主题页面横屏时隐藏标题栏、导航栏
-	
-* 16/02/04
+    默认的情况下，应用启动后，会固定为指定的屏幕方向，即使屏幕旋转，Activity 也不会出现销毁或者转向等任何反应。
 
-	* Fixed: 永辉Android 解屏逻辑问题
-	
-		待机再激活时，要检测activity数量，如果为0，则表示进入后台，无为；大于0，进入解屏界面
+3. 强制开启屏幕旋转效果
+
+    如果手机没有开启重力感应器或者在 AndroidManifest.xml 中设置了 android:screenOrientation，该 Activity 不会响应屏幕旋转事件。
+
+    如果在上述情况下，依然希望 Activity 能响应屏幕旋转，则添加如下代码：
+
+        // activity 的 onCreate 函数中
+        this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
+
+4. 屏幕旋转时，不希望 activity 被销毁
+
+    如果希望捕获屏幕旋转事件，并且不希望 activity 被销毁，方法如下：
+
+    * （1）在 AndroidManifest.xml 对应的 activity 属性中，添加：
+
+            android:configChanges="orientation|screenSize"
+
+    * （2）在对应的 activity 中，重载函数 onConfigurationChanged
+
+            @Override
+            public void onConfigurationChanged(Configuration newConfig) {
+                super.onConfigurationChanged(newConfig);
+            }
+
+    在该函数中可以通过两种方法检测当前的屏幕状态：
+
+    * 第一种：
+
+        判断 newConfig.orientation 是否等于 Configuration.ORIENTATION_LANDSCAPE，Configuration.ORIENTATION_PORTRAIT
+
+        当然，这种方法只能判断屏幕是否为横屏，或者竖屏，不能获取具体的旋转角度。
+
+    * 第二种：
+
+        调用 this.getWindowManager().getDefaultDisplay().getRotation();
+
+        该函数的返回值，有如下四种：
+
+        Surface.ROTATION_0，Surface.ROTATION_90，Surface.ROTATION_180，Surface.ROTATION_270
+
+        其中，Surface.ROTATION_0 表示的是手机竖屏方向向上，后面几个以此为基准依次以顺时针 90 度递增。
+
+        *这种方法的 Bug*
+
+        最近发现这种方法有一个 Bug，它只能一次旋转 90 度，如果你突然一下子旋转 180 度，onConfigurationChanged 函数不会被调用。
+
+5. 获取屏幕旋转方向
+
+		this.getResources().getConfiguration().orientation
 		
-	* Fixed: 永辉Android 触屏同时验证用户信息
-	
-* 16/02/03 
+6. 横屏时隐藏导航栏，进入全屏状态
 
-    * Add: 客户端JS异常，本地提交至服务器
-    
-* 16/01/30
+		Boolean isLandscape = (config.orientation == Configuration.ORIENTATION_LANDSCAPE);
 
-    * Fixed: 解屏进入主界面，检测版本升级
-
-    	通过登录界面，进入主界面，则不再测试
-
-* 16/01/29  
-
-	* Fixed: 文件存储使用手机空间，不是所有机弄都支持SD卡
-	* Add: 设置 -> 校正
-		
-		安装时，可能由于用户空间不足，导致静态压缩文件解压失败，该功能会重新解压静态文件
-		
-	* Add: 用户行为日志
-	* Add: 设置 -> 检测版本升级;判断版本号是否为偶数,以便内测
-		
-
-* 16/01/28
-
-    * Fixed: 挂载SD卡时，使用手机空间
-    
-    	用户手机没有挂载SD卡时，文件读写使用手机空间
-    	设置界面，可以查看文件存储类型
-    
-* 16/01/27
-
-    * Add: 实现浏览器下拉刷新
-    	* [chrisbanes/Android-PullToRefresh](https://github.com/chrisbanes/Android-PullToRefresh)
-    	* [Android 之 PullToRefresh 的使用方法](http://www.nljb.net/default/Android%E4%B9%8BPullToRefresh%E7%9A%84%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95/)
-    	* [Android 之 PullToRefresh(ListView 、GridView 、WebView) 使用详解和总结](http://blog.csdn.net/u011068702/article/details/48688281)
-    * Optimized: 应用图标，使用第三方网站生成
-    	* [Launcher icons](http://android-ui-utils.googlecode.com/hg/asset-studio/dist/icons-launcher.html)
-    * Fixed: apk签名档被误删除，主要原因是随便存放，现在已放入项目，与代码同步保存
-    	* [Android 手机出现 "已安装了存在签名冲突的同名数据包" 的原因及解决办法](http://blog.csdn.net/dyllove98/article/details/8830264)
+        bannerView.setVisibility(isLandscape ? View.GONE : View.VISIBLE);
+        if (isLandscape) {
+            WindowManager.LayoutParams lp = getWindow().getAttributes();
+            lp.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
+            getWindow().setAttributes(lp);
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        } else {
+            WindowManager.LayoutParams attr = getWindow().getAttributes();
+            attr.flags &= (~WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            getWindow().setAttributes(attr);
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        }
