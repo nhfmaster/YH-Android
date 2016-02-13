@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.intfocus.yh_android"
-    android:versionCode="54"
-    android:versionName="1.2.4" >
+    android:versionCode="55"
+    android:versionName="1.2.5" >
 
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.VIBRATE" />
@@ -32,8 +32,8 @@
 
         <activity
             android:name=".LoginActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"
+            android:screenOrientation="portrait"
             android:theme="@style/FullscreenTheme" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -43,24 +43,32 @@
         </activity>
         <activity
             android:name=".MainActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity
             android:name=".SettingActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity
             android:name=".SubjectActivity"
+            android:configChanges="orientation|screenSize"
+            android:screenOrientation="fullSensor"
             android:theme="@style/AppTheme" />
         <activity
             android:name=".CommentActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity
             android:name=".ResetPasswordActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity
             android:name=".screen_lock.InitPassCodeActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity
             android:name=".screen_lock.ConfirmPassCodeActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
 
         <!-- 必选-->

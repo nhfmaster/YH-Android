@@ -2,6 +2,7 @@ package com.intfocus.yh_android;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -11,6 +12,7 @@ import android.util.Log;
 import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,6 +46,7 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
     private int objectID;
     private int objectType;
     private int groupID, userID;
+    private RelativeLayout bannerView;
 
     @Override
     @SuppressLint("SetJavaScriptEnabled")
@@ -66,6 +69,7 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
             groupID = -2;
         }
 
+        bannerView = (RelativeLayout) findViewById(R.id.actionBar);
         mTitle = (TextView) findViewById(R.id.title);
         mPDFView = (PDFView) findViewById(R.id.pdfview);
         mComment = (ImageView) findViewById(R.id.comment);
@@ -89,8 +93,7 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 String label = simpleDateFormat.format(System.currentTimeMillis());
                 // 显示最后更新的时间
-                refreshView.getLoadingLayoutProxy()
-                        .setLastUpdatedLabel(label);
+                refreshView.getLoadingLayoutProxy().setLastUpdatedLabel(label);
             }
         });
 
@@ -140,6 +143,20 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
         initColorView(colorViews);
     }
 
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        if(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            bannerView.setVisibility(View.GONE);
+        }
+        else { //if(newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            bannerView.setVisibility(View.VISIBLE);
+        }
+
+        dealWithURL();
+    }
+
     private void dealWithURL() {
         if (isInnerLink) {
             reportID = TextUtils.split(link, "/")[3];
@@ -182,7 +199,7 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
     protected Handler mHandlerForPDF = new Handler() {
         public void handleMessage(Message message) {
 
-            Log.i("PDF", pdfFile.getAbsolutePath());
+            //Log.i("PDF", pdfFile.getAbsolutePath());
             if (pdfFile.exists()) {
                 mPDFView.fromFile(pdfFile)
                         .showMinimap(true)
