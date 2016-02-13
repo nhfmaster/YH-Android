@@ -10,6 +10,7 @@ import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -73,6 +74,7 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
         mTitle = (TextView) findViewById(R.id.title);
         mPDFView = (PDFView) findViewById(R.id.pdfview);
         mComment = (ImageView) findViewById(R.id.comment);
+        mComment.setOnClickListener(mOnCommentLister);
         mPDFView.setVisibility(View.INVISIBLE);
 
         pullToRefreshWebView = (PullToRefreshWebView) findViewById(R.id.webview);
@@ -109,30 +111,8 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
         isInnerLink = !(link.startsWith("http://") || link.startsWith("https://"));
 
         mTitle.setText(bannerName);
-        dealWithURL();
+        checkInterfaceOrientation(this.getResources().getConfiguration());
 
-        mComment.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(mContext, CommentActivity.class);
-                intent.putExtra("bannerName", bannerName);
-                intent.putExtra("objectID", objectID);
-                intent.putExtra("objectType", objectType);
-
-                mContext.startActivity(intent);
-
-                /*
-                 * 用户行为记录, 单独异常处理，不可影响用户体验
-                 */
-                try {
-                    logParams = new JSONObject();
-                    logParams.put("action", "点击/主题页面/评论");
-                    new Thread(mRunnableForLogger).start();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
 
         List<ImageView> colorViews = new ArrayList<ImageView>();
         colorViews.add((ImageView) findViewById(R.id.colorView0));
@@ -147,11 +127,24 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
-        if(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            bannerView.setVisibility(View.GONE);
-        }
-        else { //if(newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            bannerView.setVisibility(View.VISIBLE);
+        // 横屏时隐藏标题栏、导航栏
+        checkInterfaceOrientation(newConfig);
+    }
+
+    private void checkInterfaceOrientation(Configuration config) {
+        Boolean isLandscape = (config.orientation == Configuration.ORIENTATION_LANDSCAPE);
+
+        bannerView.setVisibility(isLandscape ? View.GONE : View.VISIBLE);
+        if (isLandscape) {
+            WindowManager.LayoutParams lp = getWindow().getAttributes();
+            lp.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
+            getWindow().setAttributes(lp);
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        } else {
+            WindowManager.LayoutParams attr = getWindow().getAttributes();
+            attr.flags &= (~WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            getWindow().setAttributes(attr);
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         }
 
         dealWithURL();
@@ -230,6 +223,29 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
 
             Message message = mHandlerForPDF.obtainMessage();
             mHandlerForPDF.sendMessage(message);
+        }
+    };
+
+    private View.OnClickListener mOnCommentLister = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            Intent intent = new Intent(mContext, CommentActivity.class);
+            intent.putExtra("bannerName", bannerName);
+            intent.putExtra("objectID", objectID);
+            intent.putExtra("objectType", objectType);
+
+            mContext.startActivity(intent);
+
+                /*
+                 * 用户行为记录, 单独异常处理，不可影响用户体验
+                 */
+            try {
+                logParams = new JSONObject();
+                logParams.put("action", "点击/主题页面/评论");
+                new Thread(mRunnableForLogger).start();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     };
 
