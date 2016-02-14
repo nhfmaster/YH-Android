@@ -7,13 +7,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.Log;
 
 import com.intfocus.yh_android.screen_lock.ConfirmPassCodeActivity;
 import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.URLs;
 import com.pgyersdk.crash.PgyCrashManager;
+import com.squareup.leakcanary.LeakCanary;
 
 import org.OpenUDID.OpenUDID_manager;
 
@@ -27,47 +27,29 @@ public class YHApplication extends Application implements Application.ActivityLi
     private Activity currentActivity;
     private Context mContext;
 
-    //Create broadcast object
-    BroadcastReceiver mybroadcast = new BroadcastReceiver() {
+    /*
+     *  手机待机再激活时发送开屏广播
+     */
+    BroadcastReceiver broadcastScreenOnAndOff = new BroadcastReceiver() {
 
-        //When Event is published, onReceive method is called
         @Override
         public void onReceive(Context context, Intent intent) {
-            // TODO Auto-generated method stub
-            Log.i("[BroadcastReceiver]", "MyReceiver");
 
-            if(intent.getAction().equals(Intent.ACTION_SCREEN_ON)){
-                Log.i("[BroadcastReceiver]", "Screen ON");
-                Log.i("mActivities", String.format("%d", BaseActivity.mActivities.size()));
+            if (intent.getAction().equals(Intent.ACTION_SCREEN_ON) && // 开屏状态
+                BaseActivity.mActivities.size() > 0 && // 应用活动Activity数量大于零
+                currentActivity != null && !currentActivity.getClass().toString().contains("ConfirmPassCodeActivity") && // 当前活动的Activity非解锁界面
+                FileUtil.checkIsLocked(mContext)) { // 应用处于登录状态，并且开启了密码锁
 
-                if(BaseActivity.mActivities.size() == 0) {
-                    Log.i("[BroadcastReceiver]", "Do Nothing");
-                } else {
-                    if (currentActivity != null && !currentActivity.getClass().toString().contains("ConfirmPassCodeActivity")) {
-                        if (FileUtil.checkIsLocked(mContext)) {
-                            Intent i = new Intent(getApplicationContext(), ConfirmPassCodeActivity.class);
-                            i.putExtra("is_from_login", false);
-                            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(i);
-                        } else {
-                            Log.i("[BroadcastReceiver]", "no setup screen lock function");
-                        }
-
-                    } else {
-                        Log.i("[BroadcastReceiver]", "already in ConfirmPassCodeActivity view");
-                    }
-                }
+                Intent i = new Intent(getApplicationContext(), ConfirmPassCodeActivity.class);
+                i.putExtra("is_from_login", false);
+                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(i);
             }
-            else if(intent.getAction().equals(Intent.ACTION_SCREEN_OFF)){
-                Log.i("[BroadcastReceiver]", "Screen OFF");
-            }
-
         }
     };
 
     @Override
     public void onCreate() {
-        // TODO Auto-generated method stub
         super.onCreate();
 
         mContext = YHApplication.this;
@@ -90,7 +72,7 @@ public class YHApplication extends Application implements Application.ActivityLi
         FileUtil.checkAssets(mContext, "loading");
         FileUtil.checkAssets(mContext, "assets");
 
-          /*
+        /*
          *  基本目录结构
          */
         File cachedFile = new File(String.format("%s/%s", FileUtil.basePath(mContext), URLs.CACHED_DIRNAME));
@@ -100,13 +82,16 @@ public class YHApplication extends Application implements Application.ActivityLi
 
         registerActivityLifecycleCallbacks(this);
 
-        registerReceiver(mybroadcast, new IntentFilter(Intent.ACTION_SCREEN_ON));
-        registerReceiver(mybroadcast, new IntentFilter(Intent.ACTION_SCREEN_OFF));
-        Log.i("SD", "---------------");
-        // mounted
-        Log.i("SD", Environment.getExternalStorageState());
-        Log.i("SD", FileUtil.basePath(mContext));
-        Log.i("SD", "---------------");
+        /*
+         *  手机待机再激活时发送开屏广播
+         */
+        registerReceiver(broadcastScreenOnAndOff, new IntentFilter(Intent.ACTION_SCREEN_ON));
+        //registerReceiver(broadcastScreenOnAndOff, new IntentFilter(Intent.ACTION_SCREEN_OFF));
+
+        /*
+         *  监测内存泄漏
+         */
+        LeakCanary.install(this);
     }
 
     @Override
