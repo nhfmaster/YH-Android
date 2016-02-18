@@ -1,6 +1,8 @@
 package com.intfocus.yh_android.util;
 
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
@@ -31,14 +33,18 @@ public class ApiHelper {
 
 		String urlString = String.format(URLs.API_USER_PATH, URLs.HOST, "android", username, password);
 		try {
-    		Map<String, String> device = new HashMap();
+    		JSONObject device = new JSONObject();
     		device.put("name", android.os.Build.MODEL);
     		device.put("platform", "android");
     		device.put("os", android.os.Build.MODEL);
     		device.put("os_version", Build.VERSION.RELEASE);
     		device.put("uuid", OpenUDID_manager.getOpenUDID());
-    		Map<String, Map<String, String>> params = new HashMap();
-    		params.put("device", device);
+
+			PackageInfo packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+
+			JSONObject params = new JSONObject();
+			params.put("device", device);
+			params.put("app_version", String.format("a%s", packageInfo.versionName));
     		
 			Map<String, String> response = HttpUtil.httpPost(urlString, params);
 
@@ -341,6 +347,9 @@ public class ApiHelper {
 			param.put("user_name", userJSON.getString("user_name"));
 			param.put("user_device_id", userJSON.getInt("user_device_id"));
 
+			PackageInfo packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+			param.put("app_version", String.format("a%s", packageInfo.versionName));
+
 			JSONObject params = new JSONObject();
 			params.put("action_log", param);
 
@@ -352,6 +361,8 @@ public class ApiHelper {
 			String urlString = String.format("%s%s", URLs.HOST, URLs.API_ACTION_LOG__PATH);
 			HttpUtil.httpPost(urlString, params);
 		} catch (JSONException e) {
+			e.printStackTrace();
+		} catch (PackageManager.NameNotFoundException e) {
 			e.printStackTrace();
 		}
 	}
