@@ -654,11 +654,18 @@ public class BaseActivity extends Activity {
 
                     FileUtil.unZip(zipStream, sharedPath, true);
 
+                    String userConfigPath = String.format("%s/%s", FileUtil.basePath(mContext), URLs.USER_CONFIG_FILENAME);
+                    JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
+                    userJSON.put("local_assets_md5", userJSON.getString("assets_md5"));
+                    FileUtil.writeFile(userConfigPath, userJSON.toString());
+
                     if(mWebView == null) {
                         mWebView.reload();
                     }
 
                 } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
