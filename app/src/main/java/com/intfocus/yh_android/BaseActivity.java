@@ -3,6 +3,7 @@ package com.intfocus.yh_android;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
@@ -10,6 +11,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PowerManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -32,11 +34,18 @@ import com.pgyersdk.javabean.AppBean;
 import com.pgyersdk.update.PgyUpdateManager;
 import com.pgyersdk.update.UpdateManagerListener;
 
+import org.apache.commons.io.FileUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -54,10 +63,12 @@ public class BaseActivity extends Activity {
     protected int userID = 0;
     protected String urlString;
     protected String assetsPath;
+    protected String sharedPath;
     protected String relativeAssetsPath;
     protected String urlStringForDetecting;
     protected String urlStringForLoading;
     protected JSONObject logParams;
+    protected ProgressDialog mProgressDialog;
     protected static ArrayList<Activity> mActivities = new ArrayList<Activity>();
 
     protected Context mContext;
@@ -70,7 +81,7 @@ public class BaseActivity extends Activity {
         finishLoginActivityWhenInMainAcitivty(this);
 
         mContext = BaseActivity.this;
-        String sharedPath = FileUtil.sharedPath(mContext);
+        sharedPath = FileUtil.sharedPath(mContext);
         assetsPath = sharedPath;
         urlStringForDetecting = URLs.HOST;
         relativeAssetsPath = "assets";
@@ -498,6 +509,161 @@ public class BaseActivity extends Activity {
         PgyUpdateManager.register(BaseActivity.this, updateManagerListener);
     }
 
+    /**
+     *  检测服务器端静态文件是否更新
+     */
+    public void checkAssetsUpdated() {
+        boolean isShouldUpdateAssets = false;
+
+        try {
+            String assetsZipPath = String.format("%s/assets.zip", sharedPath);
+
+            if(!(new File(assetsZipPath)).exists()) {
+                isShouldUpdateAssets = true;
+            }
+
+            String userConfigPath = String.format("%s/%s", FileUtil.basePath(mContext), URLs.USER_CONFIG_FILENAME);
+            JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
+            if(!isShouldUpdateAssets && userJSON.getString("local_assets_md5") != userJSON.getString("assets_md5")) {
+                isShouldUpdateAssets = true;
+            }
+
+            if(!isShouldUpdateAssets) {
+                return;
+            }
+
+            // instantiate it within the onCreate method
+            mProgressDialog = new ProgressDialog(mContext);
+            mProgressDialog.setMessage("更新静态文件");
+            mProgressDialog.setIndeterminate(true);
+            mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            mProgressDialog.setCancelable(true);
+
+            // execute this when the downloader must be fired
+            final DownloadAssetsTask downloadTask = new DownloadAssetsTask(mContext);
+            downloadTask.execute(String.format(URLs.API_ASSETS_PATH, URLs.HOST), assetsZipPath);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // usually, subclasses of AsyncTask are declared inside the activity class.
+    // that way, you can easily modify the UI thread from here
+    protected class DownloadAssetsTask extends AsyncTask<String, Integer, String> {
+
+        private Context context;
+        private PowerManager.WakeLock mWakeLock;
+
+        public DownloadAssetsTask(Context context) {
+            this.context = context;
+        }
+
+        @Override
+        protected String doInBackground(String... params) {
+            InputStream input = null;
+            OutputStream output = null;
+            HttpURLConnection connection = null;
+            try {
+                URL url = new URL(params[0]);
+                connection = (HttpURLConnection) url.openConnection();
+                connection.connect();
+
+                // expect HTTP 200 OK, so we don't mistakenly save error report
+                // instead of the file
+                if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                    return "Server returned HTTP " + connection.getResponseCode()
+                            + " " + connection.getResponseMessage();
+                }
+
+                // this will be useful to display download percentage
+                // might be -1: server did not report the length
+                int fileLength = connection.getContentLength();
+
+                // download the file
+                input = connection.getInputStream();
+                output = new FileOutputStream(params[1]);
+
+                byte data[] = new byte[4096];
+                long total = 0;
+                int count;
+                while ((count = input.read(data)) != -1) {
+                    // allow canceling with back button
+                    if (isCancelled()) {
+                        input.close();
+                        return null;
+                    }
+                    total += count;
+                    // publishing the progress....
+                    if (fileLength > 0) // only if total length is known
+                        publishProgress((int) (total * 100 / fileLength));
+                    output.write(data, 0, count);
+                }
+            } catch (Exception e) {
+                return e.toString();
+            } finally {
+                try {
+                    if (output != null)
+                        output.close();
+                    if (input != null)
+                        input.close();
+                } catch (IOException ignored) {
+                }
+
+                if (connection != null)
+                    connection.disconnect();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            // take CPU lock to prevent CPU from going off if the user
+            // presses the power button during download
+            PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+            mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                    getClass().getName());
+            mWakeLock.acquire();
+            mProgressDialog.show();
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... progress) {
+            super.onProgressUpdate(progress);
+            // if we get here, length is known, now set indeterminate to false
+            mProgressDialog.setIndeterminate(false);
+            mProgressDialog.setMax(100);
+            mProgressDialog.setProgress(progress[0]);
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            mWakeLock.release();
+            mProgressDialog.dismiss();
+
+            if (result != null) {
+                Toast.makeText(context, "静态资源更新失败", Toast.LENGTH_LONG).show();
+            } else {
+                try {
+                    String assetsFolderPath = String.format("%s/assets", FileUtil.sharedPath(context));
+                    FileUtils.deleteDirectory(new File(assetsFolderPath));
+
+                    String assetsZipPath = String.format("%s/assets.zip", sharedPath);
+                    InputStream zipStream = new FileInputStream(new File(assetsZipPath));
+
+                    FileUtil.unZip(zipStream, sharedPath, true);
+
+                    if(mWebView == null) {
+                        mWebView.reload();
+                    }
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
 
     protected class JavaScriptBase {
         /*

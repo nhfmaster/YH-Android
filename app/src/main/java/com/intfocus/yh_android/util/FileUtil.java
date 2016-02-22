@@ -304,13 +304,12 @@ public class FileUtil {
 		zipInputStream.close();
 	}
 
-
 	public static void checkAssets(Context mContext, String fileName) {
 		try {
 			String zipName = String.format("%s.zip", fileName);
 			InputStream zipStream = mContext.getApplicationContext().getAssets().open(zipName);
 			String MD5String = FileUtil.MD5(zipStream);
-			String keyName = String.format("%s_md5", fileName);
+			String keyName = String.format("local_%s_md5", fileName);
 
 			String userConfigPath = String.format("%s/%s", FileUtil.basePath(mContext), URLs.USER_CONFIG_FILENAME);
 			boolean isShouldUnZip = true;

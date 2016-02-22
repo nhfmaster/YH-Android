@@ -1,22 +1,34 @@
 package com.intfocus.yh_android;
 
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.util.Log;
 import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.handmark.pulltorefresh.library.PullToRefreshWebView;
 import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.URLs;
 
+import org.apache.commons.io.FileUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -87,15 +99,8 @@ public class MainActivity extends BaseActivity {
         if(intent.hasExtra("fromActivity") && intent.getStringExtra("fromActivity").contains("ConfirmPassCodeActivity")) {
             Log.i("FromActivity", intent.getStringExtra("fromActivity"));
             checkUpgrade(false);
+            checkAssetsUpdated();
         }
-    }
-
-
-    @Override
-    protected void onRestart() {
-        super.onRestart();
-
-        Log.e("!!!!!", "RESTART!!!!!!!!!!");
     }
 
     @SuppressLint("SetJavaScriptEnabled")

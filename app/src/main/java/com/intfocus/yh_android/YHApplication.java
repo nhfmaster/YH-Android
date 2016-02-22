@@ -8,16 +8,16 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
-
 import com.intfocus.yh_android.screen_lock.ConfirmPassCodeActivity;
 import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.URLs;
 import com.pgyersdk.crash.PgyCrashManager;
 import com.squareup.leakcanary.LeakCanary;
-
 import org.OpenUDID.OpenUDID_manager;
-
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Created by lijunjie on 16/1/15.
@@ -35,16 +35,16 @@ public class YHApplication extends Application implements Application.ActivityLi
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            if (intent.getAction().equals(Intent.ACTION_SCREEN_ON) && // 开屏状态
-                BaseActivity.mActivities.size() > 0 && // 应用活动Activity数量大于零
-                currentActivity != null && !currentActivity.getClass().toString().contains("ConfirmPassCodeActivity") && // 当前活动的Activity非解锁界面
-                FileUtil.checkIsLocked(mContext)) { // 应用处于登录状态，并且开启了密码锁
+        if (intent.getAction().equals(Intent.ACTION_SCREEN_ON) && // 开屏状态
+            BaseActivity.mActivities.size() > 0 && // 应用活动Activity数量大于零
+            currentActivity != null && !currentActivity.getClass().toString().contains("ConfirmPassCodeActivity") && // 当前活动的Activity非解锁界面
+            FileUtil.checkIsLocked(mContext)) { // 应用处于登录状态，并且开启了密码锁
 
-                Intent i = new Intent(getApplicationContext(), ConfirmPassCodeActivity.class);
-                i.putExtra("is_from_login", false);
-                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(i);
-            }
+            Intent i = new Intent(getApplicationContext(), ConfirmPassCodeActivity.class);
+            i.putExtra("is_from_login", false);
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(i);
+        }
         }
     };
 
@@ -53,6 +53,7 @@ public class YHApplication extends Application implements Application.ActivityLi
         super.onCreate();
 
         mContext = YHApplication.this;
+        String sharedPath = FileUtil.basePath(mContext);
 
         /*
          *  蒲公英平台，收集闪退日志
@@ -72,10 +73,31 @@ public class YHApplication extends Application implements Application.ActivityLi
         FileUtil.checkAssets(mContext, "loading");
         FileUtil.checkAssets(mContext, "assets");
 
+        /**
+         *  静态文件放在共享文件夹内,以便与服务器端检测、更新
+         *  刚升级过时，就不必须再更新，浪费用户流量
+         */
+        String assetsFileName = "assets.zip";
+        String assetsZipPath = String.format("%s/%s", sharedPath, assetsFileName);
+        if(!(new File(assetsZipPath)).exists()) {
+            try {
+                InputStream zipStream = mContext.getApplicationContext().getAssets().open(assetsFileName);
+                FileOutputStream fos = new FileOutputStream(assetsZipPath);
+                byte[] b = new byte[1024];
+                while((zipStream.read(b)) != -1){
+                    fos.write(b);
+                }
+                zipStream.close();
+                fos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
         /*
          *  基本目录结构
          */
-        File cachedFile = new File(String.format("%s/%s", FileUtil.basePath(mContext), URLs.CACHED_DIRNAME));
+        File cachedFile = new File(String.format("%s/%s", sharedPath, URLs.CACHED_DIRNAME));
         if(!cachedFile.exists()) {
             cachedFile.mkdirs();
         }
@@ -105,7 +127,6 @@ public class YHApplication extends Application implements Application.ActivityLi
     @Override
     public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
         Log.i("YHApplication", "onActivityCreated - " + activity.getClass());
-
     }
 
     @Override
@@ -116,7 +137,6 @@ public class YHApplication extends Application implements Application.ActivityLi
     @Override
     public void onActivityResumed(Activity activity) {
         Log.i("YHApplication", "onActivityResumed - " + activity.getClass());
-
     }
 
     @Override
@@ -146,12 +166,10 @@ public class YHApplication extends Application implements Application.ActivityLi
 
     @Override
     public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
-
     }
 
     @Override
     public void onActivityDestroyed(Activity activity) {
         Log.i("YHApplication", "onActivityDestroyed");
     }
-
 }

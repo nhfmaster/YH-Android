@@ -76,7 +76,6 @@ public class LoginActivity extends BaseActivity {
          *  加载服务器网页
          */
         new Thread(mRunnableForDetecting).start();
-
     }
 
     @Override
@@ -105,8 +104,8 @@ public class LoginActivity extends BaseActivity {
 
                 String userConfigPath = String.format("%s/%s", FileUtil.basePath(mContext), URLs.USER_CONFIG_FILENAME);
                 JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
-                userJSON.remove("loading_md5");
-                userJSON.remove("assets_md5");
+                userJSON.remove("local_loading_md5");
+                userJSON.remove("local_assets_md5");
                 FileUtil.writeFile(userConfigPath, userJSON.toString());
 
                 /*
@@ -124,8 +123,6 @@ public class LoginActivity extends BaseActivity {
             e.printStackTrace();
         }
     }
-
-
 
     private class JavaScriptInterface extends JavaScriptBase {
         /*

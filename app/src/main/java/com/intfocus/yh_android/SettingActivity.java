@@ -198,8 +198,8 @@ public class SettingActivity extends BaseActivity {
             try {
                 String userConfigPath = String.format("%s/%s", FileUtil.basePath(mContext), URLs.USER_CONFIG_FILENAME);
                 JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
-                userJSON.remove("loading_md5");
-                userJSON.remove("assets_md5");
+                userJSON.remove("local_loading_md5");
+                userJSON.remove("local_assets_md5");
                 FileUtil.writeFile(userConfigPath, userJSON.toString());
 
                 /*
@@ -211,8 +211,9 @@ public class SettingActivity extends BaseActivity {
                 FileUtil.checkAssets(mContext, "loading");
                 FileUtil.checkAssets(mContext, "assets");
 
-
                 Toast.makeText(mContext, "校正完成", Toast.LENGTH_SHORT).show();
+
+                checkAssetsUpdated();
             } catch (IOException e) {
                 e.printStackTrace();
             }

@@ -1,6 +1,7 @@
 package com.intfocus.yh_android.util;
 
 import android.content.Context;
+import android.os.Environment;
 
 import java.io.Serializable;
 import java.net.URLEncoder;
@@ -15,8 +16,7 @@ import java.util.Date;
  * @created 2016-01-06
  */
 public class URLs implements Serializable {
-	
-	
+
 	public final static String HOST1 = "http://yonghui.idata.mobi";
 	public final static String HOST  = "http://10.0.3.2:4567";
 
@@ -24,13 +24,13 @@ public class URLs implements Serializable {
     public final static String LOGIN_PATH              = String.format("%s/mobile/login", HOST);
     public final static String API_USER_PATH           = "%s/api/v1/%s/%s/%s/authentication";
 
-
     public final static String API_DATA_PATH           = "/api/v1/group/%s/report/%s/attachment";
     public final static String API_COMMENT_PATH        = "/api/v1/user/%d/id/%d/type/%d";
     public final static String API_SCREEN_LOCK_PATH    = "/api/v1/user_device/%s/screen_lock";
     public final static String API_DEVICE_STATE_PATH   = "/api/v1/user_device/%d/state";
     public final static String API_RESET_PASSWORD_PATH = "/api/v1/update/%s/password";
     public final static String API_ACTION_LOG__PATH    = "/api/v1/android/logger";
+    public final static String API_ASSETS_PATH         = "%s/api/v1/download/assets.zip";
 
     public final static String KPI_PATH                = "/mobile/role/%s/group/%s/kpi";
     public final static String MESSAGE_PATH            = "/mobile/role/%s/user/%s/message";
@@ -39,12 +39,9 @@ public class URLs implements Serializable {
     public final static String COMMENT_PATH            = "/mobile/id/%s/type/%s/comment";
     public final static String RESET_PASSWORD_PATH     = "/mobile/update_user_password";
 
-    public final static String FONTS_PATH              = "/mobile/assets/fonts.zip";
-
     public final static String REPORT_DATA_FILENAME    = "template_data_group_%s_report_%s.js";
 
-
-//	public final static String STORAGE_BASE            = String.format("%s/com.intfocus.yh_android", Environment.getExternalStorageDirectory().getAbsolutePath());
+    // public final static String STORAGE_BASE            = String.format("%s/com.intfocus.yh_android", Environment.getExternalStorageDirectory().getAbsolutePath());
     public final static String TimeStamp               = new SimpleDateFormat("yyyyMMddKKmmss").format(new Date());
 
     /*
@@ -59,15 +56,12 @@ public class URLs implements Serializable {
 	public final static String TABINDEX_CONFIG_FILENAME  = "page_tab_index.plist";
 	public final static String GESTURE_PASSWORD_FILENAME = "gesture_password.plist";
 	public final static String HTML_DIRNAME              = "HTML";
-	public final static String ASSETS1_DIRNAME           = "Assets";
 	public final static String SHARED_DIRNAME            = "Shared";
     public final static String CACHED_DIRNAME            = "Cached";
 
 	public final static String CACHED_HEADER_FILENAME    = "cached_header.plist";
     public final static String CURRENT_VERSION__FILENAME = "current_version.txt";
-	
 
-	
 	public final static String storage_base(Context context) {
 //        String path = "";
 //        if(Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
@@ -77,6 +71,7 @@ public class URLs implements Serializable {
 //        }
         return context.getApplicationContext().getFilesDir().toString();
     }
+
 	/**
 	 * 对URL进行格式处理
 	 * @param path
