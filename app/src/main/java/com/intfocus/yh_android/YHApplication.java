@@ -8,16 +8,16 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
+
 import com.intfocus.yh_android.screen_lock.ConfirmPassCodeActivity;
 import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.URLs;
 import com.pgyersdk.crash.PgyCrashManager;
 import com.squareup.leakcanary.LeakCanary;
+
 import org.OpenUDID.OpenUDID_manager;
+
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * Created by lijunjie on 16/1/15.
@@ -53,7 +53,7 @@ public class YHApplication extends Application implements Application.ActivityLi
         super.onCreate();
 
         mContext = YHApplication.this;
-        String sharedPath = FileUtil.basePath(mContext);
+        String sharedPath = FileUtil.sharedPath(mContext);
 
         /*
          *  蒲公英平台，收集闪退日志
@@ -77,20 +77,11 @@ public class YHApplication extends Application implements Application.ActivityLi
          *  静态文件放在共享文件夹内,以便与服务器端检测、更新
          *  刚升级过时，就不必须再更新，浪费用户流量
          */
-        String assetsFileName = "assets.zip";
-        String assetsZipPath = String.format("%s/%s", sharedPath, assetsFileName);
-        if(!(new File(assetsZipPath)).exists()) {
-            try {
-                InputStream zipStream = mContext.getApplicationContext().getAssets().open(assetsFileName);
-                FileOutputStream fos = new FileOutputStream(assetsZipPath);
-                byte[] b = new byte[1024];
-                while((zipStream.read(b)) != -1){
-                    fos.write(b);
-                }
-                zipStream.close();
-                fos.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+        String[] assetsName = {"assets.zip", "loading.zip"};
+        for(int i=0, len=assetsName.length; i < len; i++) {
+            String assetZipPath = String.format("%s/%s", sharedPath, assetsName[i]);
+            if (!(new File(assetZipPath)).exists()) {
+                FileUtil.copyAssetFile(mContext, assetsName[i], assetZipPath);
             }
         }
 

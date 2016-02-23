@@ -6,6 +6,8 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -215,8 +217,6 @@ public class BaseActivity extends Activity {
             }
             new Thread(mRunnableForDetecting).start();
 
-
-
             /*
              * 用户行为记录, 单独异常处理，不可影响用户体验
              */
@@ -238,7 +238,6 @@ public class BaseActivity extends Activity {
         }
     }
 
-
     /*
      * ********************
      * WebView display UI
@@ -255,7 +254,7 @@ public class BaseActivity extends Activity {
                     JSONObject json = new JSONObject(response.get("body").toString());
                     statusCode = json.getBoolean("device_state") ? 200 : 401;
                 } catch(JSONException e) {
-                    //e.printStackTrace();
+                    e.printStackTrace();
                 }
             }
             Log.i("Detecting", response.get("code").toString());
@@ -292,19 +291,11 @@ public class BaseActivity extends Activity {
             Log.i("httpGetWithHeader", String.format("url: %s, assets: %s, relativeAssets: %s", urlString, assetsPath, relativeAssetsPath));
             Map<String, String> response = ApiHelper.httpGetWithHeader(urlString, assetsPath, relativeAssetsPath);
 
-
             Message message = mHandlerWithAPI.obtainMessage();
             message.what = Integer.parseInt(response.get("code").toString());
             message.obj = response.get("path").toString();
 
             Log.i("mRunnableWithAPI", String.format("code: %s, path: %s", response.get("code").toString(), response.get("path").toString()));
-
-            /*
-                String[] codes = new String[]{"200", "304"};
-                if (Arrays.asList(codes).contains(response.get("code").toString())) {
-                    message.obj = response.get("path").toString();
-                }
-            */
 
             mHandlerWithAPI.sendMessage(message);
         }
@@ -510,6 +501,52 @@ public class BaseActivity extends Activity {
     }
 
     /**
+     * app升级后，清除缓存头文件
+     */
+    public void checkVersionUpgrade(String assetsPath) {
+        try {
+            PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+            String versionConfigPath = String.format("%s/%s", assetsPath, URLs.CURRENT_VERSION__FILENAME);
+
+            boolean isUpgrade = false;
+            if ((new File(versionConfigPath)).exists()) {
+                String localVersion = FileUtil.readFile(versionConfigPath);
+                if (!localVersion.equals(packageInfo.versionName)) {
+                    isUpgrade = true;
+                    Log.i("VersionUpgrade", String.format("%s => %s remove %s/%s", localVersion, packageInfo.versionName, assetsPath, URLs.CACHED_HEADER_FILENAME));
+                }
+            } else {
+                isUpgrade = true;
+            }
+
+            if (isUpgrade) {
+                Log.i("checkVersionUpgrade", "upgrade");
+                ApiHelper.clearResponseHeader(URLs.LOGIN_PATH, assetsPath);
+                FileUtil.writeFile(versionConfigPath, packageInfo.versionName);
+
+                String userConfigPath = String.format("%s/%s", FileUtil.basePath(mContext), URLs.USER_CONFIG_FILENAME);
+                JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
+                userJSON.remove("local_loading_md5");
+                userJSON.remove("local_assets_md5");
+                FileUtil.writeFile(userConfigPath, userJSON.toString());
+
+                /*
+                 * 用户报表数据js文件存放在公共区域
+                 */
+                String headerPath = String.format("%s/%s", FileUtil.sharedPath(mContext), URLs.CACHED_HEADER_FILENAME);
+                new File(headerPath).delete();
+
+                FileUtil.checkAssets(mContext, "loading");
+                FileUtil.checkAssets(mContext, "assets");
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
      *  检测服务器端静态文件是否更新
      */
     public void checkAssetsUpdated() {
@@ -524,7 +561,8 @@ public class BaseActivity extends Activity {
 
             String userConfigPath = String.format("%s/%s", FileUtil.basePath(mContext), URLs.USER_CONFIG_FILENAME);
             JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
-            if(!isShouldUpdateAssets && userJSON.getString("local_assets_md5") != userJSON.getString("assets_md5")) {
+            if(!isShouldUpdateAssets && !userJSON.getString("local_assets_md5").equals(userJSON.getString("assets_md5"))) {
+                Log.i("checkAssetsUpdated", String.format("%s: %s != %s",assetsZipPath,  userJSON.getString("local_assets_md5"), userJSON.getString("assets_md5")));
                 isShouldUpdateAssets = true;
             }
 
@@ -658,8 +696,9 @@ public class BaseActivity extends Activity {
                     JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
                     userJSON.put("local_assets_md5", userJSON.getString("assets_md5"));
                     FileUtil.writeFile(userConfigPath, userJSON.toString());
+                    Log.i("onPostExecute", userJSON.toString());
 
-                    if(mWebView == null) {
+                    if(mWebView != null) {
                         mWebView.reload();
                     }
 

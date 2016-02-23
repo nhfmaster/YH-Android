@@ -40,10 +40,9 @@ public class ApiHelper {
     		device.put("os_version", Build.VERSION.RELEASE);
     		device.put("uuid", OpenUDID_manager.getOpenUDID());
 
-			PackageInfo packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
-
 			JSONObject params = new JSONObject();
 			params.put("device", device);
+			PackageInfo packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
 			params.put("app_version", String.format("a%s", packageInfo.versionName));
     		
 			Map<String, String> response = HttpUtil.httpPost(urlString, params);
@@ -58,6 +57,7 @@ public class ApiHelper {
 			// FileUtil.dirPath 需要优先写入登录用户信息
 			userJSON = ApiHelper.merge(userJSON, responseJSON);
 			FileUtil.writeFile(userConfigPath, userJSON.toString());
+
 			String settingsConfigPath = FileUtil.dirPath(context, URLs.CONFIG_DIRNAME, URLs.SETTINGS_CONFIG_FILENAME);
 			if((new File(settingsConfigPath)).exists()) {
 				JSONObject settingJSON = FileUtil.readConfigFile(settingsConfigPath);
@@ -80,8 +80,7 @@ public class ApiHelper {
 			Log.i("CurrentUser", userJSON.toString());
 			if(response.get("code").equals("200")) {
 				FileUtil.writeFile(settingsConfigPath, userJSON.toString());
-			}
-			else {
+			} else {
 				ret = responseJSON.getString("info");
 			}
 		} catch(Exception e) {
@@ -181,34 +180,38 @@ public class ApiHelper {
 		}
 		return retMap;
 	}
+
 	/*
-	 * assistant methods
+	 * 缓存文件中，清除指定链接的内容
+	 *
+	 * @param 链接
+	 * @param 缓存头文件相对文件夹
 	 */
 	public static void clearResponseHeader(String urlKey, String assetsPath) {
-//		File file = new File(headersFilePath);
-//		if(file.exists()) {
-//			file.delete();
-//		}
-
 		String headersFilePath = String.format("%s/%s", assetsPath, URLs.CACHED_HEADER_FILENAME);
 		if(!(new File(headersFilePath)).exists()) {
 			return;
 		}
 
 		JSONObject headersJSON = FileUtil.readConfigFile(headersFilePath);
-
 		if(headersJSON.has(urlKey)) {
-			headersJSON.remove(urlKey);
-
-			Log.i("clearResponseHeader", headersFilePath);
-			Log.i("clearResponseHeader", urlKey);
 			try {
+				headersJSON.remove(urlKey);
+				Log.i("clearResponseHeader", String.format("%s[%s]", headersFilePath, urlKey));
+
 				FileUtil.writeFile(headersFilePath, headersJSON.toString());
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
 	}
+
+	/**
+	 * 从缓存头文件中，获取指定链接的ETag/Last-Modified
+	 *
+	 * @param 链接
+	 * @param 缓存头文件相对文件夹
+	 */
 	public static Map<String, String> checkResponseHeader(String urlKey, String assetsPath) {
 		Map<String, String> headers = new HashMap<String, String>();
 
@@ -219,10 +222,11 @@ public class ApiHelper {
 			if((new File(headersFilePath)).exists()) {
 				headersJSON = FileUtil.readConfigFile(headersFilePath);
 			}
-			JSONObject headerJSON = new JSONObject();
 
+			JSONObject headerJSON = new JSONObject();
 			if(headersJSON.has(urlKey)) {
 				headerJSON = (JSONObject)headersJSON.get(urlKey);
+
 				if(headerJSON.has("ETag")) {
 					headers.put("ETag", headerJSON.getString("ETag"));
 				}
@@ -237,6 +241,13 @@ public class ApiHelper {
 		return headers;
 	}
 
+	/**
+	 * 把服务器响应的ETag/Last-Modified存入本地
+	 *
+	 * @param 链接
+	 * @param 缓存头文件相对文件夹
+	 * @param 服务器响应的ETag/Last-Modifiede
+	 */
 	public static void storeResponseHeader(String urlKey, String assetsPath, Map<String, String> response) {
 		try {
 			JSONObject headersJSON = new JSONObject();
@@ -245,6 +256,7 @@ public class ApiHelper {
 			if((new File(headersFilePath)).exists()) {
 				headersJSON = FileUtil.readConfigFile(headersFilePath);
 			}
+
 			JSONObject headerJSON = new JSONObject();
 
 			if(response.containsKey("ETag")) {
@@ -263,24 +275,34 @@ public class ApiHelper {
 		}
 	}
 
-	/*
+	/**
 	 * 合并两个JSONObject
+	 *
+	 * @param obj
+	 * @param other
+	 * @return 合并后的JSONObject
 	 */
-	public static JSONObject merge(JSONObject obj1, JSONObject obj2) {
+	public static JSONObject merge(JSONObject obj, JSONObject other) {
 		try {
-			Iterator it = obj2.keys();
+			Iterator it = other.keys();
 			while (it.hasNext()) {
 				String key = (String) it.next();
-				obj1.put(key, obj2.get(key));
+				obj.put(key, other.get(key));
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
 
-		return obj1;
+		return obj;
 	}
 
-
+	/**
+	 * 下载文件
+	 *
+	 * @param 上下文
+	 * @param 下载链接
+	 * @param 写入本地文件路径
+	 */
 	public static void downloadFile(Context context, String urlString, File outputFile) {
 		try {
 			URL url = new URL(urlString);
@@ -303,7 +325,7 @@ public class ApiHelper {
 				FileOutputStream fos = new FileOutputStream(outputFile);
 
 				int length = -1;
-				byte[] buffer = new byte[1024*10];// buffer for portion of data from connection
+				byte[] buffer = new byte[1024];// buffer for portion of data from connection
 				while ((length = in.read(buffer)) > -1) {
 					fos.write(buffer, 0, length);
 				}
@@ -320,6 +342,13 @@ public class ApiHelper {
 		}
 	}
 
+	/**
+	 * 上传锁屏信息
+	 *
+	 * @param 设备标识
+	 * @param 锁屏密码
+	 * @param 是否启用锁屏
+	 */
 	public static void screenLock(String deviceID, String password, boolean state) {
 		String urlPath   = String.format(URLs.API_SCREEN_LOCK_PATH, deviceID);
 		String urlString = String.format("%s%s", URLs.HOST, urlPath);
@@ -338,6 +367,12 @@ public class ApiHelper {
 		}
 	}
 
+	/**
+	 * 上传用户行为
+	 *
+	 * @param 上下文
+	 * @param 用户行为
+	 */
 	public static void actionLog(Context context, JSONObject param) {
 		try {
 			String userConfigPath = String.format("%s/%s", FileUtil.basePath(context), URLs.USER_CONFIG_FILENAME);

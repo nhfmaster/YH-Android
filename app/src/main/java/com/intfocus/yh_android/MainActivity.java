@@ -1,34 +1,19 @@
 package com.intfocus.yh_android;
 
 import android.annotation.SuppressLint;
-import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.PowerManager;
 import android.util.Log;
 import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.widget.ImageView;
-import android.widget.Toast;
-
 import com.handmark.pulltorefresh.library.PullToRefreshWebView;
 import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.URLs;
-
-import org.apache.commons.io.FileUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,13 +26,14 @@ public class MainActivity extends BaseActivity {
     private TabView mCurrentTab;
     private int objectType;
 
-
     @Override
     @SuppressLint("SetJavaScriptEnabled")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+        findViewById(R.id.setting).setOnClickListener(mSettingListener);
         pullToRefreshWebView = (PullToRefreshWebView) findViewById(R.id.webview);
         initRefreshWebView();
         setPullToRefreshWebView(true);
@@ -60,30 +46,9 @@ public class MainActivity extends BaseActivity {
             String urlPath = String.format(URLs.KPI_PATH, user.getString("role_id"), user.getString("group_id"));
             urlString = String.format("%s%s", URLs.HOST, urlPath);
             objectType = 1;
-
-            new Thread(mRunnableForDetecting).start();
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
-        findViewById(R.id.setting).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(mContext, SettingActivity.class);
-                mContext.startActivity(intent);
-
-                /*
-                 * 用户行为记录, 单独异常处理，不可影响用户体验
-                 */
-                try {
-                    logParams = new JSONObject();
-                    logParams.put("action", "点击/主页面/设置");
-                    new Thread(mRunnableForLogger).start();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
 
         initTab();
 
@@ -98,9 +63,16 @@ public class MainActivity extends BaseActivity {
         Intent intent = getIntent();
         if(intent.hasExtra("fromActivity") && intent.getStringExtra("fromActivity").contains("ConfirmPassCodeActivity")) {
             Log.i("FromActivity", intent.getStringExtra("fromActivity"));
+
+            checkVersionUpgrade(assetsPath);
             checkUpgrade(false);
-            checkAssetsUpdated();
         }
+        /**
+         *  检测服务器端静态文件是否更新
+         */
+        checkAssetsUpdated();
+
+        new Thread(mRunnableForDetecting).start();
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -119,6 +91,24 @@ public class MainActivity extends BaseActivity {
         mCurrentTab = mTabKPI;
         mCurrentTab.setActive(true);
     }
+
+    private View.OnClickListener mSettingListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            Intent intent = new Intent(mContext, SettingActivity.class);
+            mContext.startActivity(intent);
+            /*
+             * 用户行为记录, 单独异常处理，不可影响用户体验
+             */
+            try {
+                logParams = new JSONObject();
+                logParams.put("action", "点击/主页面/设置");
+                new Thread(mRunnableForLogger).start();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    };
 
     @SuppressLint("SetJavaScriptEnabled")
     private View.OnClickListener mTabChangeListener = new View.OnClickListener() {

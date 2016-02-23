@@ -306,8 +306,13 @@ public class FileUtil {
 
 	public static void checkAssets(Context mContext, String fileName) {
 		try {
+			String sharedPath = FileUtil.sharedPath(mContext);
 			String zipName = String.format("%s.zip", fileName);
-			InputStream zipStream = mContext.getApplicationContext().getAssets().open(zipName);
+
+			// InputStream zipStream = mContext.getApplicationContext().getAssets().open(zipName);
+			String zipPath = String.format("%s/%s", sharedPath, zipName);
+			InputStream zipStream = new FileInputStream(zipPath);
+
 			String MD5String = FileUtil.MD5(zipStream);
 			String keyName = String.format("local_%s_md5", fileName);
 
@@ -316,13 +321,15 @@ public class FileUtil {
 			JSONObject userJSON = new JSONObject();
 			if((new File(userConfigPath)).exists()) {
 				userJSON = FileUtil.readConfigFile(userConfigPath);
-				if(userJSON.has(keyName) && userJSON.getString(keyName).compareTo(MD5String) == 0) {
+				if(userJSON.has(keyName) && userJSON.getString(keyName).equals(MD5String)) {
 					isShouldUnZip = false;
+				} else {
+					Log.i("checkAssets", String.format("%s: %s != %s", zipName, userJSON.getString(keyName), MD5String));
 				}
 			}
 
 			if(isShouldUnZip) {
-				File file = new File(String.format("%s/%s", FileUtil.sharedPath(mContext), fileName));
+				File file = new File(String.format("%s/%s", sharedPath, fileName));
 				if(file.exists()) {
 					Log.i("deleteDirectory", file.getAbsolutePath());
 					FileUtils.deleteDirectory(file);
@@ -340,6 +347,27 @@ public class FileUtil {
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * 拷贝程序自带的文件至指定文件
+	 *
+	 * @param assetName 程序自带的文件名称
+	 * @param outputPath 拷贝到指定文件的路径
+	 */
+	public static void copyAssetFile(Context mContext, String assetName, String outputPath) {
+		try {
+			InputStream zipStream = mContext.getApplicationContext().getAssets().open(assetName);
+			FileOutputStream fos = new FileOutputStream(outputPath);
+			byte[] b = new byte[1024];
+			while((zipStream.read(b)) != -1){
+				fos.write(b);
+			}
+			zipStream.close();
+			fos.close();
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}

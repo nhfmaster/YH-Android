@@ -45,15 +45,11 @@ public class LoginActivity extends BaseActivity {
          *  是否启用锁屏
          */
         if (FileUtil.checkIsLocked(mContext)) {
-            Log.i("screen_lock", "lock it");
-
             Intent intent = new Intent(this, ConfirmPassCodeActivity.class);
             intent.putExtra("is_from_login", true);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             this.startActivity(intent);
         } else {
-            Log.i("screen_lock", "not lock");
-
             /*
              *  检测版本更新
              *    1. 与锁屏界面互斥；取消解屏时，返回登录界面，则不再检测版本更新；
@@ -76,52 +72,6 @@ public class LoginActivity extends BaseActivity {
          *  加载服务器网页
          */
         new Thread(mRunnableForDetecting).start();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-    }
-
-    public void checkVersionUpgrade(String assetsPath) {
-        try {
-            PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
-            String versionConfigPath = String.format("%s/%s", assetsPath, URLs.CURRENT_VERSION__FILENAME);
-
-            boolean isUpgrade = false;
-            if ((new File(versionConfigPath)).exists()) {
-                String localVersion = FileUtil.readFile(versionConfigPath);
-                if (localVersion.compareTo(packageInfo.versionName) != 0) {
-                    isUpgrade = true;
-                    Log.i("VersionUpgrade", String.format("%s => %s remove %s/%s", localVersion, packageInfo.versionName, assetsPath, URLs.CACHED_HEADER_FILENAME));
-                }
-            } else {
-                isUpgrade = true;
-            }
-            if (isUpgrade) {
-                ApiHelper.clearResponseHeader(URLs.LOGIN_PATH, assetsPath);
-                FileUtil.writeFile(versionConfigPath, packageInfo.versionName);
-
-                String userConfigPath = String.format("%s/%s", FileUtil.basePath(mContext), URLs.USER_CONFIG_FILENAME);
-                JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
-                userJSON.remove("local_loading_md5");
-                userJSON.remove("local_assets_md5");
-                FileUtil.writeFile(userConfigPath, userJSON.toString());
-
-                /*
-                 * 用户报表数据js文件存放在公共区域
-                 */
-                String headerPath = String.format("%s/%s", FileUtil.sharedPath(mContext), URLs.CACHED_HEADER_FILENAME);
-                new File(headerPath).delete();
-
-                FileUtil.checkAssets(mContext, "loading");
-                FileUtil.checkAssets(mContext, "assets");
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     private class JavaScriptInterface extends JavaScriptBase {
