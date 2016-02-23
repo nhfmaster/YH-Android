@@ -65,14 +65,6 @@ public class YHApplication extends Application implements Application.ActivityLi
          */
         OpenUDID_manager.sync(getApplicationContext());
 
-        /*
-         *  解压静态资源
-         *  loading.zip, e433278b2f0835eaaaeb951cf9dfa363
-         *  assets.zip, 490ecad478805d9455853865f4b53622
-         */
-        FileUtil.checkAssets(mContext, "loading");
-        FileUtil.checkAssets(mContext, "assets");
-
         /**
          *  静态文件放在共享文件夹内,以便与服务器端检测、更新
          *  刚升级过时，就不必须再更新，浪费用户流量
@@ -84,6 +76,14 @@ public class YHApplication extends Application implements Application.ActivityLi
                 FileUtil.copyAssetFile(mContext, assetsName[i], assetZipPath);
             }
         }
+
+        /*
+         *  解压静态资源
+         *  loading.zip, e433278b2f0835eaaaeb951cf9dfa363
+         *  assets.zip, 490ecad478805d9455853865f4b53622
+         */
+        FileUtil.checkAssets(mContext, "loading");
+        FileUtil.checkAssets(mContext, "assets");
 
         /*
          *  基本目录结构

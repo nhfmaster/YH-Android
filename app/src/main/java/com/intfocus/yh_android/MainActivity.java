@@ -70,9 +70,9 @@ public class MainActivity extends BaseActivity {
         /**
          *  检测服务器端静态文件是否更新
          */
-        checkAssetsUpdated();
-
-        new Thread(mRunnableForDetecting).start();
+        if(!checkAssetsUpdated(true)) {
+            new Thread(mRunnableForDetecting).start();
+        }
     }
 
     @SuppressLint("SetJavaScriptEnabled")

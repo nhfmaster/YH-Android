@@ -533,8 +533,9 @@ public class BaseActivity extends Activity {
                 /*
                  * 用户报表数据js文件存放在公共区域
                  */
-                String headerPath = String.format("%s/%s", FileUtil.sharedPath(mContext), URLs.CACHED_HEADER_FILENAME);
-                new File(headerPath).delete();
+                String headerPath = String.format("%s/%s", sharedPath, URLs.CACHED_HEADER_FILENAME);
+                File headerFile = new File(headerPath);
+                if(headerFile.exists()) { headerFile.delete(); }
 
                 FileUtil.checkAssets(mContext, "loading");
                 FileUtil.checkAssets(mContext, "assets");
@@ -549,7 +550,7 @@ public class BaseActivity extends Activity {
     /**
      *  检测服务器端静态文件是否更新
      */
-    public void checkAssetsUpdated() {
+    public boolean checkAssetsUpdated(boolean shouldReloadUIThread) {
         boolean isShouldUpdateAssets = false;
 
         try {
@@ -567,8 +568,15 @@ public class BaseActivity extends Activity {
             }
 
             if(!isShouldUpdateAssets) {
-                return;
+                return false;
             }
+
+            /*
+             * 用户报表数据js文件存放在公共区域
+             */
+            String headerPath = String.format("%s/%s", sharedPath, URLs.CACHED_HEADER_FILENAME);
+            File headerFile = new File(headerPath);
+            if(headerFile.exists()) { headerFile.delete(); }
 
             // instantiate it within the onCreate method
             mProgressDialog = new ProgressDialog(mContext);
@@ -578,23 +586,27 @@ public class BaseActivity extends Activity {
             mProgressDialog.setCancelable(true);
 
             // execute this when the downloader must be fired
-            final DownloadAssetsTask downloadTask = new DownloadAssetsTask(mContext);
+            final DownloadAssetsTask downloadTask = new DownloadAssetsTask(mContext, shouldReloadUIThread);
             downloadTask.execute(String.format(URLs.API_ASSETS_PATH, URLs.HOST), assetsZipPath);
 
+            return true;
         } catch (JSONException e) {
             e.printStackTrace();
         }
+
+        return false;
     }
 
     // usually, subclasses of AsyncTask are declared inside the activity class.
     // that way, you can easily modify the UI thread from here
     protected class DownloadAssetsTask extends AsyncTask<String, Integer, String> {
-
         private Context context;
         private PowerManager.WakeLock mWakeLock;
+        private boolean isReloadUIThread;
 
-        public DownloadAssetsTask(Context context) {
+        public DownloadAssetsTask(Context context, boolean shouldReloadUIThread) {
             this.context = context;
+            this.isReloadUIThread = shouldReloadUIThread;
         }
 
         @Override
@@ -698,10 +710,9 @@ public class BaseActivity extends Activity {
                     FileUtil.writeFile(userConfigPath, userJSON.toString());
                     Log.i("onPostExecute", userJSON.toString());
 
-                    if(mWebView != null) {
-                        mWebView.reload();
+                    if(isReloadUIThread) {
+                        new Thread(mRunnableForDetecting).start();
                     }
-
                 } catch (IOException e) {
                     e.printStackTrace();
                 } catch (JSONException e) {

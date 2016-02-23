@@ -63,17 +63,18 @@ public class URLs implements Serializable {
     public final static String CURRENT_VERSION__FILENAME = "current_version.txt";
 
 	public final static String storage_base(Context context) {
-//        String path = "";
-//        if(Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-//            path = String.format("%s/com.intfocus.yh_android", Environment.getExternalStorageDirectory().getAbsolutePath());
-//        } else {
-//            path =String.format("%s/com.intfocus.yh_android", context.getApplicationContext().getFilesDir());
-//        }
+        //    String path = "";
+        //    if(Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+        //        path = String.format("%s/com.intfocus.yh_android", Environment.getExternalStorageDirectory().getAbsolutePath());
+        //    } else {
+        //        path =String.format("%s/com.intfocus.yh_android", context.getApplicationContext().getFilesDir());
+        //    }
         return context.getApplicationContext().getFilesDir().toString();
     }
 
 	/**
 	 * 对URL进行格式处理
+     *
 	 * @param path
 	 * @return
 	 */
@@ -86,6 +87,7 @@ public class URLs implements Serializable {
 	
 	/**
      * MD5加码。32位
+     *
      * @param inStr
      * @return
      */

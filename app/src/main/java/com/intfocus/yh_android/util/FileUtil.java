@@ -304,6 +304,12 @@ public class FileUtil {
 		zipInputStream.close();
 	}
 
+	/**
+	 * 检测sharedPath/{assets.zip, loading.zip} md5值与缓存文件中是否相等
+	 *
+	 * @param mContext 上下文
+	 * @param fileName 静态文件名称
+	 */
 	public static void checkAssets(Context mContext, String fileName) {
 		try {
 			String sharedPath = FileUtil.sharedPath(mContext);
@@ -324,18 +330,18 @@ public class FileUtil {
 				if(userJSON.has(keyName) && userJSON.getString(keyName).equals(MD5String)) {
 					isShouldUnZip = false;
 				} else {
-					Log.i("checkAssets", String.format("%s: %s != %s", zipName, userJSON.getString(keyName), MD5String));
+					Log.i("checkAssets", String.format("%s[%s] != %s", zipName, keyName, MD5String));
 				}
 			}
 
 			if(isShouldUnZip) {
 				File file = new File(String.format("%s/%s", sharedPath, fileName));
 				if(file.exists()) {
-					Log.i("deleteDirectory", file.getAbsolutePath());
 					FileUtils.deleteDirectory(file);
 				}
 
-				zipStream = mContext.getApplicationContext().getAssets().open(zipName);
+				// zipStream = mContext.getApplicationContext().getAssets().open(zipName);
+				zipStream = new FileInputStream(zipPath);
 				FileUtil.unZip(zipStream, FileUtil.sharedPath(mContext), true);
 				Log.i("unZip", String.format("%s, %s", zipName, MD5String));
 
@@ -359,14 +365,15 @@ public class FileUtil {
 	 */
 	public static void copyAssetFile(Context mContext, String assetName, String outputPath) {
 		try {
-			InputStream zipStream = mContext.getApplicationContext().getAssets().open(assetName);
-			FileOutputStream fos = new FileOutputStream(outputPath);
-			byte[] b = new byte[1024];
-			while((zipStream.read(b)) != -1){
-				fos.write(b);
+			InputStream in = mContext.getApplicationContext().getAssets().open(assetName);
+			FileOutputStream out = new FileOutputStream(outputPath);
+			byte[] buffer = new byte[1024];
+			int readPos;
+			while((readPos = in.read(buffer)) != -1){
+				out.write(buffer, 0, readPos);
 			}
-			zipStream.close();
-			fos.close();
+			in.close();
+			out.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

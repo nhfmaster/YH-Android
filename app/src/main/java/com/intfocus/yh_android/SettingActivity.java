@@ -25,7 +25,6 @@ import java.io.File;
 import java.io.IOException;
 
 public class SettingActivity extends BaseActivity {
-
     private TextView mUserID;
     private TextView mRoleID;
     private TextView mGroupID;
@@ -39,9 +38,7 @@ public class SettingActivity extends BaseActivity {
     private Switch mLockSwitch;
     private TextView mChangeLock;
     private Button mLogout;
-
     private String screenLockInfo;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -213,13 +210,12 @@ public class SettingActivity extends BaseActivity {
 
                 Toast.makeText(mContext, "校正完成", Toast.LENGTH_SHORT).show();
 
-                checkAssetsUpdated();
+                checkAssetsUpdated(false);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     };
-
 
     /*
      *  Switch 锁屏开关
