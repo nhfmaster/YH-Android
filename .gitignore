@@ -7,7 +7,8 @@
 
 # Java class files
 *.class
-
+!app/src/main/assets/loading.zip
+!app/src/main/assets/assets.zip
 app/src/main/assets/loading
 app/src/main/assets/assets
 
