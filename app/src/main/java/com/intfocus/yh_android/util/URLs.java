@@ -17,8 +17,8 @@ import java.util.Date;
  */
 public class URLs implements Serializable {
 
-	public final static String HOST1 = "http://yonghui.idata.mobi";
-	public final static String HOST  = "http://10.0.3.2:4567";
+	public final static String HOST = "http://yonghui.idata.mobi";
+	public final static String HOST1  = "http://10.0.3.2:4567";
 
 	//login
     public final static String LOGIN_PATH              = String.format("%s/mobile/login", HOST);
