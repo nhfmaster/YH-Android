@@ -44,6 +44,8 @@ public class YHApplication extends Application implements Application.ActivityLi
             i.putExtra("is_from_login", false);
             i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(i);
+
+            currentActivity = null;
         }
         }
     };
@@ -141,6 +143,7 @@ public class YHApplication extends Application implements Application.ActivityLi
          * 1. 如果用户已使用锁屏功能，则进入验证密码界面
          * 2. 如果未使用锁屏功能，则进入登录状态
          */
+        currentActivity = null;
         currentActivity = activity;
     }
 
@@ -153,6 +156,7 @@ public class YHApplication extends Application implements Application.ActivityLi
          * 1. 如果用户已使用锁屏功能，则进入验证密码界面
          * 2. 如果未使用锁屏功能，则进入登录状态
          */
+        currentActivity = null;
         currentActivity = activity;
     }
 
