@@ -270,8 +270,7 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
                     urlKey = urlString.indexOf("?") != -1 ? TextUtils.split(urlString, "?")[0] : urlString;
                     ApiHelper.clearResponseHeader(urlKey, assetsPath);
                 }
-                String urlPath = String.format(URLs.API_DATA_PATH, groupID, reportID);
-                urlKey = String.format("%s%s", URLs.HOST, urlPath);
+                urlKey = String.format(URLs.API_DATA_PATH, URLs.HOST, groupID, reportID);
                 ApiHelper.clearResponseHeader(urlKey, FileUtil.sharedPath(mContext));
 
                 ApiHelper.reportData(mContext, String.format("%d", groupID), reportID);

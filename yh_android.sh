@@ -21,6 +21,6 @@ else
     echo "copy server to current asset file"
     cp ${server_assets_path} ${current_assets_path}
 
-    bash $0
+    bash "$0"
 fi
 

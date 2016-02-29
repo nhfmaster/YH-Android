@@ -96,8 +96,7 @@ public class BaseActivity extends Activity {
                 if (user.has("is_login") && user.getBoolean("is_login")) {
                     userID = user.getInt("user_id");
                     assetsPath = FileUtil.dirPath(mContext, URLs.HTML_DIRNAME);
-                    String urlPath = String.format(URLs.API_DEVICE_STATE_PATH, user.getInt("user_device_id"));
-                    urlStringForDetecting = String.format("%s%s", URLs.HOST, urlPath);
+                    urlStringForDetecting = String.format(URLs.API_DEVICE_STATE_PATH, URLs.HOST, user.getInt("user_device_id"));
                     relativeAssetsPath = "../../Shared/assets";
                     urlStringForLoading = String.format("file:///%s/loading/loading.html", sharedPath);
                 }

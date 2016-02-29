@@ -55,9 +55,7 @@ public class CommentActivity extends BaseActivity {
         objectType = intent.getIntExtra("objectType", -1);
 
         mTitle.setText(bannerName);
-
-        String urlPath = String.format(URLs.COMMENT_PATH, objectID, objectType);
-        urlString = String.format("%s%s", URLs.HOST, urlPath);
+        urlString = String.format(URLs.COMMENT_PATH, URLs.HOST, objectID, objectType);
 
         new Thread(mRunnableForDetecting).start();
 

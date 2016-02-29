@@ -88,9 +88,10 @@ public class YHApplication extends Application implements Application.ActivityLi
         /*
          *  基本目录结构
          */
-        File cachedFile = new File(String.format("%s/%s", sharedPath, URLs.CACHED_DIRNAME));
-        if(!cachedFile.exists()) {
-            cachedFile.mkdirs();
+        String cachedPath = String.format("%s/%s", FileUtil.basePath(mContext), URLs.CACHED_DIRNAME);
+        File cachedFolder = new File(cachedPath);
+        if(!cachedFolder.exists()) {
+            cachedFolder.mkdirs();
         }
 
         registerActivityLifecycleCallbacks(this);

@@ -24,20 +24,20 @@ public class URLs implements Serializable {
     public final static String LOGIN_PATH              = String.format("%s/mobile/login", HOST);
     public final static String API_USER_PATH           = "%s/api/v1/%s/%s/%s/authentication";
 
-    public final static String API_DATA_PATH           = "/api/v1/group/%s/report/%s/attachment";
-    public final static String API_COMMENT_PATH        = "/api/v1/user/%d/id/%d/type/%d";
-    public final static String API_SCREEN_LOCK_PATH    = "/api/v1/user_device/%s/screen_lock";
-    public final static String API_DEVICE_STATE_PATH   = "/api/v1/user_device/%d/state";
-    public final static String API_RESET_PASSWORD_PATH = "/api/v1/update/%s/password";
-    public final static String API_ACTION_LOG__PATH    = "/api/v1/android/logger";
+    public final static String API_DATA_PATH           = "%s/api/v1/group/%s/report/%s/attachment";
+    public final static String API_COMMENT_PATH        = "%s/api/v1/user/%d/id/%d/type/%d";
+    public final static String API_SCREEN_LOCK_PATH    = "%s/api/v1/user_device/%s/screen_lock";
+    public final static String API_DEVICE_STATE_PATH   = "%s/api/v1/user_device/%d/state";
+    public final static String API_RESET_PASSWORD_PATH = "%s/api/v1/update/%s/password";
+    public final static String API_ACTION_LOG_PATH     = "%s/api/v1/android/logger";
     public final static String API_ASSETS_PATH         = "%s/api/v1/download/assets.zip";
 
-    public final static String KPI_PATH                = "/mobile/role/%s/group/%s/kpi";
-    public final static String MESSAGE_PATH            = "/mobile/role/%s/user/%s/message";
-    public final static String APPLICATION_PATH        = "/mobile/role/%s/app";
-    public final static String ANALYSE_PATH            = "/mobile/role/%s/analyse";
-    public final static String COMMENT_PATH            = "/mobile/id/%s/type/%s/comment";
-    public final static String RESET_PASSWORD_PATH     = "/mobile/update_user_password";
+    public final static String KPI_PATH                = "%s/mobile/role/%s/group/%s/kpi";
+    public final static String MESSAGE_PATH            = "%s/mobile/role/%s/user/%s/message";
+    public final static String APPLICATION_PATH        = "%s/mobile/role/%s/app";
+    public final static String ANALYSE_PATH            = "%s/mobile/role/%s/analyse";
+    public final static String COMMENT_PATH            = "%s/mobile/id/%s/type/%s/comment";
+    public final static String RESET_PASSWORD_PATH     = "%s/mobile/update_user_password";
 
     public final static String REPORT_DATA_FILENAME    = "template_data_group_%s_report_%s.js";
 

@@ -95,8 +95,7 @@ public class ApiHelper {
 	 */
 	public static void reportData(Context context, String groupID, String reportID) {
 		String assetsPath = FileUtil.sharedPath(context);
-		String urlPath   = String.format(URLs.API_DATA_PATH, groupID, reportID);
-		String urlString = String.format("%s%s", URLs.HOST, urlPath);
+		String urlString = String.format(URLs.API_DATA_PATH, URLs.HOST, groupID, reportID);
 
 		String fileName  = String.format(URLs.REPORT_DATA_FILENAME, groupID, reportID);
 		String filePath  = String.format("%s/assets/javascripts/%s", assetsPath, fileName);
@@ -122,8 +121,7 @@ public class ApiHelper {
 	 * 发表评论
 	 */
 	public static void writeComment(int userID, int objectType, int objectID, Map params) throws UnsupportedEncodingException, JSONException {
-		String urlPath   = String.format(URLs.API_COMMENT_PATH, userID, objectID, objectType);
-		String urlString = String.format("%s%s", URLs.HOST, urlPath);
+		String urlString = String.format(URLs.API_COMMENT_PATH, URLs.HOST, userID, objectID, objectType);
 
 		Map<String, String> response = HttpUtil.httpPost(urlString, params);
 		Log.i("WriteComment", response.get("code").toString());
@@ -350,8 +348,7 @@ public class ApiHelper {
 	 * @param 是否启用锁屏
 	 */
 	public static void screenLock(String deviceID, String password, boolean state) {
-		String urlPath   = String.format(URLs.API_SCREEN_LOCK_PATH, deviceID);
-		String urlString = String.format("%s%s", URLs.HOST, urlPath);
+		String urlString = String.format(URLs.API_SCREEN_LOCK_PATH, URLs.HOST, deviceID);
 
 		try {
 			Map<String, String> params = new HashMap();
@@ -393,7 +390,7 @@ public class ApiHelper {
 			userParams.put("user_pass", userJSON.getString("password"));
 			params.put("user", userParams);
 
-			String urlString = String.format("%s%s", URLs.HOST, URLs.API_ACTION_LOG__PATH);
+			String urlString = String.format(URLs.API_ACTION_LOG_PATH, URLs.HOST);
 			HttpUtil.httpPost(urlString, params);
 		} catch (JSONException e) {
 			e.printStackTrace();

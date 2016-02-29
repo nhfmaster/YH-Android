@@ -43,8 +43,7 @@ public class MainActivity extends BaseActivity {
         mWebView.loadUrl(urlStringForLoading);
 
         try {
-            String urlPath = String.format(URLs.KPI_PATH, user.getString("role_id"), user.getString("group_id"));
-            urlString = String.format("%s%s", URLs.HOST, urlPath);
+            urlString = String.format(URLs.KPI_PATH, URLs.HOST, user.getString("role_id"), user.getString("group_id"));
             objectType = 1;
         } catch (JSONException e) {
             e.printStackTrace();
@@ -124,30 +123,28 @@ public class MainActivity extends BaseActivity {
             mWebView.loadUrl(String.format("file:///%s/loading/loading.html", FileUtil.sharedPath(mContext)));
 
             try {
-                String urlPath;
                 switch (v.getId()) {
                     case R.id.tab_kpi:
                         objectType = 1;
-                        urlPath = String.format(URLs.KPI_PATH, user.getString("role_id"), user.getString("group_id"));
+                        urlString = String.format(URLs.KPI_PATH, URLs.HOST, user.getString("role_id"), user.getString("group_id"));
                         break;
                     case R.id.tab_analysis:
                         objectType = 2;
-                        urlPath = String.format(URLs.ANALYSE_PATH, user.getString("role_id"));
+                        urlString = String.format(URLs.ANALYSE_PATH, URLs.HOST, user.getString("role_id"));
                         break;
                     case R.id.tab_app:
                         objectType = 3;
-                        urlPath = String.format(URLs.APPLICATION_PATH, user.getString("role_id"));
+                        urlString = String.format(URLs.APPLICATION_PATH, URLs.HOST, user.getString("role_id"));
                         break;
                     case R.id.tab_message:
                         objectType = 5;
-                        urlPath = String.format(URLs.MESSAGE_PATH, user.getString("role_id"), user.getString("user_id"));
+                        urlString = String.format(URLs.MESSAGE_PATH, URLs.HOST, user.getString("role_id"), user.getString("user_id"));
                         break;
                     default:
-                        urlPath = String.format(URLs.KPI_PATH, user.getString("role_id"), user.getString("group_id"));
+                        urlString = String.format(URLs.KPI_PATH, URLs.HOST, user.getString("role_id"), user.getString("group_id"));
                         break;
                 }
 
-                urlString = String.format("%s%s", URLs.HOST, urlPath);
                 new Thread(mRunnableForDetecting).start();
             } catch (Exception e) {
                 e.printStackTrace();
