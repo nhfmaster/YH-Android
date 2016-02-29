@@ -58,7 +58,7 @@ public class LoginActivity extends BaseActivity {
             checkUpgrade(false);
         }
 
-        urlString = URLs.LOGIN_PATH;
+        urlString = String.format(URLs.LOGIN_PATH, URLs.HOST);
         urlStringForDetecting = URLs.HOST;
         assetsPath = FileUtil.sharedPath(mContext);
         relativeAssetsPath = "assets";

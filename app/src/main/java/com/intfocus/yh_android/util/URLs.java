@@ -20,10 +20,7 @@ public class URLs implements Serializable {
 	public final static String HOST = "http://yonghui.idata.mobi";
 	public final static String HOST1  = "http://10.0.3.2:4567";
 
-	//login
-    public final static String LOGIN_PATH              = String.format("%s/mobile/login", HOST);
     public final static String API_USER_PATH           = "%s/api/v1/%s/%s/%s/authentication";
-
     public final static String API_DATA_PATH           = "%s/api/v1/group/%s/report/%s/attachment";
     public final static String API_COMMENT_PATH        = "%s/api/v1/user/%d/id/%d/type/%d";
     public final static String API_SCREEN_LOCK_PATH    = "%s/api/v1/user_device/%s/screen_lock";
@@ -32,6 +29,7 @@ public class URLs implements Serializable {
     public final static String API_ACTION_LOG_PATH     = "%s/api/v1/android/logger";
     public final static String API_ASSETS_PATH         = "%s/api/v1/download/assets.zip";
 
+    public final static String LOGIN_PATH              = "%s/mobile/login";
     public final static String KPI_PATH                = "%s/mobile/role/%s/group/%s/kpi";
     public final static String MESSAGE_PATH            = "%s/mobile/role/%s/user/%s/message";
     public final static String APPLICATION_PATH        = "%s/mobile/role/%s/app";
@@ -86,7 +84,7 @@ public class URLs implements Serializable {
 	}	
 	
 	/**
-     * MD5加码。32位
+     * MD5加密-32位
      *
      * @param inStr
      * @return

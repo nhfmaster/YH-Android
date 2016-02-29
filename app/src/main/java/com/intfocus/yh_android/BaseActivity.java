@@ -520,7 +520,8 @@ public class BaseActivity extends Activity {
 
             if (isUpgrade) {
                 Log.i("checkVersionUpgrade", "upgrade");
-                ApiHelper.clearResponseHeader(URLs.LOGIN_PATH, assetsPath);
+                String urlString = String.format(URLs.LOGIN_PATH, URLs.HOST);
+                ApiHelper.clearResponseHeader(urlString, assetsPath);
                 FileUtil.writeFile(versionConfigPath, packageInfo.versionName);
 
                 String userConfigPath = String.format("%s/%s", FileUtil.basePath(mContext), URLs.USER_CONFIG_FILENAME);
