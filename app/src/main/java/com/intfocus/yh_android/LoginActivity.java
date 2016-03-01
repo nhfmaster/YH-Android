@@ -2,23 +2,15 @@ package com.intfocus.yh_android;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.widget.Toast;
-
 import com.handmark.pulltorefresh.library.PullToRefreshWebView;
 import com.intfocus.yh_android.screen_lock.ConfirmPassCodeActivity;
 import com.intfocus.yh_android.util.ApiHelper;
 import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.URLs;
-
 import org.json.JSONObject;
-
-import java.io.File;
-import java.io.IOException;
 
 public class LoginActivity extends BaseActivity {
 
@@ -89,14 +81,14 @@ public class LoginActivity extends BaseActivity {
                         checkVersionUpgrade(assetsPath);
 
                         // 跳转至主界面
-                        Intent intent = new Intent(mContext, MainActivity.class);
+                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                         intent.putExtra("fromActivity", this.getClass().toString());
                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        mContext.startActivity(intent);
+                        LoginActivity.this.startActivity(intent);
 
                         finish();
                     } else {
-                        Toast.makeText(mContext, info, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(LoginActivity.this, info, Toast.LENGTH_SHORT).show();
                     }
 
                 } catch (Exception e) {
@@ -114,7 +106,7 @@ public class LoginActivity extends BaseActivity {
                     e.printStackTrace();
                 }
             } else {
-                Toast.makeText(mContext, "请输入用户名与密码", Toast.LENGTH_SHORT).show();
+                Toast.makeText(LoginActivity.this, "请输入用户名与密码", Toast.LENGTH_SHORT).show();
             }
         }
 
