@@ -14,6 +14,7 @@ import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.URLs;
 import com.pgyersdk.crash.PgyCrashManager;
 import com.squareup.leakcanary.LeakCanary;
+import com.squareup.leakcanary.RefWatcher;
 
 import org.OpenUDID.OpenUDID_manager;
 
@@ -24,11 +25,12 @@ import java.io.File;
  */
 public class YHApplication extends Application implements Application.ActivityLifecycleCallbacks {
 
-    private Activity currentActivity;
+    private String currentActivityName;
     private Context mContext;
+    private RefWatcher refWatcher;
 
     /*
-     *  手机待机再激活时发送开屏广播
+     *  手机待机再激活时发送解屏广播
      */
     BroadcastReceiver broadcastScreenOnAndOff = new BroadcastReceiver() {
 
@@ -37,15 +39,13 @@ public class YHApplication extends Application implements Application.ActivityLi
 
         if (intent.getAction().equals(Intent.ACTION_SCREEN_ON) && // 开屏状态
             BaseActivity.mActivities.size() > 0 && // 应用活动Activity数量大于零
-            currentActivity != null && !currentActivity.getClass().toString().contains("ConfirmPassCodeActivity") && // 当前活动的Activity非解锁界面
+            !currentActivityName.contains("ConfirmPassCodeActivity") && // 当前活动的Activity非解锁界面
             FileUtil.checkIsLocked(mContext)) { // 应用处于登录状态，并且开启了密码锁
 
             Intent i = new Intent(getApplicationContext(), ConfirmPassCodeActivity.class);
             i.putExtra("is_from_login", false);
             i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(i);
-
-            currentActivity = null;
         }
         }
     };
@@ -54,6 +54,7 @@ public class YHApplication extends Application implements Application.ActivityLi
     public void onCreate() {
         super.onCreate();
 
+        currentActivityName = "";
         mContext = YHApplication.this;
         String sharedPath = FileUtil.sharedPath(mContext);
 
@@ -107,7 +108,7 @@ public class YHApplication extends Application implements Application.ActivityLi
         /*
          *  监测内存泄漏
          */
-        LeakCanary.install(this);
+        refWatcher = LeakCanary.install(this);
     }
 
     @Override
@@ -143,8 +144,7 @@ public class YHApplication extends Application implements Application.ActivityLi
          * 1. 如果用户已使用锁屏功能，则进入验证密码界面
          * 2. 如果未使用锁屏功能，则进入登录状态
          */
-        currentActivity = null;
-        currentActivity = activity;
+        currentActivityName = activity.getClass().toString();
     }
 
     @Override
@@ -156,8 +156,7 @@ public class YHApplication extends Application implements Application.ActivityLi
          * 1. 如果用户已使用锁屏功能，则进入验证密码界面
          * 2. 如果未使用锁屏功能，则进入登录状态
          */
-        currentActivity = null;
-        currentActivity = activity;
+        currentActivityName = activity.getClass().toString();
     }
 
     @Override
@@ -167,5 +166,11 @@ public class YHApplication extends Application implements Application.ActivityLi
     @Override
     public void onActivityDestroyed(Activity activity) {
         Log.i("YHApplication", "onActivityDestroyed");
+    }
+
+
+    public static RefWatcher getRefWatcher(Context context) {
+        YHApplication application = (YHApplication) context.getApplicationContext();
+        return application.refWatcher;
     }
 }
