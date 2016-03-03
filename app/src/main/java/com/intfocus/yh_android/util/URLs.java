@@ -1,7 +1,6 @@
 package com.intfocus.yh_android.util;
 
 import android.content.Context;
-import android.os.Environment;
 
 import java.io.Serializable;
 import java.net.URLEncoder;

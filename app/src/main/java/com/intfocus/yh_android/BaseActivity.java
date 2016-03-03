@@ -35,6 +35,7 @@ import com.intfocus.yh_android.util.URLs;
 import com.pgyersdk.javabean.AppBean;
 import com.pgyersdk.update.PgyUpdateManager;
 import com.pgyersdk.update.UpdateManagerListener;
+import com.squareup.leakcanary.RefWatcher;
 
 import org.apache.commons.io.FileUtils;
 import org.json.JSONException;
@@ -79,6 +80,7 @@ public class BaseActivity extends Activity {
     @SuppressLint("SetJavaScriptEnabled")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         mActivities.add(this);
         finishLoginActivityWhenInMainAcitivty(this);
 
@@ -104,12 +106,16 @@ public class BaseActivity extends Activity {
                 e.printStackTrace();
             }
         }
+
+        RefWatcher refWatcher = YHApplication.getRefWatcher(mContext);
+        refWatcher.watch(this);
     }
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
         mActivities.remove(this);
+
+        super.onDestroy();
     }
 
     public static void finishAll() {
@@ -434,7 +440,6 @@ public class BaseActivity extends Activity {
 
     protected void checkUpgrade(final boolean isShowToast) {
         UpdateManagerListener updateManagerListener = new UpdateManagerListener() {
-
             @Override
             public void onUpdateAvailable(final String result) {
                 Log.i("PGYER", result);
@@ -444,7 +449,7 @@ public class BaseActivity extends Activity {
                 try {
                     JSONObject response = new JSONObject(result);
                     message = response.getString("message");
-                    if(message.isEmpty()) {
+                    if (message.isEmpty()) {
                         JSONObject responseData = response.getJSONObject("data");
                         message = responseData.getString("releaseNote");
                         versionCode = responseData.getString("versionCode");
@@ -457,11 +462,11 @@ public class BaseActivity extends Activity {
                 }
 
                 // 偶数时为正式版本
-                if(Integer.parseInt(versionCode) % 2 == 1) {
-                    if(isShowToast) {
+                if (Integer.parseInt(versionCode) % 2 == 1) {
+                    if (isShowToast) {
                         Toast.makeText(mContext, "已是最新版本", Toast.LENGTH_SHORT).show();
                     }
-                    return ;
+                    return;
                 }
 
 
@@ -490,7 +495,7 @@ public class BaseActivity extends Activity {
 
             @Override
             public void onNoUpdateAvailable() {
-                if(isShowToast) {
+                if (isShowToast) {
                     Toast.makeText(mContext, "已是最新版本", Toast.LENGTH_SHORT).show();
                 }
             }
