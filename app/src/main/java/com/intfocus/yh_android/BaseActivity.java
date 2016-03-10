@@ -2,6 +2,7 @@ package com.intfocus.yh_android;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -80,8 +81,13 @@ public class BaseActivity extends Activity {
     @SuppressLint("SetJavaScriptEnabled")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        mActivities.add(this);
+        ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        String runningActivity = activityManager.getRunningTasks(1).get(0).topActivity.getClassName();
+        System.out.println("runningActivity:" + runningActivity);
+        if (!(runningActivity.equalsIgnoreCase("com.intfocus.yh_android.MainActivity"))) {
+            mActivities.add(this);
+        }
+        System.out.println("mActivitysizeadd:" + mActivities.size());
         finishLoginActivityWhenInMainAcitivty(this);
 
         mContext = BaseActivity.this;
@@ -114,20 +120,21 @@ public class BaseActivity extends Activity {
     @Override
     public void onDestroy() {
         mActivities.remove(this);
-
+        System.out.println("mActivitysizeremove:" + mActivities.size());
         super.onDestroy();
     }
 
     public static void finishAll() {
-        for(Activity activity:mActivities) {
+        for (Activity activity : mActivities) {
             activity.finish();
         }
+        mActivities.clear();
     }
 
     private void finishLoginActivityWhenInMainAcitivty(Activity activity) {
-        if(activity.getClass().toString().contains("MainActivity")) {
-            for(Activity a:mActivities) {
-                if(a.getClass().toString().contains("LoginActivity")) {
+        if (activity.getClass().toString().contains("MainActivity")) {
+            for (Activity a : mActivities) {
+                if (a.getClass().toString().contains("LoginActivity")) {
                     a.finish();
                     Log.i("finishLoginActivity", mActivities.toString());
                 }
@@ -186,7 +193,7 @@ public class BaseActivity extends Activity {
     }
 
     public void setPullToRefreshWebView(boolean isAllow) {
-        if(!isAllow) {
+        if (!isAllow) {
             pullToRefreshWebView.setMode(PullToRefreshBase.Mode.DISABLED);
             return;
         }
@@ -216,7 +223,7 @@ public class BaseActivity extends Activity {
             /*
              *  下拉浏览器刷新时，删除响应头文件，相当于无缓存刷新
              */
-            if(urlString != null && !urlString.isEmpty()) {
+            if (urlString != null && !urlString.isEmpty()) {
                 String urlKey = urlString.indexOf("?") != -1 ? TextUtils.split(urlString, "?")[0] : urlString;
                 ApiHelper.clearResponseHeader(urlKey, assetsPath);
             }
@@ -235,6 +242,7 @@ public class BaseActivity extends Activity {
 
             return null;
         }
+
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
@@ -253,12 +261,12 @@ public class BaseActivity extends Activity {
         public void run() {
             Map<String, String> response = HttpUtil.httpGet(urlStringForDetecting, new HashMap<String, String>());
             int statusCode = Integer.parseInt(response.get("code").toString());
-            if(statusCode == 200) {
+            if (statusCode == 200) {
                 Log.i("StatusCode", response.get("body").toString());
                 try {
                     JSONObject json = new JSONObject(response.get("body").toString());
                     statusCode = json.getBoolean("device_state") ? 200 : 401;
-                } catch(JSONException e) {
+                } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
@@ -376,14 +384,14 @@ public class BaseActivity extends Activity {
     }
 
     public void initColorView(List<ImageView> colorViews) {
-        String[] colors =  {"#ffffff", "#ffcd0a", "#fd9053", "#dd0929", "#016a43", "#9d203c", "#093db5", "#6a3906", "#192162", "#000000"};
+        String[] colors = {"#ffffff", "#ffcd0a", "#fd9053", "#dd0929", "#016a43", "#9d203c", "#093db5", "#6a3906", "#192162", "#000000"};
         String userIDStr = String.format("%d", userID);
         int numDiff = colorViews.size() - userIDStr.length();
         numDiff = numDiff < 0 ? 0 : numDiff;
 
-        for(int i=0; i < colorViews.size(); i++) {
+        for (int i = 0; i < colorViews.size(); i++) {
             int colorIndex = 0;
-            if(i >= numDiff) {
+            if (i >= numDiff) {
                 colorIndex = Character.getNumericValue(userIDStr.charAt(i - numDiff));
             }
             colorViews.get(i).setBackgroundColor(Color.parseColor(colors[colorIndex]));
@@ -540,7 +548,9 @@ public class BaseActivity extends Activity {
                  */
                 String headerPath = String.format("%s/%s", sharedPath, URLs.CACHED_HEADER_FILENAME);
                 File headerFile = new File(headerPath);
-                if(headerFile.exists()) { headerFile.delete(); }
+                if (headerFile.exists()) {
+                    headerFile.delete();
+                }
 
                 FileUtil.checkAssets(mContext, "loading");
                 FileUtil.checkAssets(mContext, "assets");
@@ -553,7 +563,7 @@ public class BaseActivity extends Activity {
     }
 
     /**
-     *  检测服务器端静态文件是否更新
+     * 检测服务器端静态文件是否更新
      */
     public boolean checkAssetsUpdated(boolean shouldReloadUIThread) {
         boolean isShouldUpdateAssets = false;
@@ -561,18 +571,18 @@ public class BaseActivity extends Activity {
         try {
             String assetsZipPath = String.format("%s/assets.zip", sharedPath);
 
-            if(!(new File(assetsZipPath)).exists()) {
+            if (!(new File(assetsZipPath)).exists()) {
                 isShouldUpdateAssets = true;
             }
 
             String userConfigPath = String.format("%s/%s", FileUtil.basePath(mContext), URLs.USER_CONFIG_FILENAME);
             JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
-            if(!isShouldUpdateAssets && !userJSON.getString("local_assets_md5").equals(userJSON.getString("assets_md5"))) {
-                Log.i("checkAssetsUpdated", String.format("%s: %s != %s",assetsZipPath,  userJSON.getString("local_assets_md5"), userJSON.getString("assets_md5")));
+            if (!isShouldUpdateAssets && !userJSON.getString("local_assets_md5").equals(userJSON.getString("assets_md5"))) {
+                Log.i("checkAssetsUpdated", String.format("%s: %s != %s", assetsZipPath, userJSON.getString("local_assets_md5"), userJSON.getString("assets_md5")));
                 isShouldUpdateAssets = true;
             }
 
-            if(!isShouldUpdateAssets) {
+            if (!isShouldUpdateAssets) {
                 return false;
             }
 
@@ -581,7 +591,9 @@ public class BaseActivity extends Activity {
              */
             String headerPath = String.format("%s/%s", sharedPath, URLs.CACHED_HEADER_FILENAME);
             File headerFile = new File(headerPath);
-            if(headerFile.exists()) { headerFile.delete(); }
+            if (headerFile.exists()) {
+                headerFile.delete();
+            }
 
             // instantiate it within the onCreate method
             mProgressDialog = new ProgressDialog(mContext);
@@ -715,7 +727,7 @@ public class BaseActivity extends Activity {
                     FileUtil.writeFile(userConfigPath, userJSON.toString());
                     Log.i("onPostExecute", userJSON.toString());
 
-                    if(isReloadUIThread) {
+                    if (isReloadUIThread) {
                         new Thread(mRunnableForDetecting).start();
                     }
                 } catch (IOException e) {
