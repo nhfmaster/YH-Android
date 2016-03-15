@@ -19,6 +19,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -48,11 +49,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -73,7 +76,7 @@ public class BaseActivity extends Activity {
     protected String urlStringForLoading;
     protected JSONObject logParams;
     protected ProgressDialog mProgressDialog;
-    protected static ArrayList<Activity> mActivities = new ArrayList<Activity>();
+    protected static ArrayList<Activity> mActivities = new ArrayList<Activity>(3);
 
     protected Context mContext;
 
@@ -81,13 +84,11 @@ public class BaseActivity extends Activity {
     @SuppressLint("SetJavaScriptEnabled")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        String runningActivity = activityManager.getRunningTasks(1).get(0).topActivity.getClassName();
-        System.out.println("runningActivity:" + runningActivity);
-        if (!(runningActivity.equalsIgnoreCase("com.intfocus.yh_android.MainActivity"))) {
-            mActivities.add(this);
+        mActivities.add(this);
+        for (Activity a : mActivities) {
+            System.out.println("mActivityName: " + a.toString());
         }
-        System.out.println("mActivitysizeadd:" + mActivities.size());
+
         finishLoginActivityWhenInMainAcitivty(this);
 
         mContext = BaseActivity.this;
@@ -117,11 +118,56 @@ public class BaseActivity extends Activity {
         refWatcher.watch(this);
     }
 
+    public static void fixInputMethodManagerLeak(Context context) {
+        if (context == null) {
+            return;
+        }
+        try {
+            // 对 mCurRootView mServedView mNextServedView 进行置空...
+            InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm == null) {
+                return;
+            }
+
+            Object obj_get = null;
+            Field f_mCurRootView = imm.getClass().getDeclaredField("mCurRootView");
+            Field f_mServedView = imm.getClass().getDeclaredField("mServedView");
+            Field f_mNextServedView = imm.getClass().getDeclaredField("mNextServedView");
+
+            if (f_mCurRootView.isAccessible() == false) {
+                f_mCurRootView.setAccessible(true);
+            }
+            obj_get = f_mCurRootView.get(imm);
+            if (obj_get != null) { // 不为null则置为空
+                f_mCurRootView.set(imm, null);
+            }
+
+            if (f_mServedView.isAccessible() == false) {
+                f_mServedView.setAccessible(true);
+            }
+            obj_get = f_mServedView.get(imm);
+            if (obj_get != null) { // 不为null则置为空
+                f_mServedView.set(imm, null);
+            }
+
+            if (f_mNextServedView.isAccessible() == false) {
+                f_mNextServedView.setAccessible(true);
+            }
+            obj_get = f_mNextServedView.get(imm);
+            if (obj_get != null) { // 不为null则置为空
+                f_mNextServedView.set(imm, null);
+            }
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
+    }
+
     @Override
     public void onDestroy() {
         mActivities.remove(this);
-        System.out.println("mActivitysizeremove:" + mActivities.size());
+        System.out.println("activityDestroy: " + this.toString());
         super.onDestroy();
+        fixInputMethodManagerLeak(this);
     }
 
     public static void finishAll() {
@@ -285,7 +331,8 @@ public class BaseActivity extends Activity {
                     new Thread(mRunnableWithAPI).start();
                     break;
                 case 400:
-                    showDialogForWithoutNetwork();
+                case 408:
+                    showWebViewForWithoutNetwork();
                     break;
                 case 401:
                     showDialogForDeviceForbided();
@@ -362,6 +409,11 @@ public class BaseActivity extends Activity {
                 }
         );
         alertDialog.show();
+    }
+
+    public void showWebViewForWithoutNetwork() {
+        urlStringForLoading = String.format("file:///%s/loading/network_400.html", FileUtil.sharedPath(mContext));
+        mWebView.loadUrl(urlStringForLoading);
     }
 
 

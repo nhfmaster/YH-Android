@@ -232,7 +232,7 @@ public class ConfirmPassCodeActivity extends Activity {
 
                 new Thread(new Runnable() {
                     @Override
-                    public void run() {
+                    public synchronized void run() {
                         try {
                             JSONObject params = new JSONObject();
                             params.put("action", "解屏");

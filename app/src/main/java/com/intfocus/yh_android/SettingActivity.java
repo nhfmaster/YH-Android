@@ -73,7 +73,6 @@ public class SettingActivity extends BaseActivity {
 
         initializeUI();
     }
-
     @Override
     public void onResume() {
         super.onResume();  // Always call the superclass method first

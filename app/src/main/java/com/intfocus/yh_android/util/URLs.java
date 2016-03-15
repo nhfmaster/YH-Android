@@ -18,6 +18,7 @@ public class URLs implements Serializable {
 
 	public final static String HOST = "http://yonghui.idata.mobi";
 	public final static String HOST1  = "http://10.0.3.2:4567";
+    public final static String HOST3  = "http://www.google.com";
 
     public final static String API_USER_PATH           = "%s/api/v1/%s/%s/%s/authentication";
     public final static String API_DATA_PATH           = "%s/api/v1/group/%s/report/%s/attachment";

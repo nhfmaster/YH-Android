@@ -39,11 +39,11 @@ public class HttpUtil {
         HttpParams httpParameters = new BasicHttpParams();
         // Set the timeout in milliseconds until a connection is established.
         // The default value is zero, that means the timeout is not used.
-        int timeoutConnection = 3000;
+        int timeoutConnection = 500;
         HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
         // Set the default socket timeout (SO_TIMEOUT)
         // in milliseconds which is the timeout for waiting for data.
-        int timeoutSocket = 5000;
+        int timeoutSocket = 500;
         HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
 
         DefaultHttpClient client = new DefaultHttpClient(httpParameters);
@@ -79,9 +79,15 @@ public class HttpUtil {
 
         }
         catch (IOException e) {
+            Log.i("GETBUG", e.getMessage());
             e.printStackTrace();
-            retMap.put("code", "400");
-            retMap.put("body", String.format("%s 访问失败:\n%s", urlString, e.getMessage()));
+            if(e.getMessage().contains("timed out")) {
+                retMap.put("code", "408");
+                retMap.put("body", "{\"info\": \"连接超时\"}");
+            } else if(e.getMessage().contains("Unable to resolve host")) {
+                retMap.put("code", "400");
+                retMap.put("body", "{\"info\": \"网络未连接\"}");
+            }
         }
         return retMap;
     }
@@ -98,11 +104,11 @@ public class HttpUtil {
         HttpParams httpParameters = new BasicHttpParams();
         // Set the timeout in milliseconds until a connection is established.
         // The default value is zero, that means the timeout is not used.
-        int timeoutConnection = 6000;
+        int timeoutConnection = 3000;
         HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
         // Set the default socket timeout (SO_TIMEOUT)
         // in milliseconds which is the timeout for waiting for data.
-        int timeoutSocket = 8000;
+        int timeoutSocket = 3000;
         HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
 
         DefaultHttpClient client = new DefaultHttpClient(httpParameters);
@@ -162,11 +168,6 @@ public class HttpUtil {
         }
         catch (IOException e) {
             e.printStackTrace();
-
-            retMap.put("code", "401");
-            retMap.put("body", "{\"info\": \"用户名或密码错误\"}");
-        }
-        finally {
         }
         return retMap;
     }
@@ -182,11 +183,11 @@ public class HttpUtil {
         HttpParams httpParameters = new BasicHttpParams();
         // Set the timeout in milliseconds until a connection is established.
         // The default value is zero, that means the timeout is not used.
-        int timeoutConnection = 6000;
+        int timeoutConnection = 3000;
         HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
         // Set the default socket timeout (SO_TIMEOUT)
         // in milliseconds which is the timeout for waiting for data.
-        int timeoutSocket = 8000;
+        int timeoutSocket = 3000;
         HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
 
         DefaultHttpClient client = new DefaultHttpClient(httpParameters);
@@ -223,9 +224,17 @@ public class HttpUtil {
         }
         catch (IOException e) {
             e.printStackTrace();
+            // 400: Unable to resolve host "yonghui.idata.mobi": No address associated with hostname
 
-            retMap.put("code", "401");
-            retMap.put("body", "{\"info\": \"用户名或密码错误\"}");
+            Log.i("DDEBUG", e.getMessage());
+            if(e.getMessage().contains("Unable to resolve host")) {
+                retMap.put("code", "400");
+                retMap.put("body", "{\"info\": \"网络未连接\"}");
+            }
+            else if(e.getMessage().contains("Unauthorized")) {
+                retMap.put("code", "401");
+                retMap.put("body", "{\"info\": \"用户名或密码错误\"}");
+            }
         }
         return retMap;
     }

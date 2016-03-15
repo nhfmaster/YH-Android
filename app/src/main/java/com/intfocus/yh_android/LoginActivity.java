@@ -63,7 +63,7 @@ public class LoginActivity extends BaseActivity {
         /*
          *  加载服务器网页
          */
-        new Thread(mRunnableForDetecting).start();
+//        new Thread(mRunnableForDetecting).start();
     }
 
     private class JavaScriptInterface extends JavaScriptBase {

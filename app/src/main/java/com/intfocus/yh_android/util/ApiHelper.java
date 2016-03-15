@@ -54,6 +54,15 @@ public class ApiHelper {
 			userJSON.put("password", password);
 			userJSON.put("is_login", response.get("code").equals("200"));
 
+			if(response.get("code").equals("400")) {
+				return "网络未连接";
+			} else if(response.get("code").equals("401")) {
+				return "用户名或密码不正确";
+			}else if(response.get("code").equals("408")) {
+				return "连接超时";
+			} else if(!response.get("code").equals("200")) {
+				return responseJSON.getString("info");
+			}
 			// FileUtil.dirPath 需要优先写入登录用户信息
 			userJSON = ApiHelper.merge(userJSON, responseJSON);
 			FileUtil.writeFile(userConfigPath, userJSON.toString());
