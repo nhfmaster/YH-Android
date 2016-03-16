@@ -71,7 +71,7 @@ public class BaseActivity extends Activity {
     protected String relativeAssetsPath;
     protected String urlStringForDetecting;
     protected String urlStringForLoading;
-    protected JSONObject logParams;
+    protected JSONObject logParams = new JSONObject();
     protected ProgressDialog mProgressDialog;
     protected static ArrayList<Activity> mActivities = new ArrayList<Activity>();
 
@@ -261,7 +261,7 @@ public class BaseActivity extends Activity {
         public void run() {
             Map<String, String> response = HttpUtil.httpGet(urlStringForDetecting, new HashMap<String, String>());
             int statusCode = Integer.parseInt(response.get("code").toString());
-            if (statusCode == 200) {
+            if (statusCode == 200 && !urlStringForDetecting.equals(URLs.HOST)) {
                 Log.i("StatusCode", response.get("body").toString());
                 try {
                     JSONObject json = new JSONObject(response.get("body").toString());
