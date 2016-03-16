@@ -37,16 +37,16 @@ public class YHApplication extends Application implements Application.ActivityLi
         @Override
         public void onReceive(Context context, Intent intent) {
 
-        if (intent.getAction().equals(Intent.ACTION_SCREEN_ON) && // 开屏状态
-            BaseActivity.mActivities.size() > 0 && // 应用活动Activity数量大于零
-            !currentActivityName.contains("ConfirmPassCodeActivity") && // 当前活动的Activity非解锁界面
-            FileUtil.checkIsLocked(mContext)) { // 应用处于登录状态，并且开启了密码锁
+            if (intent.getAction().equals(Intent.ACTION_SCREEN_ON) && // 开屏状态
+                    BaseActivity.mActivities.size() > 0 && // 应用活动Activity数量大于零
+                    !currentActivityName.contains("ConfirmPassCodeActivity") && // 当前活动的Activity非解锁界面
+                    FileUtil.checkIsLocked(mContext)) { // 应用处于登录状态，并且开启了密码锁
 
-            Intent i = new Intent(getApplicationContext(), ConfirmPassCodeActivity.class);
-            i.putExtra("is_from_login", false);
-            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(i);
-        }
+                Intent i = new Intent(getApplicationContext(), ConfirmPassCodeActivity.class);
+                i.putExtra("is_from_login", false);
+                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(i);
+            }
         }
     };
 
@@ -72,28 +72,24 @@ public class YHApplication extends Application implements Application.ActivityLi
          *  静态文件放在共享文件夹内,以便与服务器端检测、更新
          *  刚升级过时，就不必须再更新，浪费用户流量
          */
-        String[] assetsName = {"assets.zip", "loading.zip"};
-        for(int i=0, len=assetsName.length; i < len; i++) {
-            String assetZipPath = String.format("%s/%s", sharedPath, assetsName[i]);
-            if (!(new File(assetZipPath)).exists()) {
-                FileUtil.copyAssetFile(mContext, assetsName[i], assetZipPath);
-            }
-        }
-
         /*
          *  解压静态资源
          *  loading.zip, e433278b2f0835eaaaeb951cf9dfa363
          *  assets.zip, 490ecad478805d9455853865f4b53622
          */
-        FileUtil.checkAssets(mContext, "loading");
-        FileUtil.checkAssets(mContext, "assets");
+        FileUtil.checkAssets(mContext, "loading", false);
+        FileUtil.checkAssets(mContext, "assets", false);
+        FileUtil.checkAssets(mContext, "fonts", true);
+        FileUtil.checkAssets(mContext, "images", true);
+        FileUtil.checkAssets(mContext, "stylesheets", true);
+        FileUtil.checkAssets(mContext, "javascripts", true);
 
         /*
          *  基本目录结构
          */
         String cachedPath = String.format("%s/%s", FileUtil.basePath(mContext), URLs.CACHED_DIRNAME);
         File cachedFolder = new File(cachedPath);
-        if(!cachedFolder.exists()) {
+        if (!cachedFolder.exists()) {
             cachedFolder.mkdirs();
         }
 

@@ -19,6 +19,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -48,11 +49,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -73,7 +76,7 @@ public class BaseActivity extends Activity {
     protected String urlStringForLoading;
     protected JSONObject logParams;
     protected ProgressDialog mProgressDialog;
-    protected static ArrayList<Activity> mActivities = new ArrayList<Activity>();
+    protected static ArrayList<Activity> mActivities = new ArrayList<Activity>(3);
 
     protected Context mContext;
 
@@ -81,13 +84,11 @@ public class BaseActivity extends Activity {
     @SuppressLint("SetJavaScriptEnabled")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        String runningActivity = activityManager.getRunningTasks(1).get(0).topActivity.getClassName();
-        System.out.println("runningActivity:" + runningActivity);
-        if (!(runningActivity.equalsIgnoreCase("com.intfocus.yh_android.MainActivity"))) {
-            mActivities.add(this);
+        mActivities.add(this);
+        for (Activity a : mActivities) {
+            System.out.println("mActivityName: " + a.toString());
         }
-        System.out.println("mActivitysizeadd:" + mActivities.size());
+
         finishLoginActivityWhenInMainAcitivty(this);
 
         mContext = BaseActivity.this;
@@ -117,11 +118,56 @@ public class BaseActivity extends Activity {
         refWatcher.watch(this);
     }
 
+    public static void fixInputMethodManagerLeak(Context context) {
+        if (context == null) {
+            return;
+        }
+        try {
+            // 对 mCurRootView mServedView mNextServedView 进行置空...
+            InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm == null) {
+                return;
+            }
+
+            Object obj_get = null;
+            Field f_mCurRootView = imm.getClass().getDeclaredField("mCurRootView");
+            Field f_mServedView = imm.getClass().getDeclaredField("mServedView");
+            Field f_mNextServedView = imm.getClass().getDeclaredField("mNextServedView");
+
+            if (f_mCurRootView.isAccessible() == false) {
+                f_mCurRootView.setAccessible(true);
+            }
+            obj_get = f_mCurRootView.get(imm);
+            if (obj_get != null) { // 不为null则置为空
+                f_mCurRootView.set(imm, null);
+            }
+
+            if (f_mServedView.isAccessible() == false) {
+                f_mServedView.setAccessible(true);
+            }
+            obj_get = f_mServedView.get(imm);
+            if (obj_get != null) { // 不为null则置为空
+                f_mServedView.set(imm, null);
+            }
+
+            if (f_mNextServedView.isAccessible() == false) {
+                f_mNextServedView.setAccessible(true);
+            }
+            obj_get = f_mNextServedView.get(imm);
+            if (obj_get != null) { // 不为null则置为空
+                f_mNextServedView.set(imm, null);
+            }
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
+    }
+
     @Override
     public void onDestroy() {
         mActivities.remove(this);
-        System.out.println("mActivitysizeremove:" + mActivities.size());
+        System.out.println("activityDestroy: " + this.toString());
         super.onDestroy();
+        fixInputMethodManagerLeak(this);
     }
 
     public static void finishAll() {
@@ -285,7 +331,8 @@ public class BaseActivity extends Activity {
                     new Thread(mRunnableWithAPI).start();
                     break;
                 case 400:
-                    showDialogForWithoutNetwork();
+                case 408:
+                    showWebViewForWithoutNetwork();
                     break;
                 case 401:
                     showDialogForDeviceForbided();
@@ -334,7 +381,13 @@ public class BaseActivity extends Activity {
     Runnable mRunnableForLogger = new Runnable() {
         @Override
         public void run() {
-            ApiHelper.actionLog(mContext, logParams);
+            try {
+                if (logParams.get("action").toString().equals("登录") || logParams.get("action").toString().equals("解屏"))
+                    ApiHelper.actionLog(mContext, logParams);
+                System.out.println("logParams: " + logParams.get("action").toString());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     };
 
@@ -362,6 +415,11 @@ public class BaseActivity extends Activity {
                 }
         );
         alertDialog.show();
+    }
+
+    public void showWebViewForWithoutNetwork() {
+        urlStringForLoading = String.format("file:///%s/loading/network_400.html", FileUtil.sharedPath(mContext));
+        mWebView.loadUrl(urlStringForLoading);
     }
 
 
@@ -536,13 +594,6 @@ public class BaseActivity extends Activity {
                 String urlString = String.format(URLs.LOGIN_PATH, URLs.HOST);
                 ApiHelper.clearResponseHeader(urlString, assetsPath);
                 FileUtil.writeFile(versionConfigPath, packageInfo.versionName);
-
-                String userConfigPath = String.format("%s/%s", FileUtil.basePath(mContext), URLs.USER_CONFIG_FILENAME);
-                JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
-                userJSON.remove("local_loading_md5");
-                userJSON.remove("local_assets_md5");
-                FileUtil.writeFile(userConfigPath, userJSON.toString());
-
                 /*
                  * 用户报表数据js文件存放在公共区域
                  */
@@ -552,8 +603,6 @@ public class BaseActivity extends Activity {
                     headerFile.delete();
                 }
 
-                FileUtil.checkAssets(mContext, "loading");
-                FileUtil.checkAssets(mContext, "assets");
             }
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
@@ -565,11 +614,18 @@ public class BaseActivity extends Activity {
     /**
      * 检测服务器端静态文件是否更新
      */
-    public boolean checkAssetsUpdated(boolean shouldReloadUIThread) {
+    public void checkAssetsUpdated(boolean shouldReloadUIThread) {
+        checkAssetUpdated(shouldReloadUIThread, "loading", false);
+        checkAssetUpdated(shouldReloadUIThread, "fonts", true);
+        checkAssetUpdated(shouldReloadUIThread, "images", true);
+        checkAssetUpdated(shouldReloadUIThread, "stylesheets", true);
+        checkAssetUpdated(shouldReloadUIThread, "javascripts", true);
+    }
+    public boolean checkAssetUpdated(boolean shouldReloadUIThread, String assetName, boolean isInAssets) {
         boolean isShouldUpdateAssets = false;
 
         try {
-            String assetsZipPath = String.format("%s/assets.zip", sharedPath);
+            String assetsZipPath = String.format("%s/%s.zip", sharedPath, assetName);
 
             if (!(new File(assetsZipPath)).exists()) {
                 isShouldUpdateAssets = true;
@@ -577,8 +633,10 @@ public class BaseActivity extends Activity {
 
             String userConfigPath = String.format("%s/%s", FileUtil.basePath(mContext), URLs.USER_CONFIG_FILENAME);
             JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
-            if (!isShouldUpdateAssets && !userJSON.getString("local_assets_md5").equals(userJSON.getString("assets_md5"))) {
-                Log.i("checkAssetsUpdated", String.format("%s: %s != %s", assetsZipPath, userJSON.getString("local_assets_md5"), userJSON.getString("assets_md5")));
+            String localKeyName = String.format("local_%s_md5", assetName);
+            String keyName = String.format("%s_md5", assetName);
+            if (!isShouldUpdateAssets && !userJSON.getString(localKeyName).equals(userJSON.getString(keyName))) {
+                Log.i("checkAssetsUpdated", String.format("%s: %s != %s", assetsZipPath, userJSON.getString(localKeyName), userJSON.getString(keyName)));
                 isShouldUpdateAssets = true;
             }
 
@@ -597,14 +655,14 @@ public class BaseActivity extends Activity {
 
             // instantiate it within the onCreate method
             mProgressDialog = new ProgressDialog(mContext);
-            mProgressDialog.setMessage("更新静态文件");
+            mProgressDialog.setMessage("更新assets静态文件");
             mProgressDialog.setIndeterminate(true);
             mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
             mProgressDialog.setCancelable(true);
 
             // execute this when the downloader must be fired
-            final DownloadAssetsTask downloadTask = new DownloadAssetsTask(mContext, shouldReloadUIThread);
-            downloadTask.execute(String.format(URLs.API_ASSETS_PATH, URLs.HOST), assetsZipPath);
+            final DownloadAssetsTask downloadTask = new DownloadAssetsTask(mContext, shouldReloadUIThread, assetName, isInAssets);
+            downloadTask.execute(String.format(URLs.API_ASSETS_PATH, URLs.HOST, assetName), assetsZipPath);
 
             return true;
         } catch (JSONException e) {
@@ -614,16 +672,21 @@ public class BaseActivity extends Activity {
         return false;
     }
 
+
     // usually, subclasses of AsyncTask are declared inside the activity class.
     // that way, you can easily modify the UI thread from here
     protected class DownloadAssetsTask extends AsyncTask<String, Integer, String> {
         private Context context;
         private PowerManager.WakeLock mWakeLock;
         private boolean isReloadUIThread;
+        private String assetFilename;
+        private boolean isInAssets;
 
-        public DownloadAssetsTask(Context context, boolean shouldReloadUIThread) {
+        public DownloadAssetsTask(Context context, boolean shouldReloadUIThread, String assetFilename, boolean isInAssets) {
             this.context = context;
             this.isReloadUIThread = shouldReloadUIThread;
+            this.assetFilename = assetFilename;
+            this.isInAssets = isInAssets;
         }
 
         @Override
@@ -712,28 +775,9 @@ public class BaseActivity extends Activity {
             if (result != null) {
                 Toast.makeText(context, "静态资源更新失败", Toast.LENGTH_LONG).show();
             } else {
-                try {
-                    String assetsFolderPath = String.format("%s/assets", FileUtil.sharedPath(context));
-                    FileUtils.deleteDirectory(new File(assetsFolderPath));
-
-                    String assetsZipPath = String.format("%s/assets.zip", sharedPath);
-                    InputStream zipStream = new FileInputStream(new File(assetsZipPath));
-
-                    FileUtil.unZip(zipStream, sharedPath, true);
-
-                    String userConfigPath = String.format("%s/%s", FileUtil.basePath(mContext), URLs.USER_CONFIG_FILENAME);
-                    JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
-                    userJSON.put("local_assets_md5", userJSON.getString("assets_md5"));
-                    FileUtil.writeFile(userConfigPath, userJSON.toString());
-                    Log.i("onPostExecute", userJSON.toString());
-
-                    if (isReloadUIThread) {
-                        new Thread(mRunnableForDetecting).start();
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                FileUtil.checkAssets(mContext, assetFilename, isInAssets);
+                if (isReloadUIThread) {
+                    new Thread(mRunnableForDetecting).start();
                 }
             }
         }

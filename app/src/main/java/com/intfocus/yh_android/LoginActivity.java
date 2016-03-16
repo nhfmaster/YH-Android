@@ -5,11 +5,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.webkit.JavascriptInterface;
 import android.widget.Toast;
+
 import com.handmark.pulltorefresh.library.PullToRefreshWebView;
 import com.intfocus.yh_android.screen_lock.ConfirmPassCodeActivity;
 import com.intfocus.yh_android.util.ApiHelper;
 import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.URLs;
+
 import org.json.JSONObject;
 
 public class LoginActivity extends BaseActivity {

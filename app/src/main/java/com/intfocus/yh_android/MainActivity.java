@@ -7,11 +7,14 @@ import android.util.Log;
 import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.widget.ImageView;
+
 import com.handmark.pulltorefresh.library.PullToRefreshWebView;
 import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.URLs;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -60,7 +63,7 @@ public class MainActivity extends BaseActivity {
         initColorView(colorViews);
 
         Intent intent = getIntent();
-        if(intent.hasExtra("fromActivity") && intent.getStringExtra("fromActivity").contains("ConfirmPassCodeActivity")) {
+        if (intent.hasExtra("fromActivity") && intent.getStringExtra("fromActivity").contains("ConfirmPassCodeActivity")) {
             Log.i("FromActivity", intent.getStringExtra("fromActivity"));
 
             checkVersionUpgrade(assetsPath);
@@ -69,9 +72,8 @@ public class MainActivity extends BaseActivity {
         /**
          *  检测服务器端静态文件是否更新
          */
-        if(!checkAssetsUpdated(true)) {
-            new Thread(mRunnableForDetecting).start();
-        }
+        checkAssetsUpdated(true);
+        new Thread(mRunnableForDetecting).start();
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -139,7 +141,7 @@ public class MainActivity extends BaseActivity {
                         break;
                     case R.id.tab_message:
                         objectType = 5;
-                        urlString = String.format(URLs.MESSAGE_PATH, URLs.HOST, user.getString("role_id"), user.getString("user_id"));
+                        urlString = String.format(URLs.MESSAGE_PATH, URLs.HOST, user.getString("role_id"), user.getString("group_id"), user.getString("user_id"));
                         break;
                     default:
                         urlString = String.format(URLs.KPI_PATH, URLs.HOST, user.getString("role_id"), user.getString("group_id"));

@@ -24,378 +24,386 @@ import java.util.Map;
 
 public class ApiHelper {
 
-	/*
-	 * 用户登录验证
-	 * params: {device: {name, platform, os, os_version, uuid}}
-	 */
-	public static String authentication(Context context, String username, String password) {
-		String ret = "success";
+    /*
+     * 用户登录验证
+     * params: {device: {name, platform, os, os_version, uuid}}
+     */
+    public static String authentication(Context context, String username, String password) {
+        String ret = "success";
 
-		String urlString = String.format(URLs.API_USER_PATH, URLs.HOST, "android", username, password);
-		try {
-    		JSONObject device = new JSONObject();
-    		device.put("name", android.os.Build.MODEL);
-    		device.put("platform", "android");
-    		device.put("os", android.os.Build.MODEL);
-    		device.put("os_version", Build.VERSION.RELEASE);
-    		device.put("uuid", OpenUDID_manager.getOpenUDID());
+        String urlString = String.format(URLs.API_USER_PATH, URLs.HOST, "android", username, password);
+        try {
+            JSONObject device = new JSONObject();
+            device.put("name", android.os.Build.MODEL);
+            device.put("platform", "android");
+            device.put("os", android.os.Build.MODEL);
+            device.put("os_version", Build.VERSION.RELEASE);
+            device.put("uuid", OpenUDID_manager.getOpenUDID());
 
-			JSONObject params = new JSONObject();
-			params.put("device", device);
-			PackageInfo packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
-			params.put("app_version", String.format("a%s", packageInfo.versionName));
-    		
-			Map<String, String> response = HttpUtil.httpPost(urlString, params);
+            JSONObject params = new JSONObject();
+            params.put("device", device);
+            PackageInfo packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+            params.put("app_version", String.format("a%s", packageInfo.versionName));
 
-			JSONObject responseJSON = new JSONObject(response.get("body").toString());
+            Map<String, String> response = HttpUtil.httpPost(urlString, params);
 
-			String userConfigPath = String.format("%s/%s", FileUtil.basePath(context), URLs.USER_CONFIG_FILENAME);
-			JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
-			userJSON.put("password", password);
-			userJSON.put("is_login", response.get("code").equals("200"));
+            JSONObject responseJSON = new JSONObject(response.get("body").toString());
 
-			// FileUtil.dirPath 需要优先写入登录用户信息
-			userJSON = ApiHelper.merge(userJSON, responseJSON);
-			FileUtil.writeFile(userConfigPath, userJSON.toString());
+            String userConfigPath = String.format("%s/%s", FileUtil.basePath(context), URLs.USER_CONFIG_FILENAME);
+            JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
+            userJSON.put("password", password);
+            userJSON.put("is_login", response.get("code").equals("200"));
 
-			String settingsConfigPath = FileUtil.dirPath(context, URLs.CONFIG_DIRNAME, URLs.SETTINGS_CONFIG_FILENAME);
-			if((new File(settingsConfigPath)).exists()) {
-				JSONObject settingJSON = FileUtil.readConfigFile(settingsConfigPath);
-				if(settingJSON.has("use_gesture_password")) {
-					userJSON.put("use_gesture_password", settingJSON.getBoolean("use_gesture_password"));
-				} else {
-					userJSON.put("use_gesture_password",false);
-				}
-				if(settingJSON.has("gesture_password")) {
-					userJSON.put("gesture_password", settingJSON.getString("gesture_password"));
-				} else {
-					userJSON.put("gesture_password", "");
-				}
-			} else {
-				userJSON.put("use_gesture_password", false);
-				userJSON.put("gesture_password", "");
-			}
-			FileUtil.writeFile(userConfigPath, userJSON.toString());
+            if (response.get("code").equals("400")) {
+                return "网络未连接";
+            } else if (response.get("code").equals("401")) {
+                return "用户名或密码不正确";
+            } else if (response.get("code").equals("408")) {
+                return "连接超时";
+            } else if (!response.get("code").equals("200")) {
+                return responseJSON.getString("info");
+            }
+            // FileUtil.dirPath 需要优先写入登录用户信息
+            userJSON = ApiHelper.merge(userJSON, responseJSON);
+            FileUtil.writeFile(userConfigPath, userJSON.toString());
 
-			Log.i("CurrentUser", userJSON.toString());
-			if(response.get("code").equals("200")) {
-				FileUtil.writeFile(settingsConfigPath, userJSON.toString());
-			} else {
-				ret = responseJSON.getString("info");
-			}
-		} catch(Exception e) {
-			e.printStackTrace();
-			ret = e.getMessage();
-		}
-		return ret;
-	}
+            String settingsConfigPath = FileUtil.dirPath(context, URLs.CONFIG_DIRNAME, URLs.SETTINGS_CONFIG_FILENAME);
+            if ((new File(settingsConfigPath)).exists()) {
+                JSONObject settingJSON = FileUtil.readConfigFile(settingsConfigPath);
+                if (settingJSON.has("use_gesture_password")) {
+                    userJSON.put("use_gesture_password", settingJSON.getBoolean("use_gesture_password"));
+                } else {
+                    userJSON.put("use_gesture_password", false);
+                }
+                if (settingJSON.has("gesture_password")) {
+                    userJSON.put("gesture_password", settingJSON.getString("gesture_password"));
+                } else {
+                    userJSON.put("gesture_password", "");
+                }
+            } else {
+                userJSON.put("use_gesture_password", false);
+                userJSON.put("gesture_password", "");
+            }
+            FileUtil.writeFile(userConfigPath, userJSON.toString());
 
-	/*
-	 *  获取报表网页数据
-	 */
-	public static void reportData(Context context, String groupID, String reportID) {
-		String assetsPath = FileUtil.sharedPath(context);
-		String urlString = String.format(URLs.API_DATA_PATH, URLs.HOST, groupID, reportID);
+            Log.i("CurrentUser", userJSON.toString());
+            if (response.get("code").equals("200")) {
+                FileUtil.writeFile(settingsConfigPath, userJSON.toString());
+            } else {
+                ret = responseJSON.getString("info");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            ret = e.getMessage();
+        }
+        return ret;
+    }
 
-		String fileName  = String.format(URLs.REPORT_DATA_FILENAME, groupID, reportID);
-		String filePath  = String.format("%s/assets/javascripts/%s", assetsPath, fileName);
+    /*
+     *  获取报表网页数据
+     */
+    public static void reportData(Context context, String groupID, String reportID) {
+        String assetsPath = FileUtil.sharedPath(context);
+        String urlString = String.format(URLs.API_DATA_PATH, URLs.HOST, groupID, reportID);
 
-		Map<String, String> headers = ApiHelper.checkResponseHeader(urlString, assetsPath);
-		Map<String, String> response = HttpUtil.httpGet(urlString, headers);
+        String fileName = String.format(URLs.REPORT_DATA_FILENAME, groupID, reportID);
+        String filePath = String.format("%s/assets/javascripts/%s", assetsPath, fileName);
 
-		if(response.get("code").equals("200")) {
-			try {
-				ApiHelper.storeResponseHeader(urlString, assetsPath, response);
+        Map<String, String> headers = ApiHelper.checkResponseHeader(urlString, assetsPath);
+        Map<String, String> response = HttpUtil.httpGet(urlString, headers);
 
-				FileUtil.writeFile(filePath, response.get("body").toString());
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		else {
-			Log.i("Code", response.get("code").toString());
-		}
-	}
+        if (response.get("code").equals("200")) {
+            try {
+                ApiHelper.storeResponseHeader(urlString, assetsPath, response);
 
-	/*
-	 * 发表评论
-	 */
-	public static void writeComment(int userID, int objectType, int objectID, Map params) throws UnsupportedEncodingException, JSONException {
-		String urlString = String.format(URLs.API_COMMENT_PATH, URLs.HOST, userID, objectID, objectType);
+                FileUtil.writeFile(filePath, response.get("body").toString());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            Log.i("Code", response.get("code").toString());
+        }
+    }
 
-		Map<String, String> response = HttpUtil.httpPost(urlString, params);
-		Log.i("WriteComment", response.get("code").toString());
-		Log.i("WriteComment", response.get("body").toString());
-	}
+    /*
+     * 发表评论
+     */
+    public static void writeComment(int userID, int objectType, int objectID, Map params) throws UnsupportedEncodingException, JSONException {
+        String urlString = String.format(URLs.API_COMMENT_PATH, URLs.HOST, userID, objectID, objectType);
 
-	public static Map<String, String> httpGetWithHeader(String urlString, String assetsPath, String relativeAssetsPath) {
-		Map<String, String> retMap = new HashMap<String, String>();
+        Map<String, String> response = HttpUtil.httpPost(urlString, params);
+        Log.i("WriteComment", response.get("code").toString());
+        Log.i("WriteComment", response.get("body").toString());
+    }
 
-		String urlKey = urlString.indexOf("?") != -1 ? TextUtils.split(urlString, "?")[0] : urlString;
+    public static Map<String, String> httpGetWithHeader(String urlString, String assetsPath, String relativeAssetsPath) {
+        Map<String, String> retMap = new HashMap<String, String>();
 
-		try {
-			Map<String, String> headers = ApiHelper.checkResponseHeader(urlString, assetsPath);
+        String urlKey = urlString.indexOf("?") != -1 ? TextUtils.split(urlString, "?")[0] : urlString;
 
-			Map<String, String> response = HttpUtil.httpGet(urlKey, headers);
-			String statusCode = response.get("code").toString();
-			retMap.put("code", statusCode);
+        try {
+            Map<String, String> headers = ApiHelper.checkResponseHeader(urlString, assetsPath);
 
-			String htmlName = HttpUtil.UrlToFileName(urlString);
-			String htmlPath = String.format("%s/%s", assetsPath, htmlName);
-			retMap.put("path", htmlPath);
+            Map<String, String> response = HttpUtil.httpGet(urlKey, headers);
+            String statusCode = response.get("code").toString();
+            retMap.put("code", statusCode);
 
-			if (statusCode.equals("200")) {
-				ApiHelper.storeResponseHeader(urlKey, assetsPath, response);
+            String htmlName = HttpUtil.UrlToFileName(urlString);
+            String htmlPath = String.format("%s/%s", assetsPath, htmlName);
+            retMap.put("path", htmlPath);
 
-				String htmlContent = response.get("body").toString();
-				htmlContent = htmlContent.replace("/javascripts/", String.format("%s/javascripts/", relativeAssetsPath));
-				htmlContent = htmlContent.replace("/stylesheets/", String.format("%s/stylesheets/", relativeAssetsPath));
-				htmlContent = htmlContent.replace("/images/", String.format("%s/images/", relativeAssetsPath));
-				FileUtil.writeFile(htmlPath, htmlContent);
-			}
-		} catch (Exception e) {
-			retMap.put("code", "500");
-			e.printStackTrace();
-		}
+            if (statusCode.equals("200")) {
+                ApiHelper.storeResponseHeader(urlKey, assetsPath, response);
 
-		return retMap;
-	}
+                String htmlContent = response.get("body").toString();
+                htmlContent = htmlContent.replace("/javascripts/", String.format("%s/javascripts/", relativeAssetsPath));
+                htmlContent = htmlContent.replace("/stylesheets/", String.format("%s/stylesheets/", relativeAssetsPath));
+                htmlContent = htmlContent.replace("/images/", String.format("%s/images/", relativeAssetsPath));
+                FileUtil.writeFile(htmlPath, htmlContent);
+            }
+        } catch (Exception e) {
+            retMap.put("code", "500");
+            e.printStackTrace();
+        }
 
-	public static Map<String, String> resetPassword(String userID, String newPassword) {
-		Map<String, String> retMap = new HashMap<String, String>();
+        return retMap;
+    }
 
-		try {
-			String urlPath = String.format(URLs.API_RESET_PASSWORD_PATH, userID);
-			String urlString = String.format("%s/%s", URLs.HOST, urlPath);
+    public static Map<String, String> resetPassword(String userID, String newPassword) {
+        Map<String, String> retMap = new HashMap<String, String>();
 
-			Map<String, String> params = new HashMap<String, String>();
-			params.put("password", newPassword);
-			retMap = HttpUtil.httpPost(urlString, params);
-		} catch(Exception e) {
-			e.printStackTrace();
-			retMap.put("code", "500");
-			retMap.put("body", e.getLocalizedMessage());
-		}
-		return retMap;
-	}
+        try {
+            String urlPath = String.format(URLs.API_RESET_PASSWORD_PATH, userID);
+            String urlString = String.format("%s/%s", URLs.HOST, urlPath);
 
-	/*
-	 * 缓存文件中，清除指定链接的内容
-	 *
-	 * @param 链接
-	 * @param 缓存头文件相对文件夹
-	 */
-	public static void clearResponseHeader(String urlKey, String assetsPath) {
-		String headersFilePath = String.format("%s/%s", assetsPath, URLs.CACHED_HEADER_FILENAME);
-		if(!(new File(headersFilePath)).exists()) {
-			return;
-		}
+            Map<String, String> params = new HashMap<String, String>();
+            params.put("password", newPassword);
+            retMap = HttpUtil.httpPost(urlString, params);
+        } catch (Exception e) {
+            e.printStackTrace();
+            retMap.put("code", "500");
+            retMap.put("body", e.getLocalizedMessage());
+        }
+        return retMap;
+    }
 
-		JSONObject headersJSON = FileUtil.readConfigFile(headersFilePath);
-		if(headersJSON.has(urlKey)) {
-			try {
-				headersJSON.remove(urlKey);
-				Log.i("clearResponseHeader", String.format("%s[%s]", headersFilePath, urlKey));
+    /*
+     * 缓存文件中，清除指定链接的内容
+     *
+     * @param 链接
+     * @param 缓存头文件相对文件夹
+     */
+    public static void clearResponseHeader(String urlKey, String assetsPath) {
+        String headersFilePath = String.format("%s/%s", assetsPath, URLs.CACHED_HEADER_FILENAME);
+        if (!(new File(headersFilePath)).exists()) {
+            return;
+        }
 
-				FileUtil.writeFile(headersFilePath, headersJSON.toString());
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
+        JSONObject headersJSON = FileUtil.readConfigFile(headersFilePath);
+        if (headersJSON.has(urlKey)) {
+            try {
+                headersJSON.remove(urlKey);
+                Log.i("clearResponseHeader", String.format("%s[%s]", headersFilePath, urlKey));
 
-	/**
-	 * 从缓存头文件中，获取指定链接的ETag/Last-Modified
-	 *
-	 * @param 链接
-	 * @param 缓存头文件相对文件夹
-	 */
-	public static Map<String, String> checkResponseHeader(String urlKey, String assetsPath) {
-		Map<String, String> headers = new HashMap<String, String>();
+                FileUtil.writeFile(headersFilePath, headersJSON.toString());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
-		try {
-			JSONObject headersJSON = new JSONObject();
+    /**
+     * 从缓存头文件中，获取指定链接的ETag/Last-Modified
+     *
+     * @param 链接
+     * @param 缓存头文件相对文件夹
+     */
+    public static Map<String, String> checkResponseHeader(String urlKey, String assetsPath) {
+        Map<String, String> headers = new HashMap<String, String>();
 
-			String headersFilePath = String.format("%s/%s", assetsPath, URLs.CACHED_HEADER_FILENAME);
-			if((new File(headersFilePath)).exists()) {
-				headersJSON = FileUtil.readConfigFile(headersFilePath);
-			}
+        try {
+            JSONObject headersJSON = new JSONObject();
 
-			JSONObject headerJSON = new JSONObject();
-			if(headersJSON.has(urlKey)) {
-				headerJSON = (JSONObject)headersJSON.get(urlKey);
+            String headersFilePath = String.format("%s/%s", assetsPath, URLs.CACHED_HEADER_FILENAME);
+            if ((new File(headersFilePath)).exists()) {
+                headersJSON = FileUtil.readConfigFile(headersFilePath);
+            }
 
-				if(headerJSON.has("ETag")) {
-					headers.put("ETag", headerJSON.getString("ETag"));
-				}
-				if(headerJSON.has("Last-Modified")) {
-					headers.put("Last-Modified", headerJSON.getString("Last-Modified"));
-				}
-			}
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
+            JSONObject headerJSON = new JSONObject();
+            if (headersJSON.has(urlKey)) {
+                headerJSON = (JSONObject) headersJSON.get(urlKey);
 
-		return headers;
-	}
+                if (headerJSON.has("ETag")) {
+                    headers.put("ETag", headerJSON.getString("ETag"));
+                }
+                if (headerJSON.has("Last-Modified")) {
+                    headers.put("Last-Modified", headerJSON.getString("Last-Modified"));
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
-	/**
-	 * 把服务器响应的ETag/Last-Modified存入本地
-	 *
-	 * @param 链接
-	 * @param 缓存头文件相对文件夹
-	 * @param 服务器响应的ETag/Last-Modifiede
-	 */
-	public static void storeResponseHeader(String urlKey, String assetsPath, Map<String, String> response) {
-		try {
-			JSONObject headersJSON = new JSONObject();
+        return headers;
+    }
 
-			String headersFilePath = String.format("%s/%s", assetsPath, URLs.CACHED_HEADER_FILENAME);
-			if((new File(headersFilePath)).exists()) {
-				headersJSON = FileUtil.readConfigFile(headersFilePath);
-			}
+    /**
+     * 把服务器响应的ETag/Last-Modified存入本地
+     *
+     * @param 链接
+     * @param 缓存头文件相对文件夹
+     * @param 服务器响应的ETag/Last-Modifiede
+     */
+    public static void storeResponseHeader(String urlKey, String assetsPath, Map<String, String> response) {
+        try {
+            JSONObject headersJSON = new JSONObject();
 
-			JSONObject headerJSON = new JSONObject();
+            String headersFilePath = String.format("%s/%s", assetsPath, URLs.CACHED_HEADER_FILENAME);
+            if ((new File(headersFilePath)).exists()) {
+                headersJSON = FileUtil.readConfigFile(headersFilePath);
+            }
 
-			if(response.containsKey("ETag")) {
-				headerJSON.put("ETag", response.get("ETag").toString());
-			}
-			if(response.containsKey("Last-Modified")) {
-				headerJSON.put("Last-Modified", response.get("Last-Modified").toString());
-			}
+            JSONObject headerJSON = new JSONObject();
 
-			headersJSON.put(urlKey, headerJSON);
-			FileUtil.writeFile(headersFilePath, headersJSON.toString());
-		} catch (JSONException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+            if (response.containsKey("ETag")) {
+                headerJSON.put("ETag", response.get("ETag").toString());
+            }
+            if (response.containsKey("Last-Modified")) {
+                headerJSON.put("Last-Modified", response.get("Last-Modified").toString());
+            }
 
-	/**
-	 * 合并两个JSONObject
-	 *
-	 * @param obj
-	 * @param other
-	 * @return 合并后的JSONObject
-	 */
-	public static JSONObject merge(JSONObject obj, JSONObject other) {
-		try {
-			Iterator it = other.keys();
-			while (it.hasNext()) {
-				String key = (String) it.next();
-				obj.put(key, other.get(key));
-			}
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
+            headersJSON.put(urlKey, headerJSON);
+            FileUtil.writeFile(headersFilePath, headersJSON.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-		return obj;
-	}
+    /**
+     * 合并两个JSONObject
+     *
+     * @param obj
+     * @param other
+     * @return 合并后的JSONObject
+     */
+    public static JSONObject merge(JSONObject obj, JSONObject other) {
+        try {
+            Iterator it = other.keys();
+            while (it.hasNext()) {
+                String key = (String) it.next();
+                obj.put(key, other.get(key));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
-	/**
-	 * 下载文件
-	 *
-	 * @param 上下文
-	 * @param 下载链接
-	 * @param 写入本地文件路径
-	 */
-	public static void downloadFile(Context context, String urlString, File outputFile) {
-		try {
-			URL url = new URL(urlString);
-			String headerPath = String.format("%s/%s/%s", FileUtil.basePath(context), URLs.CACHED_DIRNAME, URLs.CACHED_HEADER_FILENAME);
+        return obj;
+    }
 
-			JSONObject headerJSON = new JSONObject();
-			if ((new File(headerPath)).exists()) {
-				headerJSON = FileUtil.readConfigFile(headerPath);
-			}
+    /**
+     * 下载文件
+     *
+     * @param 上下文
+     * @param 下载链接
+     * @param 写入本地文件路径
+     */
+    public static void downloadFile(Context context, String urlString, File outputFile) {
+        try {
+            URL url = new URL(urlString);
+            String headerPath = String.format("%s/%s/%s", FileUtil.basePath(context), URLs.CACHED_DIRNAME, URLs.CACHED_HEADER_FILENAME);
 
-			URLConnection conn = url.openConnection();
-			String etag = conn.getHeaderField("ETag");
+            JSONObject headerJSON = new JSONObject();
+            if ((new File(headerPath)).exists()) {
+                headerJSON = FileUtil.readConfigFile(headerPath);
+            }
 
-			boolean isDownloaded = outputFile.exists() && headerJSON.has(urlString) && etag != null && !etag.isEmpty() && headerJSON.getString(urlString).equals(etag);
+            URLConnection conn = url.openConnection();
+            String etag = conn.getHeaderField("ETag");
 
-			if(isDownloaded) {
-				Log.i("downloadFile", "exist - " + outputFile.getAbsolutePath());
-			} else {
-				InputStream in = url.openStream();
-				FileOutputStream fos = new FileOutputStream(outputFile);
+            boolean isDownloaded = outputFile.exists() && headerJSON.has(urlString) && etag != null && !etag.isEmpty() && headerJSON.getString(urlString).equals(etag);
 
-				int length = -1;
-				byte[] buffer = new byte[1024];// buffer for portion of data from connection
-				while ((length = in.read(buffer)) > -1) {
-					fos.write(buffer, 0, length);
-				}
-				fos.close();
-				in.close();
+            if (isDownloaded) {
+                Log.i("downloadFile", "exist - " + outputFile.getAbsolutePath());
+            } else {
+                InputStream in = url.openStream();
+                FileOutputStream fos = new FileOutputStream(outputFile);
 
-				if(etag != null && !etag.isEmpty()) {
-					headerJSON.put(urlString, etag);
-					FileUtil.writeFile(headerPath, headerJSON.toString());
-				}
-			}
-		} catch(Exception e) {
-			e.printStackTrace();
-		}
-	}
+                int length = -1;
+                byte[] buffer = new byte[1024];// buffer for portion of data from connection
+                while ((length = in.read(buffer)) > -1) {
+                    fos.write(buffer, 0, length);
+                }
+                fos.close();
+                in.close();
 
-	/**
-	 * 上传锁屏信息
-	 *
-	 * @param 设备标识
-	 * @param 锁屏密码
-	 * @param 是否启用锁屏
-	 */
-	public static void screenLock(String deviceID, String password, boolean state) {
-		String urlString = String.format(URLs.API_SCREEN_LOCK_PATH, URLs.HOST, deviceID);
+                if (etag != null && !etag.isEmpty()) {
+                    headerJSON.put(urlString, etag);
+                    FileUtil.writeFile(headerPath, headerJSON.toString());
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-		try {
-			Map<String, String> params = new HashMap();
-			params.put("screen_lock_state", "1");
-			params.put("screen_lock_type", "4位数字");
-			params.put("screen_lock", password);
+    /**
+     * 上传锁屏信息
+     *
+     * @param 设备标识
+     * @param 锁屏密码
+     * @param 是否启用锁屏
+     */
+    public static void screenLock(String deviceID, String password, boolean state) {
+        String urlString = String.format(URLs.API_SCREEN_LOCK_PATH, URLs.HOST, deviceID);
 
-			HttpUtil.httpPost(urlString, params);
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-	}
+        try {
+            Map<String, String> params = new HashMap();
+            params.put("screen_lock_state", "1");
+            params.put("screen_lock_type", "4位数字");
+            params.put("screen_lock", password);
 
-	/**
-	 * 上传用户行为
-	 *
-	 * @param 上下文
-	 * @param 用户行为
-	 */
-	public static void actionLog(Context context, JSONObject param) {
-		try {
-			String userConfigPath = String.format("%s/%s", FileUtil.basePath(context), URLs.USER_CONFIG_FILENAME);
-			JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
+            HttpUtil.httpPost(urlString, params);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
 
-			param.put("user_id", userJSON.getInt("user_id"));
-			param.put("user_name", userJSON.getString("user_name"));
-			param.put("user_device_id", userJSON.getInt("user_device_id"));
+    /**
+     * 上传用户行为
+     *
+     * @param 上下文
+     * @param 用户行为
+     */
+    public static void actionLog(Context context, JSONObject param) {
+        try {
+            String userConfigPath = String.format("%s/%s", FileUtil.basePath(context), URLs.USER_CONFIG_FILENAME);
+            JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
 
-			PackageInfo packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
-			param.put("app_version", String.format("a%s", packageInfo.versionName));
+            param.put("user_id", userJSON.getInt("user_id"));
+            param.put("user_name", userJSON.getString("user_name"));
+            param.put("user_device_id", userJSON.getInt("user_device_id"));
 
-			JSONObject params = new JSONObject();
-			params.put("action_log", param);
+            PackageInfo packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+            param.put("app_version", String.format("a%s", packageInfo.versionName));
 
-			JSONObject userParams = new JSONObject();
-			userParams.put("user_name", userJSON.getString("user_name"));
-			userParams.put("user_pass", userJSON.getString("password"));
-			params.put("user", userParams);
+            JSONObject params = new JSONObject();
+            params.put("action_log", param);
 
-			String urlString = String.format(URLs.API_ACTION_LOG_PATH, URLs.HOST);
-			HttpUtil.httpPost(urlString, params);
-		} catch (JSONException e) {
-			e.printStackTrace();
-		} catch (PackageManager.NameNotFoundException e) {
-			e.printStackTrace();
-		}
-	}
+            JSONObject userParams = new JSONObject();
+            userParams.put("user_name", userJSON.getString("user_name"));
+            userParams.put("user_pass", userJSON.getString("password"));
+            params.put("user", userParams);
+
+            String urlString = String.format(URLs.API_ACTION_LOG_PATH, URLs.HOST);
+            HttpUtil.httpPost(urlString, params);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
 }
