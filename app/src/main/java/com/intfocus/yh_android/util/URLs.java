@@ -31,7 +31,7 @@ public class URLs implements Serializable {
 
     public final static String LOGIN_PATH              = "%s/mobile/login";
     public final static String KPI_PATH                = "%s/mobile/role/%s/group/%s/kpi";
-    public final static String MESSAGE_PATH            = "%s/mobile/role/%s/user/%s/message";
+    public final static String MESSAGE_PATH            = "%s/mobile/role/%s/group/%s/user/%s/message";
     public final static String APPLICATION_PATH        = "%s/mobile/role/%s/app";
     public final static String ANALYSE_PATH            = "%s/mobile/role/%s/analyse";
     public final static String COMMENT_PATH            = "%s/mobile/id/%s/type/%s/comment";

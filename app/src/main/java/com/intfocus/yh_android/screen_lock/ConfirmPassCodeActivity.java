@@ -47,10 +47,12 @@ public class ConfirmPassCodeActivity extends Activity {
 
     private Bitmap bitmapBlack = Bitmap.createBitmap(300, 300, Bitmap.Config.ARGB_8888);
     private Bitmap bitmapGlay = Bitmap.createBitmap(300, 300, Bitmap.Config.ARGB_8888);
+
     public static Intent createIntent(Context context) {
         Intent intent = new Intent(context, ConfirmPassCodeActivity.class);
         return intent;
     }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -216,14 +218,14 @@ public class ConfirmPassCodeActivity extends Activity {
 
             String userConfigPath = String.format("%s/%s", FileUtil.basePath(mContext), URLs.USER_CONFIG_FILENAME);
             JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
-            if(stringBuilder.toString().equals(userJSON.getString("gesture_password"))) {
+            if (stringBuilder.toString().equals(userJSON.getString("gesture_password"))) {
                 /*
                  * 出现验证界面，是由于两种原因
                  * 1. 打开app时，之前已登录用户设置了锁屏功能;验证成功，直接跳转至主界面
                  * 2. 已打开app, 手机待机后再激活时，进入app；验证成功，不作任何处理
                  *
                  */
-                if(is_from_login) {
+                if (is_from_login) {
                     Intent intent = new Intent(mContext, MainActivity.class);
                     intent.putExtra("fromActivity", this.getClass().toString());
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -248,7 +250,7 @@ public class ConfirmPassCodeActivity extends Activity {
                                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);//它可以关掉所要到的界面中间的activity
                                 startActivity(intent);
                             }
-                        } catch(JSONException e) {
+                        } catch (JSONException e) {
                             e.printStackTrace();
                         }
                     }
@@ -268,7 +270,7 @@ public class ConfirmPassCodeActivity extends Activity {
                 initCircleColor();
             }
 
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -303,7 +305,7 @@ public class ConfirmPassCodeActivity extends Activity {
 
             String settingsConfigPath = FileUtil.dirPath(mContext, URLs.CONFIG_DIRNAME, URLs.SETTINGS_CONFIG_FILENAME);
             FileUtil.writeFile(settingsConfigPath, userJSON.toString());
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 

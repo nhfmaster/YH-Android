@@ -263,8 +263,8 @@ public class InitPassCodeActivity extends Activity {
                                     e.printStackTrace();
                                 }
                             }
-                        }).start();;
-                    } catch(Exception e) {
+                        }).start();
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
 

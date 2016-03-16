@@ -204,8 +204,12 @@ public class SettingActivity extends BaseActivity {
                 String headerPath = String.format("%s/%s", FileUtil.sharedPath(mContext), URLs.CACHED_HEADER_FILENAME);
                 new File(headerPath).delete();
 
-                FileUtil.checkAssets(mContext, "loading");
-                FileUtil.checkAssets(mContext, "assets");
+                FileUtil.checkAssets(mContext, "loading", false);
+                FileUtil.checkAssets(mContext, "assets", false);
+                FileUtil.checkAssets(mContext, "fonts", true);
+                FileUtil.checkAssets(mContext, "images", true);
+                FileUtil.checkAssets(mContext, "stylesheets", true);
+                FileUtil.checkAssets(mContext, "javascripts", true);
 
                 Toast.makeText(mContext, "校正完成", Toast.LENGTH_SHORT).show();
 

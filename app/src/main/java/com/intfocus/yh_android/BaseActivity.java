@@ -381,7 +381,13 @@ public class BaseActivity extends Activity {
     Runnable mRunnableForLogger = new Runnable() {
         @Override
         public void run() {
-            ApiHelper.actionLog(mContext, logParams);
+            try {
+                if (logParams.get("action").toString().equals("登录") || logParams.get("action").toString().equals("解屏"))
+                    ApiHelper.actionLog(mContext, logParams);
+                System.out.println("logParams: " + logParams.get("action").toString());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     };
 
@@ -588,13 +594,6 @@ public class BaseActivity extends Activity {
                 String urlString = String.format(URLs.LOGIN_PATH, URLs.HOST);
                 ApiHelper.clearResponseHeader(urlString, assetsPath);
                 FileUtil.writeFile(versionConfigPath, packageInfo.versionName);
-
-                String userConfigPath = String.format("%s/%s", FileUtil.basePath(mContext), URLs.USER_CONFIG_FILENAME);
-                JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
-                userJSON.remove("local_loading_md5");
-                userJSON.remove("local_assets_md5");
-                FileUtil.writeFile(userConfigPath, userJSON.toString());
-
                 /*
                  * 用户报表数据js文件存放在公共区域
                  */
@@ -604,8 +603,6 @@ public class BaseActivity extends Activity {
                     headerFile.delete();
                 }
 
-                FileUtil.checkAssets(mContext, "loading");
-                FileUtil.checkAssets(mContext, "assets");
             }
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
