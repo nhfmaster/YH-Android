@@ -614,11 +614,18 @@ public class BaseActivity extends Activity {
     /**
      * 检测服务器端静态文件是否更新
      */
-    public boolean checkAssetsUpdated(boolean shouldReloadUIThread) {
+    public void checkAssetsUpdated(boolean shouldReloadUIThread) {
+        checkAssetUpdated(shouldReloadUIThread, "loading", false);
+        checkAssetUpdated(shouldReloadUIThread, "fonts", true);
+        checkAssetUpdated(shouldReloadUIThread, "images", true);
+        checkAssetUpdated(shouldReloadUIThread, "stylesheets", true);
+        checkAssetUpdated(shouldReloadUIThread, "javascripts", true);
+    }
+    public boolean checkAssetUpdated(boolean shouldReloadUIThread, String assetName, boolean isInAssets) {
         boolean isShouldUpdateAssets = false;
 
         try {
-            String assetsZipPath = String.format("%s/assets.zip", sharedPath);
+            String assetsZipPath = String.format("%s/%s.zip", sharedPath, assetName);
 
             if (!(new File(assetsZipPath)).exists()) {
                 isShouldUpdateAssets = true;
@@ -626,8 +633,10 @@ public class BaseActivity extends Activity {
 
             String userConfigPath = String.format("%s/%s", FileUtil.basePath(mContext), URLs.USER_CONFIG_FILENAME);
             JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
-            if (!isShouldUpdateAssets && !userJSON.getString("local_assets_md5").equals(userJSON.getString("assets_md5"))) {
-                Log.i("checkAssetsUpdated", String.format("%s: %s != %s", assetsZipPath, userJSON.getString("local_assets_md5"), userJSON.getString("assets_md5")));
+            String localKeyName = String.format("local_%s_md5", assetName);
+            String keyName = String.format("%s_md5", assetName);
+            if (!isShouldUpdateAssets && !userJSON.getString(localKeyName).equals(userJSON.getString(keyName))) {
+                Log.i("checkAssetsUpdated", String.format("%s: %s != %s", assetsZipPath, userJSON.getString(localKeyName), userJSON.getString(keyName)));
                 isShouldUpdateAssets = true;
             }
 
@@ -646,14 +655,14 @@ public class BaseActivity extends Activity {
 
             // instantiate it within the onCreate method
             mProgressDialog = new ProgressDialog(mContext);
-            mProgressDialog.setMessage("更新静态文件");
+            mProgressDialog.setMessage("更新assets静态文件");
             mProgressDialog.setIndeterminate(true);
             mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
             mProgressDialog.setCancelable(true);
 
             // execute this when the downloader must be fired
-            final DownloadAssetsTask downloadTask = new DownloadAssetsTask(mContext, shouldReloadUIThread);
-            downloadTask.execute(String.format(URLs.API_ASSETS_PATH, URLs.HOST), assetsZipPath);
+            final DownloadAssetsTask downloadTask = new DownloadAssetsTask(mContext, shouldReloadUIThread, assetName, isInAssets);
+            downloadTask.execute(String.format(URLs.API_ASSETS_PATH, URLs.HOST, assetName), assetsZipPath);
 
             return true;
         } catch (JSONException e) {
@@ -663,16 +672,21 @@ public class BaseActivity extends Activity {
         return false;
     }
 
+
     // usually, subclasses of AsyncTask are declared inside the activity class.
     // that way, you can easily modify the UI thread from here
     protected class DownloadAssetsTask extends AsyncTask<String, Integer, String> {
         private Context context;
         private PowerManager.WakeLock mWakeLock;
         private boolean isReloadUIThread;
+        private String assetFilename;
+        private boolean isInAssets;
 
-        public DownloadAssetsTask(Context context, boolean shouldReloadUIThread) {
+        public DownloadAssetsTask(Context context, boolean shouldReloadUIThread, String assetFilename, boolean isInAssets) {
             this.context = context;
             this.isReloadUIThread = shouldReloadUIThread;
+            this.assetFilename = assetFilename;
+            this.isInAssets = isInAssets;
         }
 
         @Override
@@ -761,28 +775,9 @@ public class BaseActivity extends Activity {
             if (result != null) {
                 Toast.makeText(context, "静态资源更新失败", Toast.LENGTH_LONG).show();
             } else {
-                try {
-                    String assetsFolderPath = String.format("%s/assets", FileUtil.sharedPath(context));
-                    FileUtils.deleteDirectory(new File(assetsFolderPath));
-
-                    String assetsZipPath = String.format("%s/assets.zip", sharedPath);
-                    InputStream zipStream = new FileInputStream(new File(assetsZipPath));
-
-                    FileUtil.unZip(zipStream, sharedPath, true);
-
-                    String userConfigPath = String.format("%s/%s", FileUtil.basePath(mContext), URLs.USER_CONFIG_FILENAME);
-                    JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
-                    userJSON.put("local_assets_md5", userJSON.getString("assets_md5"));
-                    FileUtil.writeFile(userConfigPath, userJSON.toString());
-                    Log.i("onPostExecute", userJSON.toString());
-
-                    if (isReloadUIThread) {
-                        new Thread(mRunnableForDetecting).start();
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                FileUtil.checkAssets(mContext, assetFilename, isInAssets);
+                if (isReloadUIThread) {
+                    new Thread(mRunnableForDetecting).start();
                 }
             }
         }

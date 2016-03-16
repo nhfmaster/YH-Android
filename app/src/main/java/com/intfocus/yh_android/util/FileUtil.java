@@ -319,7 +319,11 @@ public class FileUtil {
 
             // InputStream zipStream = mContext.getApplicationContext().getAssets().open(zipName);
             String zipPath = String.format("%s/%s", sharedPath, zipName);
-            // 不存在就copy
+            String assetZipPath = String.format("%s/%s.zip", sharedPath, fileName);
+            if (!(new File(assetZipPath)).exists()) {
+                FileUtil.copyAssetFile(mContext,String.format("%s.zip", fileName), assetZipPath);
+            }
+
             InputStream zipStream = new FileInputStream(zipPath);
 
             String MD5String = FileUtil.MD5(zipStream);

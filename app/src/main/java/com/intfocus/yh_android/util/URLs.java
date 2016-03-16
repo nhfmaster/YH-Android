@@ -27,7 +27,7 @@ public class URLs implements Serializable {
     public final static String API_DEVICE_STATE_PATH   = "%s/api/v1/user_device/%d/state";
     public final static String API_RESET_PASSWORD_PATH = "%s/api/v1/update/%s/password";
     public final static String API_ACTION_LOG_PATH     = "%s/api/v1/android/logger";
-    public final static String API_ASSETS_PATH         = "%s/api/v1/download/assets.zip";
+    public final static String API_ASSETS_PATH         = "%s/api/v1/download/%s.zip";
 
     public final static String LOGIN_PATH              = "%s/mobile/login";
     public final static String KPI_PATH                = "%s/mobile/role/%s/group/%s/kpi";

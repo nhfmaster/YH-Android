@@ -72,14 +72,6 @@ public class YHApplication extends Application implements Application.ActivityLi
          *  静态文件放在共享文件夹内,以便与服务器端检测、更新
          *  刚升级过时，就不必须再更新，浪费用户流量
          */
-        String[] assetsName = {"assets.zip", "loading.zip", "fonts.zip", "images.zip", "javascripts.zip", "stylesheets.zip"};
-        for (int i = 0, len = assetsName.length; i < len; i++) {
-            String assetZipPath = String.format("%s/%s", sharedPath, assetsName[i]);
-            if (!(new File(assetZipPath)).exists()) {
-                FileUtil.copyAssetFile(mContext, assetsName[i], assetZipPath);
-            }
-        }
-
         /*
          *  解压静态资源
          *  loading.zip, e433278b2f0835eaaaeb951cf9dfa363
