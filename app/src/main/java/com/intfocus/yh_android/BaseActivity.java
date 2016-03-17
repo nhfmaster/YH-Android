@@ -92,7 +92,7 @@ public class BaseActivity extends Activity {
         assetsPath = sharedPath;
         urlStringForDetecting = URLs.HOST;
         relativeAssetsPath = "assets";
-        urlStringForLoading = String.format("file:///%s/loading/login.html", sharedPath);
+        urlStringForLoading = String.format("file:///%s/loading/loading.html", sharedPath);
 
         String userConfigPath = String.format("%s/%s", FileUtil.basePath(mContext), URLs.USER_CONFIG_FILENAME);
         if ((new File(userConfigPath)).exists()) {
@@ -103,7 +103,6 @@ public class BaseActivity extends Activity {
                     assetsPath = FileUtil.dirPath(mContext, URLs.HTML_DIRNAME);
                     urlStringForDetecting = String.format(URLs.API_DEVICE_STATE_PATH, URLs.HOST, user.getInt("user_device_id"));
                     relativeAssetsPath = "../../Shared/assets";
-                    urlStringForLoading = String.format("file:///%s/loading/loading.html", sharedPath);
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -324,6 +323,7 @@ public class BaseActivity extends Activity {
         public void handleMessage(Message message) {
             switch (message.what) {
                 case 200:
+                case 304:
                     new Thread(mRunnableWithAPI).start();
                     break;
                 case 400:
@@ -365,6 +365,10 @@ public class BaseActivity extends Activity {
                     String localHtmlPath = String.format("file:///%s", (String) message.obj);
                     Log.i("localHtmlPath", localHtmlPath);
                     mWebView.loadUrl(localHtmlPath);
+                    break;
+                case 400:
+                case 408:
+                    showWebViewForWithoutNetwork();
                     break;
                 default:
                     String msg = String.format("访问服务器失败（%d)", message.what);

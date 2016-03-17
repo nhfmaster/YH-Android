@@ -168,6 +168,9 @@ public class ApiHelper {
                 htmlContent = htmlContent.replace("/images/", String.format("%s/images/", relativeAssetsPath));
                 FileUtil.writeFile(htmlPath, htmlContent);
             }
+            else {
+                retMap.put("code", statusCode);
+            }
         } catch (Exception e) {
             retMap.put("code", "500");
             e.printStackTrace();

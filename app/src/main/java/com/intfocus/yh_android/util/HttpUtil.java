@@ -44,7 +44,7 @@ public class HttpUtil {
         HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
         // Set the default socket timeout (SO_TIMEOUT)
         // in milliseconds which is the timeout for waiting for data.
-        int timeoutSocket = 3000;
+        int timeoutSocket = 5000;
         HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
 
         DefaultHttpClient client = new DefaultHttpClient(httpParameters);
@@ -78,7 +78,7 @@ public class HttpUtil {
                 retMap.put("body", responseBody);
             }
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             Log.i("GETBUG", e.getMessage());
             e.printStackTrace();
             if (e.getMessage().contains("timed out")) {
@@ -107,7 +107,7 @@ public class HttpUtil {
         HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
         // Set the default socket timeout (SO_TIMEOUT)
         // in milliseconds which is the timeout for waiting for data.
-        int timeoutSocket = 3000;
+        int timeoutSocket = 5000;
         HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
 
         DefaultHttpClient client = new DefaultHttpClient(httpParameters);
@@ -163,7 +163,7 @@ public class HttpUtil {
             ResponseHandler<String> handler = new BasicResponseHandler();
             String responseBody = handler.handleResponse(response);
             retMap.put("body", responseBody);
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return retMap;
@@ -183,7 +183,7 @@ public class HttpUtil {
         HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
         // Set the default socket timeout (SO_TIMEOUT)
         // in milliseconds which is the timeout for waiting for data.
-        int timeoutSocket = 3000;
+        int timeoutSocket = 5000;
         HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
 
         DefaultHttpClient client = new DefaultHttpClient(httpParameters);
@@ -217,7 +217,7 @@ public class HttpUtil {
             ResponseHandler<String> handler = new BasicResponseHandler();
             String responseBody = handler.handleResponse(response);
             retMap.put("body", responseBody);
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             // 400: Unable to resolve host "yonghui.idata.mobi": No address associated with hostname
 

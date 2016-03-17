@@ -21,20 +21,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends BaseActivity {
-
+    private int objectType;
+    private TabView mCurrentTab;
     private TabView mTabKPI;
     private TabView mTabAnalysis;
     private TabView mTabAPP;
     private TabView mTabMessage;
-    private TabView mCurrentTab;
-    private int objectType;
 
     @Override
     @SuppressLint("SetJavaScriptEnabled")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
 
         findViewById(R.id.setting).setOnClickListener(mSettingListener);
         pullToRefreshWebView = (PullToRefreshWebView) findViewById(R.id.webview);
@@ -123,6 +121,11 @@ public class MainActivity extends BaseActivity {
             mCurrentTab.setActive(false);
             mCurrentTab = (TabView) v;
             mCurrentTab.setActive(true);
+
+            mTabKPI.setEnabled(true);
+            mTabAnalysis.setEnabled(true);
+            mTabAPP.setEnabled(true);
+            mTabMessage.setEnabled(true);
 
             mWebView.loadUrl(String.format("file:///%s/loading/loading.html", FileUtil.sharedPath(mContext)));
 
