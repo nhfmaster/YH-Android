@@ -2,7 +2,6 @@ package com.intfocus.yh_android;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -39,12 +38,10 @@ import com.pgyersdk.update.PgyUpdateManager;
 import com.pgyersdk.update.UpdateManagerListener;
 import com.squareup.leakcanary.RefWatcher;
 
-import org.apache.commons.io.FileUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -55,7 +52,6 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -382,8 +378,9 @@ public class BaseActivity extends Activity {
         @Override
         public void run() {
             try {
-                if (logParams.get("action").toString().equals("登录") || logParams.get("action").toString().equals("解屏"))
-                    ApiHelper.actionLog(mContext, logParams);
+                if (!logParams.getString("action").equals("登录") && !logParams.getString("action").equals("解屏")) return;
+
+                ApiHelper.actionLog(mContext, logParams);
                 System.out.println("logParams: " + logParams.get("action").toString());
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -391,6 +388,9 @@ public class BaseActivity extends Activity {
         }
     };
 
+    /*
+     * deprecate idea
+     *
     public void showDialogForWithoutNetwork() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(BaseActivity.this);
         alertDialog.setTitle("温馨提示");
@@ -416,6 +416,7 @@ public class BaseActivity extends Activity {
         );
         alertDialog.show();
     }
+    */
 
     public void showWebViewForWithoutNetwork() {
         urlStringForLoading = String.format("file:///%s/loading/network_400.html", FileUtil.sharedPath(mContext));
@@ -578,31 +579,24 @@ public class BaseActivity extends Activity {
             PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
             String versionConfigPath = String.format("%s/%s", assetsPath, URLs.CURRENT_VERSION__FILENAME);
 
-            boolean isUpgrade = false;
+            String localVersion = "new-installer";
+            boolean isUpgrade = true;
             if ((new File(versionConfigPath)).exists()) {
-                String localVersion = FileUtil.readFile(versionConfigPath);
-                if (!localVersion.equals(packageInfo.versionName)) {
-                    isUpgrade = true;
-                    Log.i("VersionUpgrade", String.format("%s => %s remove %s/%s", localVersion, packageInfo.versionName, assetsPath, URLs.CACHED_HEADER_FILENAME));
-                }
-            } else {
-                isUpgrade = true;
+                localVersion = FileUtil.readFile(versionConfigPath);
+                if (localVersion.equals(packageInfo.versionName)) { isUpgrade = false; }
             }
 
             if (isUpgrade) {
-                Log.i("checkVersionUpgrade", "upgrade");
-                String urlString = String.format(URLs.LOGIN_PATH, URLs.HOST);
-                ApiHelper.clearResponseHeader(urlString, assetsPath);
-                FileUtil.writeFile(versionConfigPath, packageInfo.versionName);
+                Log.i("VersionUpgrade", String.format("%s => %s remove %s/%s", localVersion, packageInfo.versionName, assetsPath, URLs.CACHED_HEADER_FILENAME));
+
                 /*
                  * 用户报表数据js文件存放在公共区域
                  */
                 String headerPath = String.format("%s/%s", sharedPath, URLs.CACHED_HEADER_FILENAME);
                 File headerFile = new File(headerPath);
-                if (headerFile.exists()) {
-                    headerFile.delete();
-                }
+                if (headerFile.exists()) { headerFile.delete(); }
 
+                FileUtil.writeFile(versionConfigPath, packageInfo.versionName);
             }
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
@@ -625,9 +619,9 @@ public class BaseActivity extends Activity {
         boolean isShouldUpdateAssets = false;
 
         try {
-            String assetsZipPath = String.format("%s/%s.zip", sharedPath, assetName);
+            String assetZipPath = String.format("%s/%s.zip", sharedPath, assetName);
 
-            if (!(new File(assetsZipPath)).exists()) {
+            if (!(new File(assetZipPath)).exists()) {
                 isShouldUpdateAssets = true;
             }
 
@@ -636,33 +630,22 @@ public class BaseActivity extends Activity {
             String localKeyName = String.format("local_%s_md5", assetName);
             String keyName = String.format("%s_md5", assetName);
             if (!isShouldUpdateAssets && !userJSON.getString(localKeyName).equals(userJSON.getString(keyName))) {
-                Log.i("checkAssetsUpdated", String.format("%s: %s != %s", assetsZipPath, userJSON.getString(localKeyName), userJSON.getString(keyName)));
                 isShouldUpdateAssets = true;
             }
 
-            if (!isShouldUpdateAssets) {
-                return false;
-            }
+            if (!isShouldUpdateAssets) { return false; }
 
-            /*
-             * 用户报表数据js文件存放在公共区域
-             */
-            String headerPath = String.format("%s/%s", sharedPath, URLs.CACHED_HEADER_FILENAME);
-            File headerFile = new File(headerPath);
-            if (headerFile.exists()) {
-                headerFile.delete();
-            }
-
+            Log.i("checkAssetUpdated", String.format("%s: %s != %s", assetZipPath, userJSON.getString(localKeyName), userJSON.getString(keyName)));
             // instantiate it within the onCreate method
             mProgressDialog = new ProgressDialog(mContext);
-            mProgressDialog.setMessage("更新assets静态文件");
+            mProgressDialog.setMessage(String.format("更新%s库", assetName));
             mProgressDialog.setIndeterminate(true);
             mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
             mProgressDialog.setCancelable(true);
 
             // execute this when the downloader must be fired
             final DownloadAssetsTask downloadTask = new DownloadAssetsTask(mContext, shouldReloadUIThread, assetName, isInAssets);
-            downloadTask.execute(String.format(URLs.API_ASSETS_PATH, URLs.HOST, assetName), assetsZipPath);
+            downloadTask.execute(String.format(URLs.API_ASSETS_PATH, URLs.HOST, assetName), assetZipPath);
 
             return true;
         } catch (JSONException e) {
@@ -774,11 +757,10 @@ public class BaseActivity extends Activity {
 
             if (result != null) {
                 Toast.makeText(context, "静态资源更新失败", Toast.LENGTH_LONG).show();
-            } else {
+            }
+            else {
                 FileUtil.checkAssets(mContext, assetFilename, isInAssets);
-                if (isReloadUIThread) {
-                    new Thread(mRunnableForDetecting).start();
-                }
+                if (isReloadUIThread) { new Thread(mRunnableForDetecting).start(); }
             }
         }
     }

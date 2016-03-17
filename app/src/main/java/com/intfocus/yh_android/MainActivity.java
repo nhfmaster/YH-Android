@@ -69,8 +69,9 @@ public class MainActivity extends BaseActivity {
             checkVersionUpgrade(assetsPath);
             checkUpgrade(false);
         }
-        /**
-         *  检测服务器端静态文件是否更新
+
+        /*
+         * 检测服务器静态资源是否更新，并下载
          */
         checkAssetsUpdated(true);
         new Thread(mRunnableForDetecting).start();

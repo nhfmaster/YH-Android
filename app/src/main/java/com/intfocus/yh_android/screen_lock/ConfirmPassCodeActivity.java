@@ -25,6 +25,8 @@ import com.intfocus.yh_android.util.URLs;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+
 /**
  * Created by lijunjie on 16/1/22.
  */
@@ -241,16 +243,16 @@ public class ConfirmPassCodeActivity extends Activity {
                             ApiHelper.actionLog(mContext, params);
 
                             String userConfigPath = String.format("%s/%s", FileUtil.basePath(mContext), URLs.USER_CONFIG_FILENAME);
-                            JSONObject user = FileUtil.readConfigFile(userConfigPath);
+                            JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
 
-                            String info = ApiHelper.authentication(mContext, user.getString("user_num"), user.getString("password"));
+                            String info = ApiHelper.authentication(mContext, userJSON.getString("user_num"), userJSON.getString("password"));
                             if (info.compareTo("success") != 0) {
-                                Intent intent = new Intent();
-                                intent.setClass(ConfirmPassCodeActivity.this, LoginActivity.class);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);//它可以关掉所要到的界面中间的activity
-                                startActivity(intent);
+                                userJSON.put("is_login", false);
+                                FileUtil.writeFile(userConfigPath, userJSON.toString());
                             }
                         } catch (JSONException e) {
+                            e.printStackTrace();
+                        } catch (IOException e) {
                             e.printStackTrace();
                         }
                     }

@@ -315,18 +315,17 @@ public class FileUtil {
     public static void checkAssets(Context mContext, String fileName, boolean isInAssets) {
         try {
             String sharedPath = FileUtil.sharedPath(mContext);
-            String zipName = String.format("%s.zip", fileName);
+            String zipFileName = String.format("%s.zip", fileName);
 
             // InputStream zipStream = mContext.getApplicationContext().getAssets().open(zipName);
-            String zipPath = String.format("%s/%s", sharedPath, zipName);
-            String assetZipPath = String.format("%s/%s.zip", sharedPath, fileName);
-            if (!(new File(assetZipPath)).exists()) {
-                FileUtil.copyAssetFile(mContext,String.format("%s.zip", fileName), assetZipPath);
+            String zipFilePath = String.format("%s/%s", sharedPath, zipFileName);
+            String zipFolderPath = String.format("%s/%s", sharedPath, fileName);
+            if (!(new File(zipFilePath)).exists()) {
+                FileUtil.copyAssetFile(mContext, zipFileName, zipFilePath);
             }
 
-            InputStream zipStream = new FileInputStream(zipPath);
-
-            String MD5String = FileUtil.MD5(zipStream);
+            InputStream zipStream = new FileInputStream(zipFilePath);
+            String md5String = FileUtil.MD5(zipStream);
             String keyName = String.format("local_%s_md5", fileName);
 
             String userConfigPath = String.format("%s/%s", FileUtil.basePath(mContext), URLs.USER_CONFIG_FILENAME);
@@ -334,32 +333,31 @@ public class FileUtil {
             JSONObject userJSON = new JSONObject();
             if ((new File(userConfigPath)).exists()) {
                 userJSON = FileUtil.readConfigFile(userConfigPath);
-                if (userJSON.has(keyName) && userJSON.getString(keyName).equals(MD5String)) {
+                if (userJSON.has(keyName) && userJSON.getString(keyName).equals(md5String)) {
                     isShouldUnZip = false;
-                } else {
-                    Log.i("checkAssets", String.format("%s[%s] != %s", zipName, keyName, MD5String));
                 }
             }
 
-
             if (isShouldUnZip) {
+                Log.i("checkAssets", String.format("%s[%s] != %s", zipFileName, keyName, md5String));
+
                 String folderPath = sharedPath;
                 if(isInAssets) {
                     folderPath = String.format("%s/assets/%s/", sharedPath, fileName);
                 }
                 else {
-                    File file = new File(String.format("%s/%s", sharedPath, fileName));
+                    File file = new File(zipFolderPath);
                     if (file.exists()) {
                         FileUtils.deleteDirectory(file);
                     }
                 }
 
                 // zipStream = mContext.getApplicationContext().getAssets().open(zipName);
-                zipStream = new FileInputStream(zipPath);
+                zipStream = new FileInputStream(zipFilePath);
                 FileUtil.unZip(zipStream, folderPath, true);
-                Log.i("unZip", String.format("%s, %s", zipName, MD5String));
+                Log.i("unZip", String.format("%s, %s", zipFileName, md5String));
 
-                userJSON.put(keyName, MD5String);
+                userJSON.put(keyName, md5String);
                 FileUtil.writeFile(userConfigPath, userJSON.toString());
             }
 
