@@ -24,8 +24,6 @@ import java.util.Map;
 
 public class CommentActivity extends BaseActivity {
 
-    private TextView mTitle;
-
     private String bannerName;
     private int objectID;
     private int objectType;
@@ -39,7 +37,7 @@ public class CommentActivity extends BaseActivity {
         findViewById(R.id.back).setOnClickListener(mOnBackListener);
         findViewById(R.id.back_text).setOnClickListener(mOnBackListener);
 
-        mTitle = (TextView) findViewById(R.id.title);
+        TextView mTitle = (TextView) findViewById(R.id.title);
 
         pullToRefreshWebView = (PullToRefreshWebView) findViewById(R.id.webview);
         initRefreshWebView();
@@ -60,7 +58,7 @@ public class CommentActivity extends BaseActivity {
         new Thread(mRunnableForDetecting).start();
 
 
-        List<ImageView> colorViews = new ArrayList<ImageView>();
+        List<ImageView> colorViews = new ArrayList<>();
         colorViews.add((ImageView) findViewById(R.id.colorView0));
         colorViews.add((ImageView) findViewById(R.id.colorView1));
         colorViews.add((ImageView) findViewById(R.id.colorView2));
@@ -69,7 +67,7 @@ public class CommentActivity extends BaseActivity {
         initColorView(colorViews);
     }
 
-    private View.OnClickListener mOnBackListener = new View.OnClickListener() {
+    private final View.OnClickListener mOnBackListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             CommentActivity.this.onBackPressed();
@@ -86,7 +84,7 @@ public class CommentActivity extends BaseActivity {
                 @Override
                 public void run() {
                     try {
-                        Map<String, String> params = new HashMap();
+                        Map<String, String> params = new HashMap<>();
                         params.put("object_title", bannerName);
                         params.put("user_name", user.getString("user_name"));
                         params.put("content", content);
@@ -94,9 +92,7 @@ public class CommentActivity extends BaseActivity {
                         ApiHelper.writeComment(userID, objectType, objectID, params);
 
                         new Thread(mRunnableForDetecting).start();
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    } catch (UnsupportedEncodingException e) {
+                    } catch (JSONException | UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }
                 }

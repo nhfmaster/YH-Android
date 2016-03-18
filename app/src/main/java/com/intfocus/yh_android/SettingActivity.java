@@ -27,16 +27,11 @@ public class SettingActivity extends BaseActivity {
     private TextView mUserID;
     private TextView mRoleID;
     private TextView mGroupID;
-    private TextView mChangePWD;
-    private TextView mCheckUpgrade;
     private TextView mAppName;
     private TextView mAppVersion;
     private TextView mDeviceID;
     private TextView mApiDomain;
-    private TextView mCheckAssets;
     private Switch mLockSwitch;
-    private TextView mChangeLock;
-    private Button mLogout;
     private String screenLockInfo;
 
     @Override
@@ -50,15 +45,15 @@ public class SettingActivity extends BaseActivity {
         mUserID = (TextView) findViewById(R.id.user_id);
         mRoleID = (TextView) findViewById(R.id.role_id);
         mGroupID = (TextView) findViewById(R.id.group_id);
-        mChangePWD = (TextView) findViewById(R.id.change_pwd);
-        mCheckUpgrade = (TextView) findViewById(R.id.check_upgrade);
+        TextView mChangePWD = (TextView) findViewById(R.id.change_pwd);
+        TextView mCheckUpgrade = (TextView) findViewById(R.id.check_upgrade);
         mAppName = (TextView) findViewById(R.id.app_name);
         mAppVersion = (TextView) findViewById(R.id.app_version);
         mDeviceID = (TextView) findViewById(R.id.device_id);
         mApiDomain = (TextView) findViewById(R.id.api_domain);
-        mChangeLock = (TextView) findViewById(R.id.change_lock);
-        mCheckAssets = (TextView) findViewById(R.id.check_assets);
-        mLogout = (Button) findViewById(R.id.logout);
+        TextView mChangeLock = (TextView) findViewById(R.id.change_lock);
+        TextView mCheckAssets = (TextView) findViewById(R.id.check_assets);
+        Button mLogout = (Button) findViewById(R.id.logout);
         mLockSwitch = (Switch) findViewById(R.id.lock_switch);
         screenLockInfo = "取消锁屏成功";
         mLockSwitch.setChecked(FileUtil.checkIsLocked(mContext));
@@ -103,7 +98,7 @@ public class SettingActivity extends BaseActivity {
         }
     }
 
-    public static String getApplicationName(Context context) {
+    private static String getApplicationName(Context context) {
         int stringId = context.getApplicationInfo().labelRes;
         return context.getString(stringId);
     }
@@ -111,7 +106,7 @@ public class SettingActivity extends BaseActivity {
     /*
      * 返回
      */
-    private View.OnClickListener mOnBackListener = new View.OnClickListener() {
+    private final View.OnClickListener mOnBackListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             SettingActivity.this.onBackPressed();
@@ -121,7 +116,7 @@ public class SettingActivity extends BaseActivity {
     /*
      * 退出登录
      */
-    private View.OnClickListener mLogoutListener = new View.OnClickListener() {
+    private final View.OnClickListener mLogoutListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             try {
@@ -155,7 +150,7 @@ public class SettingActivity extends BaseActivity {
     /*
     * 修改密码
     */
-    private View.OnClickListener mChangePWDListener = new View.OnClickListener() {
+    private final View.OnClickListener mChangePWDListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             Intent intent = new Intent(mContext, ResetPasswordActivity.class);
@@ -177,7 +172,7 @@ public class SettingActivity extends BaseActivity {
     /*
      * 修改锁屏密码
      */
-    private View.OnClickListener mChangeLockListener = new View.OnClickListener() {
+    private final View.OnClickListener mChangeLockListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             Toast.makeText(SettingActivity.this, "TODO: 修改锁屏密码", Toast.LENGTH_SHORT).show();
@@ -187,7 +182,7 @@ public class SettingActivity extends BaseActivity {
     /*
      * 校正静态文件
      */
-    private View.OnClickListener mCheckAssetsListener = new View.OnClickListener() {
+    private final View.OnClickListener mCheckAssetsListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             /*
@@ -215,7 +210,7 @@ public class SettingActivity extends BaseActivity {
     /*
      *  Switch 锁屏开关
      */
-    CompoundButton.OnCheckedChangeListener mSwitchLockListener = new CompoundButton.OnCheckedChangeListener() {
+    private final CompoundButton.OnCheckedChangeListener mSwitchLockListener = new CompoundButton.OnCheckedChangeListener() {
         @Override
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
             // TODO Auto-generated method stub

@@ -47,7 +47,7 @@ public class ResetPasswordActivity extends BaseActivity {
         new Thread(mRunnableForDetecting).start();
     }
 
-    private View.OnClickListener mOnBackListener = new View.OnClickListener() {
+    private final View.OnClickListener mOnBackListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             ResetPasswordActivity.this.onBackPressed();
@@ -64,7 +64,7 @@ public class ResetPasswordActivity extends BaseActivity {
                 if (URLs.MD5(oldPassword).equals(user.get("password"))) {
                     Map<String, String> response = ApiHelper.resetPassword(user.get("user_id").toString(), URLs.MD5(newPassword));
 
-                    JSONObject responseInfo = new JSONObject(response.get("body").toString());
+                    JSONObject responseInfo = new JSONObject(response.get("body"));
 
                     Builder alertDialog = new AlertDialog.Builder(ResetPasswordActivity.this);
                     alertDialog.setTitle("温馨提示");

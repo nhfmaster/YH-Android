@@ -29,13 +29,13 @@ public class HttpUtil {
     /**
      * ִ执行一个HTTP GET请求，返回请求响应的HTML
      *
-     * @param url 请求的URL地址
+     * @param urlString 请求的URL地址
      * @return 返回请求响应的HTML
      */
     //@throws UnsupportedEncodingException
     public static Map<String, String> httpGet(String urlString, Map<String, String> headers) {
         Log.i("HttpMethod#Get", urlString);
-        Map<String, String> retMap = new HashMap();
+        Map<String, String> retMap = new HashMap<>();
 
         HttpParams httpParameters = new BasicHttpParams();
         // Set the timeout in milliseconds until a connection is established.
@@ -54,10 +54,10 @@ public class HttpUtil {
             request.setHeader("User-Agent", HttpUtil.webViewUserAgent());
 
             if (headers.containsKey("ETag")) {
-                request.setHeader("IF-None-Match", headers.get("ETag").toString());
+                request.setHeader("IF-None-Match", headers.get("ETag"));
             }
             if (headers.containsKey("Last-Modified")) {
-                request.setHeader("If-Modified-Since", headers.get("Last-Modified").toString());
+                request.setHeader("If-Modified-Since", headers.get("Last-Modified"));
             }
 
 
@@ -97,7 +97,7 @@ public class HttpUtil {
      */
     //@throws UnsupportedEncodingException
     //@throws JSONException
-    public static Map<String, String> httpPost(String urlString, Map params) throws UnsupportedEncodingException, JSONException {
+    public static Map<String, String> httpPost(String urlString, Map params) throws UnsupportedEncodingException {
         Log.i("HttpMethod#Post", urlString);
 
         HttpParams httpParameters = new BasicHttpParams();
@@ -113,8 +113,8 @@ public class HttpUtil {
         DefaultHttpClient client = new DefaultHttpClient(httpParameters);
         HttpPost request = new HttpPost(urlString);
 
-        Map<String, String> retMap = new HashMap();
-        HttpResponse response = null;
+        Map<String, String> retMap = new HashMap<>();
+        HttpResponse response;
         if (params != null) {
             try {
                 Iterator iter = params.entrySet().iterator();
@@ -128,14 +128,13 @@ public class HttpUtil {
                         Map m = (Map) pairs.getValue();
 
                         JSONObject data = new JSONObject();
-                        Iterator iter2 = m.entrySet().iterator();
-                        while (iter2.hasNext()) {
-                            Map.Entry pairs2 = (Map.Entry) iter2.next();
-                            data.put((String) pairs2.getKey(), (String) pairs2.getValue());
+                        for (Object o : m.entrySet()) {
+                            Map.Entry pairs2 = (Map.Entry) o;
+                            data.put((String) pairs2.getKey(), pairs2.getValue());
                             holder.put(key, data);
                         }
                     } else {
-                        holder.put(key, (String) pairs.getValue());
+                        holder.put(key, pairs.getValue());
                     }
                 }
 
@@ -189,8 +188,8 @@ public class HttpUtil {
         DefaultHttpClient client = new DefaultHttpClient(httpParameters);
         HttpPost request = new HttpPost(urlString);
 
-        Map<String, String> retMap = new HashMap();
-        HttpResponse response = null;
+        Map<String, String> retMap = new HashMap<>();
+        HttpResponse response;
         if (params != null) {
             try {
                 StringEntity se = new StringEntity(params.toString(), HTTP.UTF_8);
@@ -245,7 +244,7 @@ public class HttpUtil {
         return String.format("%s.html", path);
     }
 
-    public static String webViewUserAgent() {
+    private static String webViewUserAgent() {
         String userAgent = System.getProperty("http.agent");
         if (userAgent.isEmpty()) {
             userAgent = "Mozilla/5.0 (Linux; U; Android 4.3; en-us; HTC One - 4.3 - API 18 - 1080x1920 Build/JLS36G) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30 default-by-hand";

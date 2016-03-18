@@ -26,7 +26,7 @@ import android.util.Log;
 public class OpenUDID_manager implements ServiceConnection{
 	public final static String PREF_KEY = "openudid";
 	public final static String PREFS_NAME = "openudid_prefs";
-	public final static String TAG = "OpenUDID";
+	private final static String TAG = "OpenUDID";
 	
 	private final static boolean LOG = true; //Display or not debug message
 
@@ -41,7 +41,7 @@ public class OpenUDID_manager implements ServiceConnection{
 		mPreferences =  context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
 		mContext = context;
 		mRandom = new Random();
-		mReceivedOpenUDIDs = new HashMap<String, Integer>();
+		mReceivedOpenUDIDs = new HashMap<>();
 	}
 	
 	@Override
@@ -125,8 +125,9 @@ public class OpenUDID_manager implements ServiceConnection{
 	}
 	
 	private void getMostFrequentOpenUDID() {
-		if (mReceivedOpenUDIDs.isEmpty() == false) {
-			final TreeMap<String,Integer> sorted_OpenUDIDS = new TreeMap(new ValueComparator());
+		if (!mReceivedOpenUDIDs.isEmpty()) {
+			final TreeMap<String,Integer> sorted_OpenUDIDS = new TreeMap<>();
+
 			sorted_OpenUDIDS.putAll(mReceivedOpenUDIDs);
         
 			OpenUDID = sorted_OpenUDIDS.firstKey();

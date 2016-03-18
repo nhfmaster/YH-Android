@@ -35,8 +35,6 @@ public class InitPassCodeActivity extends Activity {
 
     private final String TEXT_MAIN_CONFIRM = "确认密码";
     private final String TEXT_SUB_CONFIRM = "请再次输入密码";
-    private final String TEXT_MAIN_MISTAKE = "密码有误";
-    private final String TEXT_SUB_MISTAKE = "两次密码不一致";
 
     private byte counter = 0;
     private int password;
@@ -55,8 +53,7 @@ public class InitPassCodeActivity extends Activity {
             Bitmap.Config.ARGB_8888);
 
     public static Intent createIntent(Context context) {
-        Intent intent = new Intent(context, InitPassCodeActivity.class);
-        return intent;
+        return new Intent(context, InitPassCodeActivity.class);
     }
 
     @Override
@@ -271,7 +268,9 @@ public class InitPassCodeActivity extends Activity {
                     finish();
                     this.onBackPressed();
                 } else {
+                    String TEXT_MAIN_MISTAKE = "密码有误";
                     text_main_pass.setText(TEXT_MAIN_MISTAKE);
+                    String TEXT_SUB_MISTAKE = "两次密码不一致";
                     text_sub_pass.setText(TEXT_SUB_MISTAKE);
                     counter = 0;
                     password = 0;
