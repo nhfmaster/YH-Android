@@ -52,20 +52,10 @@ public class LoginActivity extends BaseActivity {
             checkUpgrade(false);
         }
 
-        urlString = String.format(URLs.LOGIN_PATH, URLs.HOST);
-        urlStringForDetecting = URLs.HOST;
-        assetsPath = FileUtil.sharedPath(mContext);
-        relativeAssetsPath = "assets";
-
         /*
          * 检测登录界面，版本是否升级
          */
         checkVersionUpgrade(assetsPath);
-
-        /*
-         *  加载服务器网页
-         */
-        new Thread(mRunnableForDetecting).start();
     }
 
     private class JavaScriptInterface extends JavaScriptBase {

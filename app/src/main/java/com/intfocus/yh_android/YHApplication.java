@@ -6,6 +6,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -19,6 +21,7 @@ import com.squareup.leakcanary.RefWatcher;
 import org.OpenUDID.OpenUDID_manager;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  * Created by lijunjie on 16/1/15.
@@ -56,7 +59,7 @@ public class YHApplication extends Application implements Application.ActivityLi
 
         currentActivityName = "";
         mContext = YHApplication.this;
-        String sharedPath = FileUtil.sharedPath(mContext);
+        String sharedPath = FileUtil.sharedPath(mContext), basePath = FileUtil.basePath(mContext);
 
         /*
          *  蒲公英平台，收集闪退日志
@@ -68,14 +71,55 @@ public class YHApplication extends Application implements Application.ActivityLi
          */
         OpenUDID_manager.sync(getApplicationContext());
 
-        /**
-         *  静态文件放在共享文件夹内,以便与服务器端检测、更新
-         *  刚升级过时，就不必须再更新，浪费用户流量
-         */
         /*
-         *  解压静态资源
-         *  loading.zip, e433278b2f0835eaaaeb951cf9dfa363
-         *  assets.zip, 490ecad478805d9455853865f4b53622
+         *  基本目录结构
+         */
+        makeSureFolderExist(URLs.CACHED_DIRNAME);
+        makeSureFolderExist(URLs.SHARED_DIRNAME);
+
+        /**
+         *  新安装、或升级后，把代码包中的静态资源重新拷贝覆盖一下
+         *  避免再从服务器下载更新，浪费用户流量
+         */
+        try {
+            PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+            String versionConfigPath = String.format("%s/%s", basePath, URLs.CURRENT_VERSION__FILENAME);
+
+            boolean isUpgrade = true;
+            String localVersion = "new-installer";
+            if ((new File(versionConfigPath)).exists()) {
+                localVersion = FileUtil.readFile(versionConfigPath);
+                if (localVersion.equals(packageInfo.versionName)) { isUpgrade = false; }
+            }
+
+            if (isUpgrade) {
+                Log.i("VersionUpgrade", String.format("%s => %s remove %s/%s", localVersion, packageInfo.versionName, basePath, URLs.CACHED_HEADER_FILENAME));
+
+                String assetZipPath;
+                File assetZipFile;
+                String[] assetsName = {"assets.zip", "loading.zip", "fonts.zip", "images.zip", "stylesheets.zip", "javascripts.zip"};
+                for(int i = 0, len = assetsName.length; i < len; i ++) {
+                    assetZipPath = String.format("%s/%s", sharedPath, assetsName[i]);
+                    assetZipFile = new File(assetZipPath);
+                    if (!assetZipFile.exists()) {
+                        assetZipFile.delete();
+                    }
+                    FileUtil.copyAssetFile(mContext, assetsName[i], assetZipPath);
+                }
+
+                FileUtil.writeFile(versionConfigPath, packageInfo.versionName);
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        /*
+         *  校正静态资源
+         *
+         *  sharedPath/filename.zip md5值 <=> user.plist中filename_md5
+         *  不一致时，则删除原解压后文件夹，重新解压zip
          */
         FileUtil.checkAssets(mContext, "loading", false);
         FileUtil.checkAssets(mContext, "assets", false);
@@ -84,14 +128,6 @@ public class YHApplication extends Application implements Application.ActivityLi
         FileUtil.checkAssets(mContext, "stylesheets", true);
         FileUtil.checkAssets(mContext, "javascripts", true);
 
-        /*
-         *  基本目录结构
-         */
-        String cachedPath = String.format("%s/%s", FileUtil.basePath(mContext), URLs.CACHED_DIRNAME);
-        File cachedFolder = new File(cachedPath);
-        if (!cachedFolder.exists()) {
-            cachedFolder.mkdirs();
-        }
 
         registerActivityLifecycleCallbacks(this);
 
@@ -168,5 +204,10 @@ public class YHApplication extends Application implements Application.ActivityLi
     public static RefWatcher getRefWatcher(Context context) {
         YHApplication application = (YHApplication) context.getApplicationContext();
         return application.refWatcher;
+    }
+
+    private void makeSureFolderExist(String folderName) {
+        String cachedPath = String.format("%s/%s", FileUtil.basePath(mContext), folderName);
+        FileUtil.makeSureFolderExist(cachedPath);
     }
 }

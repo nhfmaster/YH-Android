@@ -22,7 +22,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.IOException;
 
 public class SettingActivity extends BaseActivity {
     private TextView mUserID;
@@ -191,32 +190,25 @@ public class SettingActivity extends BaseActivity {
     private View.OnClickListener mCheckAssetsListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            try {
-                String userConfigPath = String.format("%s/%s", FileUtil.basePath(mContext), URLs.USER_CONFIG_FILENAME);
-                JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
-                userJSON.remove("local_loading_md5");
-                userJSON.remove("local_assets_md5");
-                FileUtil.writeFile(userConfigPath, userJSON.toString());
+            /*
+             * 检测服务器静态资源是否更新，并下载
+             */
+            checkAssetsUpdated(false);
 
-                /*
-                 * 用户报表数据js文件存放在公共区域
-                 */
-                String headerPath = String.format("%s/%s", FileUtil.sharedPath(mContext), URLs.CACHED_HEADER_FILENAME);
-                new File(headerPath).delete();
+            /*
+             * 用户报表数据js文件存放在公共区域
+             */
+            String headerPath = String.format("%s/%s", FileUtil.sharedPath(mContext), URLs.CACHED_HEADER_FILENAME);
+            new File(headerPath).delete();
 
-                FileUtil.checkAssets(mContext, "loading", false);
-                FileUtil.checkAssets(mContext, "assets", false);
-                FileUtil.checkAssets(mContext, "fonts",true);
-                FileUtil.checkAssets(mContext, "images", true);
-                FileUtil.checkAssets(mContext, "javascripts",true);
-                FileUtil.checkAssets(mContext, "stylesheets", true);
+            FileUtil.checkAssets(mContext, "assets", false);
+            FileUtil.checkAssets(mContext, "loading", false);
+            FileUtil.checkAssets(mContext, "fonts",true);
+            FileUtil.checkAssets(mContext, "images", true);
+            FileUtil.checkAssets(mContext, "javascripts", true);
+            FileUtil.checkAssets(mContext, "stylesheets", true);
 
-                Toast.makeText(mContext, "校正完成", Toast.LENGTH_SHORT).show();
-
-                checkAssetsUpdated(false);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            Toast.makeText(mContext, "校正完成", Toast.LENGTH_SHORT).show();
         }
     };
 

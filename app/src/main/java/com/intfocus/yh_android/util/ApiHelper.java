@@ -84,6 +84,13 @@ public class ApiHelper {
                 userJSON.put("use_gesture_password", false);
                 userJSON.put("gesture_password", "");
             }
+
+            JSONObject assetsJSON = userJSON.getJSONObject("assets");
+            userJSON.put("fonts_md5", assetsJSON.getString("fonts_md5"));
+            userJSON.put("images_md5", assetsJSON.getString("images_md5"));
+            userJSON.put("stylesheets_md5", assetsJSON.getString("stylesheets_md5"));
+            userJSON.put("javascripts_md5", assetsJSON.getString("javascripts_md5"));
+
             FileUtil.writeFile(userConfigPath, userJSON.toString());
 
             Log.i("CurrentUser", userJSON.toString());
