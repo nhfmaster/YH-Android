@@ -173,7 +173,7 @@ public class BaseActivity extends Activity {
         mActivities.clear();
     }
 
-    private void finishLoginActivityWhenInMainAcitivty(Activity activity) {
+    void finishLoginActivityWhenInMainAcitivty(Activity activity) {
         if (activity.getClass().toString().contains("MainActivity")) {
             for (Activity a : mActivities) {
                 if (a.getClass().toString().contains("LoginActivity")) {
