@@ -1,3 +1,9 @@
+.DS_Store
+
+# Android 的 Module 推荐这么写. gitignore 文件
+/build
+*.iml
+
 # Built application files
 *.apk
 *.ap_
@@ -7,16 +13,12 @@
 
 # Java class files
 *.class
-!app/src/main/assets/loading.zip
-!app/src/main/assets/assets.zip
-app/src/main/assets/loading
-app/src/main/assets/assets
+
 
 # Generated files
 bin/
 gen/
 .idea/
-app/app.iml
 
 # Gradle files
 .gradle/
@@ -36,5 +38,3 @@ proguard/
 
 # Android Studio captures folder
 captures/
-
-.idea/workspace.xml

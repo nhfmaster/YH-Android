@@ -23,10 +23,6 @@ import java.util.List;
 public class MainActivity extends BaseActivity {
     private int objectType;
     private TabView mCurrentTab;
-    private TabView mTabKPI;
-    private TabView mTabAnalysis;
-    private TabView mTabAPP;
-    private TabView mTabMessage;
 
     @Override
     @SuppressLint("SetJavaScriptEnabled")
@@ -52,7 +48,7 @@ public class MainActivity extends BaseActivity {
 
         initTab();
 
-        List<ImageView> colorViews = new ArrayList<ImageView>();
+        List<ImageView> colorViews = new ArrayList<>();
         colorViews.add((ImageView) findViewById(R.id.colorView0));
         colorViews.add((ImageView) findViewById(R.id.colorView1));
         colorViews.add((ImageView) findViewById(R.id.colorView2));
@@ -78,10 +74,10 @@ public class MainActivity extends BaseActivity {
     @SuppressLint("SetJavaScriptEnabled")
     @JavascriptInterface
     private void initTab() {
-        mTabKPI = (TabView) findViewById(R.id.tab_kpi);
-        mTabAnalysis = (TabView) findViewById(R.id.tab_analysis);
-        mTabAPP = (TabView) findViewById(R.id.tab_app);
-        mTabMessage = (TabView) findViewById(R.id.tab_message);
+        TabView mTabKPI = (TabView) findViewById(R.id.tab_kpi);
+        TabView mTabAnalysis = (TabView) findViewById(R.id.tab_analysis);
+        TabView mTabAPP = (TabView) findViewById(R.id.tab_app);
+        TabView mTabMessage = (TabView) findViewById(R.id.tab_message);
 
         mTabKPI.setOnClickListener(mTabChangeListener);
         mTabAnalysis.setOnClickListener(mTabChangeListener);
@@ -92,7 +88,7 @@ public class MainActivity extends BaseActivity {
         mCurrentTab.setActive(true);
     }
 
-    private View.OnClickListener mSettingListener = new View.OnClickListener() {
+    private final View.OnClickListener mSettingListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             Intent intent = new Intent(mContext, SettingActivity.class);
@@ -112,7 +108,7 @@ public class MainActivity extends BaseActivity {
     };
 
     @SuppressLint("SetJavaScriptEnabled")
-    private View.OnClickListener mTabChangeListener = new View.OnClickListener() {
+    private final View.OnClickListener mTabChangeListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             if (v == mCurrentTab) {
@@ -122,13 +118,7 @@ public class MainActivity extends BaseActivity {
             mCurrentTab = (TabView) v;
             mCurrentTab.setActive(true);
 
-            mTabKPI.setEnabled(true);
-            mTabAnalysis.setEnabled(true);
-            mTabAPP.setEnabled(true);
-            mTabMessage.setEnabled(true);
-
             mWebView.loadUrl(String.format("file:///%s/loading/loading.html", FileUtil.sharedPath(mContext)));
-
             try {
                 switch (v.getId()) {
                     case R.id.tab_kpi:
@@ -221,9 +211,7 @@ public class MainActivity extends BaseActivity {
                 config.put(pageName, tabIndex);
 
                 FileUtil.writeFile(filePath, config.toString());
-            } catch (JSONException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
+            } catch (JSONException | IOException e) {
                 e.printStackTrace();
             }
         }

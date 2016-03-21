@@ -60,21 +60,21 @@ import java.util.Map;
  */
 public class BaseActivity extends Activity {
 
-    protected PullToRefreshWebView pullToRefreshWebView;
-    protected android.webkit.WebView mWebView;
-    protected JSONObject user;
-    protected int userID = 0;
-    protected String urlString;
-    protected String assetsPath;
-    protected String sharedPath;
-    protected String relativeAssetsPath;
-    protected String urlStringForDetecting;
-    protected String urlStringForLoading;
-    protected JSONObject logParams = new JSONObject();
-    protected ProgressDialog mProgressDialog;
-    protected static ArrayList<Activity> mActivities = new ArrayList<Activity>(3);
+    PullToRefreshWebView pullToRefreshWebView;
+    android.webkit.WebView mWebView;
+    JSONObject user;
+    int userID = 0;
+    String urlString;
+    String assetsPath;
+    private String sharedPath;
+    private String relativeAssetsPath;
+    private String urlStringForDetecting;
+    String urlStringForLoading;
+    JSONObject logParams = new JSONObject();
+    private ProgressDialog mProgressDialog;
+    final static ArrayList<Activity> mActivities = new ArrayList<>(3);
 
-    protected Context mContext;
+    Context mContext;
 
     @Override
     @SuppressLint("SetJavaScriptEnabled")
@@ -113,7 +113,7 @@ public class BaseActivity extends Activity {
         refWatcher.watch(this);
     }
 
-    public static void fixInputMethodManagerLeak(Context context) {
+    private static void fixInputMethodManagerLeak(Context context) {
         if (context == null) {
             return;
         }
@@ -124,12 +124,12 @@ public class BaseActivity extends Activity {
                 return;
             }
 
-            Object obj_get = null;
+            Object obj_get;
             Field f_mCurRootView = imm.getClass().getDeclaredField("mCurRootView");
             Field f_mServedView = imm.getClass().getDeclaredField("mServedView");
             Field f_mNextServedView = imm.getClass().getDeclaredField("mNextServedView");
 
-            if (f_mCurRootView.isAccessible() == false) {
+            if (!f_mCurRootView.isAccessible()) {
                 f_mCurRootView.setAccessible(true);
             }
             obj_get = f_mCurRootView.get(imm);
@@ -137,7 +137,7 @@ public class BaseActivity extends Activity {
                 f_mCurRootView.set(imm, null);
             }
 
-            if (f_mServedView.isAccessible() == false) {
+            if (!f_mServedView.isAccessible()) {
                 f_mServedView.setAccessible(true);
             }
             obj_get = f_mServedView.get(imm);
@@ -145,7 +145,7 @@ public class BaseActivity extends Activity {
                 f_mServedView.set(imm, null);
             }
 
-            if (f_mNextServedView.isAccessible() == false) {
+            if (!f_mNextServedView.isAccessible()) {
                 f_mNextServedView.setAccessible(true);
             }
             obj_get = f_mNextServedView.get(imm);
@@ -188,7 +188,7 @@ public class BaseActivity extends Activity {
      * WebView Setting
      * ********************
      */
-    public android.webkit.WebView initRefreshWebView() {
+    android.webkit.WebView initRefreshWebView() {
         pullToRefreshWebView.setMode(PullToRefreshBase.Mode.PULL_FROM_START);
 
         mWebView = pullToRefreshWebView.getRefreshableView();
@@ -233,7 +233,7 @@ public class BaseActivity extends Activity {
         endLabels.setReleaseLabel("放了我，我就刷新");// 下来达到一定距离时，显示的提示
     }
 
-    public void setPullToRefreshWebView(boolean isAllow) {
+    void setPullToRefreshWebView(boolean isAllow) {
         if (!isAllow) {
             pullToRefreshWebView.setMode(PullToRefreshBase.Mode.DISABLED);
             return;
@@ -256,7 +256,7 @@ public class BaseActivity extends Activity {
     }
 
 
-    protected class pullToRefreshTask extends AsyncTask<Void, Void, Void> {
+    private class pullToRefreshTask extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void... params) {
             // 如果这个地方不使用线程休息的话，刷新就不会显示在那个 PullToRefreshListView 的 UpdatedLabel 上面
@@ -265,7 +265,7 @@ public class BaseActivity extends Activity {
              *  下拉浏览器刷新时，删除响应头文件，相当于无缓存刷新
              */
             if (urlString != null && !urlString.isEmpty()) {
-                String urlKey = urlString.indexOf("?") != -1 ? TextUtils.split(urlString, "?")[0] : urlString;
+                String urlKey = urlString.contains("?") ? TextUtils.split(urlString, "?")[0] : urlString;
                 ApiHelper.clearResponseHeader(urlKey, assetsPath);
             }
             new Thread(mRunnableForDetecting).start();
@@ -297,21 +297,21 @@ public class BaseActivity extends Activity {
      * WebView display UI
      * ********************
      */
-    Runnable mRunnableForDetecting = new Runnable() {
+    final Runnable mRunnableForDetecting = new Runnable() {
         @Override
         public void run() {
             Map<String, String> response = HttpUtil.httpGet(urlStringForDetecting, new HashMap<String, String>());
-            int statusCode = Integer.parseInt(response.get("code").toString());
+            int statusCode = Integer.parseInt(response.get("code"));
             if (statusCode == 200 && !urlStringForDetecting.equals(URLs.HOST)) {
-                Log.i("StatusCode", response.get("body").toString());
+                Log.i("StatusCode", response.get("body"));
                 try {
-                    JSONObject json = new JSONObject(response.get("body").toString());
+                    JSONObject json = new JSONObject(response.get("body"));
                     statusCode = json.getBoolean("device_state") ? 200 : 401;
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
-            Log.i("Detecting", response.get("code").toString());
+            Log.i("Detecting", response.get("code"));
 
             Message message = mHandlerForDetecting.obtainMessage();
             message.what = statusCode;
@@ -319,7 +319,7 @@ public class BaseActivity extends Activity {
         }
     };
 
-    protected Handler mHandlerForDetecting = new Handler() {
+    private final Handler mHandlerForDetecting = new Handler() {
         public void handleMessage(Message message) {
             switch (message.what) {
                 case 200:
@@ -341,23 +341,23 @@ public class BaseActivity extends Activity {
         }
     };
 
-    Runnable mRunnableWithAPI = new Runnable() {
+    private final Runnable mRunnableWithAPI = new Runnable() {
         @Override
         public void run() {
             Log.i("httpGetWithHeader", String.format("url: %s, assets: %s, relativeAssets: %s", urlString, assetsPath, relativeAssetsPath));
             Map<String, String> response = ApiHelper.httpGetWithHeader(urlString, assetsPath, relativeAssetsPath);
 
             Message message = mHandlerWithAPI.obtainMessage();
-            message.what = Integer.parseInt(response.get("code").toString());
-            message.obj = response.get("path").toString();
+            message.what = Integer.parseInt(response.get("code"));
+            message.obj = response.get("path");
 
-            Log.i("mRunnableWithAPI", String.format("code: %s, path: %s", response.get("code").toString(), response.get("path").toString()));
+            Log.i("mRunnableWithAPI", String.format("code: %s, path: %s", response.get("code"), response.get("path")));
 
             mHandlerWithAPI.sendMessage(message);
         }
     };
 
-    protected Handler mHandlerWithAPI = new Handler() {
+    private final Handler mHandlerWithAPI = new Handler() {
         public void handleMessage(Message message) {
             switch (message.what) {
                 case 200:
@@ -378,11 +378,12 @@ public class BaseActivity extends Activity {
         }
     };
 
-    Runnable mRunnableForLogger = new Runnable() {
+    final Runnable  mRunnableForLogger = new Runnable() {
         @Override
         public void run() {
             try {
-                if (!logParams.getString("action").equals("登录") && !logParams.getString("action").equals("解屏")) return;
+                if (!logParams.getString("action").equals("登录") && !logParams.getString("action").equals("解屏"))
+                    return;
 
                 ApiHelper.actionLog(mContext, logParams);
                 System.out.println("logParams: " + logParams.get("action").toString());
@@ -422,13 +423,13 @@ public class BaseActivity extends Activity {
     }
     */
 
-    public void showWebViewForWithoutNetwork() {
+    private void showWebViewForWithoutNetwork() {
         urlStringForLoading = String.format("file:///%s/loading/network_400.html", FileUtil.sharedPath(mContext));
         mWebView.loadUrl(urlStringForLoading);
     }
 
 
-    public void showDialogForDeviceForbided() {
+    private void showDialogForDeviceForbided() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(BaseActivity.this);
         alertDialog.setTitle("温馨提示");
         alertDialog.setMessage("您被禁止在该设备使用本应用");
@@ -446,7 +447,7 @@ public class BaseActivity extends Activity {
         alertDialog.show();
     }
 
-    public void initColorView(List<ImageView> colorViews) {
+    void initColorView(List<ImageView> colorViews) {
         String[] colors = {"#ffffff", "#ffcd0a", "#fd9053", "#dd0929", "#016a43", "#9d203c", "#093db5", "#6a3906", "#192162", "#000000"};
         String userIDStr = String.format("%d", userID);
         int numDiff = colorViews.size() - userIDStr.length();
@@ -461,7 +462,7 @@ public class BaseActivity extends Activity {
         }
     }
 
-    public void longLog(String Tag, String str) {
+    void longLog(String Tag, String str) {
         if (str.length() > 200) {
             Log.i(Tag, str.substring(0, 200));
             longLog(Tag, str.substring(200));
@@ -471,7 +472,7 @@ public class BaseActivity extends Activity {
     }
 
 
-    protected void modifiedUserConfig(JSONObject configJSON) {
+    void modifiedUserConfig(JSONObject configJSON) {
         try {
             String userConfigPath = String.format("%s/%s", FileUtil.basePath(mContext), URLs.USER_CONFIG_FILENAME);
             JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
@@ -491,7 +492,7 @@ public class BaseActivity extends Activity {
      * 检测版本更新
      * {"code":0,"message":"","data":{"lastBuild":"10","downloadURL":"","versionCode":"15","versionName":"0.1.5","appUrl":"http:\/\/www.pgyer.com\/yh-a","build":"10","releaseNote":"\u66f4\u65b0\u5230\u7248\u672c: 0.1.5(build10)"}}
      */
-    protected View.OnClickListener mCheckUpgradeListener = new View.OnClickListener() {
+    final View.OnClickListener mCheckUpgradeListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             checkUpgrade(true);
@@ -509,14 +510,14 @@ public class BaseActivity extends Activity {
         }
     };
 
-    protected void checkUpgrade(final boolean isShowToast) {
+    void checkUpgrade(final boolean isShowToast) {
         UpdateManagerListener updateManagerListener = new UpdateManagerListener() {
             @Override
             public void onUpdateAvailable(final String result) {
                 Log.i("PGYER", result);
 
-                String message = "服务器获取信息失败。";
-                String versionCode = "-1", versionName = "-1";
+                String message;
+                String versionCode = "-1";
                 try {
                     JSONObject response = new JSONObject(result);
                     message = response.getString("message");
@@ -524,7 +525,6 @@ public class BaseActivity extends Activity {
                         JSONObject responseData = response.getJSONObject("data");
                         message = responseData.getString("releaseNote");
                         versionCode = responseData.getString("versionCode");
-                        versionName = responseData.getString("versionName");
 
                     }
                 } catch (JSONException e) {
@@ -578,7 +578,7 @@ public class BaseActivity extends Activity {
     /**
      * app升级后，清除缓存头文件
      */
-    public void checkVersionUpgrade(String assetsPath) {
+    void checkVersionUpgrade(String assetsPath) {
         try {
             PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
             String versionConfigPath = String.format("%s/%s", assetsPath, URLs.CURRENT_VERSION__FILENAME);
@@ -587,7 +587,9 @@ public class BaseActivity extends Activity {
             boolean isUpgrade = true;
             if ((new File(versionConfigPath)).exists()) {
                 localVersion = FileUtil.readFile(versionConfigPath);
-                if (localVersion.equals(packageInfo.versionName)) { isUpgrade = false; }
+                if (localVersion.equals(packageInfo.versionName)) {
+                    isUpgrade = false;
+                }
             }
 
             if (isUpgrade) {
@@ -598,28 +600,30 @@ public class BaseActivity extends Activity {
                  */
                 String headerPath = String.format("%s/%s", sharedPath, URLs.CACHED_HEADER_FILENAME);
                 File headerFile = new File(headerPath);
-                if (headerFile.exists()) { headerFile.delete(); }
+                if (headerFile.exists()) {
+                    headerFile.delete();
+                }
 
                 FileUtil.writeFile(versionConfigPath, packageInfo.versionName);
             }
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (PackageManager.NameNotFoundException | IOException e) {
             e.printStackTrace();
         }
     }
 
     /**
      * 检测服务器端静态文件是否更新
+     * to do
      */
-    public void checkAssetsUpdated(boolean shouldReloadUIThread) {
+    void checkAssetsUpdated(boolean shouldReloadUIThread) {
         checkAssetUpdated(shouldReloadUIThread, "loading", false);
         checkAssetUpdated(shouldReloadUIThread, "fonts", true);
         checkAssetUpdated(shouldReloadUIThread, "images", true);
         checkAssetUpdated(shouldReloadUIThread, "stylesheets", true);
         checkAssetUpdated(shouldReloadUIThread, "javascripts", true);
     }
-    public boolean checkAssetUpdated(boolean shouldReloadUIThread, String assetName, boolean isInAssets) {
+
+    private boolean checkAssetUpdated(boolean shouldReloadUIThread, String assetName, boolean isInAssets) {
         boolean isShouldUpdateAssets = false;
 
         try {
@@ -637,7 +641,9 @@ public class BaseActivity extends Activity {
                 isShouldUpdateAssets = true;
             }
 
-            if (!isShouldUpdateAssets) { return false; }
+            if (!isShouldUpdateAssets) {
+                return false;
+            }
 
             Log.i("checkAssetUpdated", String.format("%s: %s != %s", assetZipPath, userJSON.getString(localKeyName), userJSON.getString(keyName)));
             // instantiate it within the onCreate method
@@ -662,12 +668,12 @@ public class BaseActivity extends Activity {
 
     // usually, subclasses of AsyncTask are declared inside the activity class.
     // that way, you can easily modify the UI thread from here
-    protected class DownloadAssetsTask extends AsyncTask<String, Integer, String> {
-        private Context context;
+    class DownloadAssetsTask extends AsyncTask<String, Integer, String> {
+        private final Context context;
         private PowerManager.WakeLock mWakeLock;
-        private boolean isReloadUIThread;
-        private String assetFilename;
-        private boolean isInAssets;
+        private final boolean isReloadUIThread;
+        private final String assetFilename;
+        private final boolean isInAssets;
 
         public DownloadAssetsTask(Context context, boolean shouldReloadUIThread, String assetFilename, boolean isInAssets) {
             this.context = context;
@@ -761,15 +767,16 @@ public class BaseActivity extends Activity {
 
             if (result != null) {
                 Toast.makeText(context, "静态资源更新失败", Toast.LENGTH_LONG).show();
-            }
-            else {
+            } else {
                 FileUtil.checkAssets(mContext, assetFilename, isInAssets);
-                if (isReloadUIThread) { new Thread(mRunnableForDetecting).start(); }
+                if (isReloadUIThread) {
+                    new Thread(mRunnableForDetecting).start();
+                }
             }
         }
     }
 
-    protected class JavaScriptBase {
+    class JavaScriptBase {
         /*
          * JS 接口，暴露给JS的方法使用@JavascriptInterface装饰
          */

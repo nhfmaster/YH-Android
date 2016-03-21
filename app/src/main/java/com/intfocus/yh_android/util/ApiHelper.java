@@ -47,7 +47,7 @@ public class ApiHelper {
 
             Map<String, String> response = HttpUtil.httpPost(urlString, params);
 
-            JSONObject responseJSON = new JSONObject(response.get("body").toString());
+            JSONObject responseJSON = new JSONObject(response.get("body"));
 
             String userConfigPath = String.format("%s/%s", FileUtil.basePath(context), URLs.USER_CONFIG_FILENAME);
             JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
@@ -123,36 +123,36 @@ public class ApiHelper {
             try {
                 ApiHelper.storeResponseHeader(urlString, assetsPath, response);
 
-                FileUtil.writeFile(filePath, response.get("body").toString());
+                FileUtil.writeFile(filePath, response.get("body"));
             } catch (IOException e) {
                 e.printStackTrace();
             }
         } else {
-            Log.i("Code", response.get("code").toString());
+            Log.i("Code", response.get("code"));
         }
     }
 
     /*
      * 发表评论
      */
-    public static void writeComment(int userID, int objectType, int objectID, Map params) throws UnsupportedEncodingException, JSONException {
+    public static void writeComment(int userID, int objectType, int objectID, Map params) throws UnsupportedEncodingException {
         String urlString = String.format(URLs.API_COMMENT_PATH, URLs.HOST, userID, objectID, objectType);
 
         Map<String, String> response = HttpUtil.httpPost(urlString, params);
-        Log.i("WriteComment", response.get("code").toString());
-        Log.i("WriteComment", response.get("body").toString());
+        Log.i("WriteComment", response.get("code"));
+        Log.i("WriteComment", response.get("body"));
     }
 
     public static Map<String, String> httpGetWithHeader(String urlString, String assetsPath, String relativeAssetsPath) {
-        Map<String, String> retMap = new HashMap<String, String>();
+        Map<String, String> retMap = new HashMap<>();
 
-        String urlKey = urlString.indexOf("?") != -1 ? TextUtils.split(urlString, "?")[0] : urlString;
+        String urlKey = urlString.contains("?") ? TextUtils.split(urlString, "?")[0] : urlString;
 
         try {
             Map<String, String> headers = ApiHelper.checkResponseHeader(urlString, assetsPath);
 
             Map<String, String> response = HttpUtil.httpGet(urlKey, headers);
-            String statusCode = response.get("code").toString();
+            String statusCode = response.get("code");
             retMap.put("code", statusCode);
 
             String htmlName = HttpUtil.UrlToFileName(urlString);
@@ -162,7 +162,7 @@ public class ApiHelper {
             if (statusCode.equals("200")) {
                 ApiHelper.storeResponseHeader(urlKey, assetsPath, response);
 
-                String htmlContent = response.get("body").toString();
+                String htmlContent = response.get("body");
                 htmlContent = htmlContent.replace("/javascripts/", String.format("%s/javascripts/", relativeAssetsPath));
                 htmlContent = htmlContent.replace("/stylesheets/", String.format("%s/stylesheets/", relativeAssetsPath));
                 htmlContent = htmlContent.replace("/images/", String.format("%s/images/", relativeAssetsPath));
@@ -180,13 +180,13 @@ public class ApiHelper {
     }
 
     public static Map<String, String> resetPassword(String userID, String newPassword) {
-        Map<String, String> retMap = new HashMap<String, String>();
+        Map<String, String> retMap = new HashMap<>();
 
         try {
             String urlPath = String.format(URLs.API_RESET_PASSWORD_PATH, userID);
             String urlString = String.format("%s/%s", URLs.HOST, urlPath);
 
-            Map<String, String> params = new HashMap<String, String>();
+            Map<String, String> params = new HashMap<>();
             params.put("password", newPassword);
             retMap = HttpUtil.httpPost(urlString, params);
         } catch (Exception e) {
@@ -225,11 +225,11 @@ public class ApiHelper {
     /**
      * 从缓存头文件中，获取指定链接的ETag/Last-Modified
      *
-     * @param 链接
-     * @param 缓存头文件相对文件夹
+     * @param urlKey 链接
+     * @param assetsPath 缓存头文件相对文件夹
      */
-    public static Map<String, String> checkResponseHeader(String urlKey, String assetsPath) {
-        Map<String, String> headers = new HashMap<String, String>();
+    private static Map<String, String> checkResponseHeader(String urlKey, String assetsPath) {
+        Map<String, String> headers = new HashMap<>();
 
         try {
             JSONObject headersJSON = new JSONObject();
@@ -239,7 +239,7 @@ public class ApiHelper {
                 headersJSON = FileUtil.readConfigFile(headersFilePath);
             }
 
-            JSONObject headerJSON = new JSONObject();
+            JSONObject headerJSON;
             if (headersJSON.has(urlKey)) {
                 headerJSON = (JSONObject) headersJSON.get(urlKey);
 
@@ -260,11 +260,11 @@ public class ApiHelper {
     /**
      * 把服务器响应的ETag/Last-Modified存入本地
      *
-     * @param 链接
-     * @param 缓存头文件相对文件夹
-     * @param 服务器响应的ETag/Last-Modifiede
+     * @param urlKey 链接
+     * @param assetsPath 缓存头文件相对文件夹
+     * @param response 服务器响应的ETag/Last-Modifiede
      */
-    public static void storeResponseHeader(String urlKey, String assetsPath, Map<String, String> response) {
+    private static void storeResponseHeader(String urlKey, String assetsPath, Map<String, String> response) {
         try {
             JSONObject headersJSON = new JSONObject();
 
@@ -276,17 +276,15 @@ public class ApiHelper {
             JSONObject headerJSON = new JSONObject();
 
             if (response.containsKey("ETag")) {
-                headerJSON.put("ETag", response.get("ETag").toString());
+                headerJSON.put("ETag", response.get("ETag"));
             }
             if (response.containsKey("Last-Modified")) {
-                headerJSON.put("Last-Modified", response.get("Last-Modified").toString());
+                headerJSON.put("Last-Modified", response.get("Last-Modified"));
             }
 
             headersJSON.put(urlKey, headerJSON);
             FileUtil.writeFile(headersFilePath, headersJSON.toString());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (JSONException | IOException e) {
             e.printStackTrace();
         }
     }
@@ -294,8 +292,8 @@ public class ApiHelper {
     /**
      * 合并两个JSONObject
      *
-     * @param obj
-     * @param other
+     * @param obj JSONObject
+     * @param other JSONObject
      * @return 合并后的JSONObject
      */
     public static JSONObject merge(JSONObject obj, JSONObject other) {
@@ -315,9 +313,9 @@ public class ApiHelper {
     /**
      * 下载文件
      *
-     * @param 上下文
-     * @param 下载链接
-     * @param 写入本地文件路径
+     * @param context 上下文
+     * @param urlString 下载链接
+     * @param outputFile 写入本地文件路径
      */
     public static void downloadFile(Context context, String urlString, File outputFile) {
         try {
@@ -340,7 +338,7 @@ public class ApiHelper {
                 InputStream in = url.openStream();
                 FileOutputStream fos = new FileOutputStream(outputFile);
 
-                int length = -1;
+                int length;
                 byte[] buffer = new byte[1024];// buffer for portion of data from connection
                 while ((length = in.read(buffer)) > -1) {
                     fos.write(buffer, 0, length);
@@ -361,15 +359,15 @@ public class ApiHelper {
     /**
      * 上传锁屏信息
      *
-     * @param 设备标识
-     * @param 锁屏密码
-     * @param 是否启用锁屏
+     * @param deviceID 设备标识
+     * @param password 锁屏密码
+     * @param state 是否启用锁屏
      */
     public static void screenLock(String deviceID, String password, boolean state) {
         String urlString = String.format(URLs.API_SCREEN_LOCK_PATH, URLs.HOST, deviceID);
 
         try {
-            Map<String, String> params = new HashMap();
+            Map<String, String> params = new HashMap<>();
             params.put("screen_lock_state", "1");
             params.put("screen_lock_type", "4位数字");
             params.put("screen_lock", password);
@@ -377,16 +375,14 @@ public class ApiHelper {
             HttpUtil.httpPost(urlString, params);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
         }
     }
 
     /**
      * 上传用户行为
      *
-     * @param 上下文
-     * @param 用户行为
+     * @param context 上下文
+     * @param param 用户行为
      */
     public static void actionLog(Context context, JSONObject param) {
         try {
@@ -410,9 +406,7 @@ public class ApiHelper {
 
             String urlString = String.format(URLs.API_ACTION_LOG_PATH, URLs.HOST);
             HttpUtil.httpPost(urlString, params);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        } catch (PackageManager.NameNotFoundException e) {
+        } catch (JSONException | PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
     }

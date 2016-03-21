@@ -15,7 +15,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.zip.ZipEntry;
@@ -62,7 +61,7 @@ public class FileUtil {
         return false;
     }
 
-    public static String userspace(Context context) {
+    private static String userspace(Context context) {
         String spacePath = "";
         try {
             String userConfigPath = String.format("%s/%s", FileUtil.basePath(context), URLs.USER_CONFIG_FILENAME);
@@ -118,8 +117,6 @@ public class FileUtil {
             inputStreamReader.close();
             string = stringBuilder.toString();
 
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -154,7 +151,7 @@ public class FileUtil {
 
         file.createNewFile();
         FileOutputStream out = new FileOutputStream(file, true);
-        out.write(content.toString().getBytes("utf-8"));
+        out.write(content.getBytes("utf-8"));
         out.close();
     }
 
@@ -173,11 +170,7 @@ public class FileUtil {
 
     public static boolean makeSureFolderExist(String pathName) {
         File folder = new File(pathName);
-        if (folder.exists() && folder.isDirectory()) {
-            return true;
-        } else {
-            return folder.mkdirs();
-        }
+        return folder.exists() && folder.isDirectory() || folder.mkdirs();
     }
 
     /*
@@ -188,8 +181,7 @@ public class FileUtil {
             folderName = String.format("/%s", folderName);
         }
 
-        String pathName = String.format("%s%s", FileUtil.sharedPath(context), folderName);
-        return pathName;
+        return String.format("%s%s", FileUtil.sharedPath(context), folderName);
     }
 
 
@@ -197,9 +189,9 @@ public class FileUtil {
      * Generage MD5 value for ZIP file
      */
     private static String convertByteArrayToHexString(byte[] arrayBytes) {
-        StringBuffer stringBuffer = new StringBuffer();
-        for (int i = 0; i < arrayBytes.length; i++) {
-            stringBuffer.append(Integer.toString((arrayBytes[i] & 0xff) + 0x100, 16)
+        StringBuilder stringBuffer = new StringBuilder();
+        for (byte bytes: arrayBytes) {
+            stringBuffer.append(Integer.toString((bytes & 0xff) + 0x100, 16)
                     .substring(1));
         }
         return stringBuffer.toString();
@@ -214,7 +206,7 @@ public class FileUtil {
             MessageDigest digest = MessageDigest.getInstance(algorithm);
 
             byte[] bytesBuffer = new byte[1024];
-            int bytesRead = -1;
+            int bytesRead;
 
             while ((bytesRead = inputStream.read(bytesBuffer)) != -1) {
                 digest.update(bytesBuffer, 0, bytesRead);
@@ -222,9 +214,7 @@ public class FileUtil {
 
             byte[] hashedBytes = digest.digest();
             return convertByteArrayToHexString(hashedBytes);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
+        } catch (IOException | NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
         return "hashFile - exception catched";
@@ -234,12 +224,12 @@ public class FileUtil {
         return hashFile(file, "MD5");
     }
 
-    public static String MD5(InputStream inputStream) {
+    private static String MD5(InputStream inputStream) {
         try {
             MessageDigest digest = MessageDigest.getInstance("MD5");
 
             byte[] bytesBuffer = new byte[1024];
-            int bytesRead = -1;
+            int bytesRead;
 
             while ((bytesRead = inputStream.read(bytesBuffer)) != -1) {
                 digest.update(bytesBuffer, 0, bytesRead);
@@ -247,9 +237,7 @@ public class FileUtil {
 
             byte[] hashedBytes = digest.digest();
             return convertByteArrayToHexString(hashedBytes);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
+        } catch (IOException | NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
 
@@ -262,7 +250,7 @@ public class FileUtil {
      *
      * @throws IOException
      */
-    public static void unZip(InputStream inputStream, String outputDirectory, boolean isReWrite) throws IOException {
+    private static void unZip(InputStream inputStream, String outputDirectory, boolean isReWrite) throws IOException {
         // 创建解压目标目录
         File file = new File(outputDirectory);
         // 如果目标目录不存在，则创建
@@ -277,7 +265,7 @@ public class FileUtil {
         // 使用1Mbuffer
         byte[] buffer = new byte[10 * 1024 * 1024];
         // 解压时字节计数
-        int count = 0;
+        int count;
         // 如果进入点为空说明已经遍历完所有压缩包中文件和目录
         while (zipEntry != null) {
             // 如果是一个目录
@@ -342,10 +330,9 @@ public class FileUtil {
                 Log.i("checkAssets", String.format("%s[%s] != %s", zipFileName, keyName, md5String));
 
                 String folderPath = sharedPath;
-                if(isInAssets) {
+                if (isInAssets) {
                     folderPath = String.format("%s/assets/%s/", sharedPath, fileName);
-                }
-                else {
+                } else {
                     File file = new File(zipFolderPath);
                     if (file.exists()) {
                         FileUtils.deleteDirectory(file);
@@ -362,9 +349,7 @@ public class FileUtil {
             }
 
             zipStream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
+        } catch (IOException | JSONException e) {
             e.printStackTrace();
         }
     }
