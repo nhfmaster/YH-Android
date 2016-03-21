@@ -366,16 +366,12 @@ public class ApiHelper {
     public static void screenLock(String deviceID, String password, boolean state) {
         String urlString = String.format(URLs.API_SCREEN_LOCK_PATH, URLs.HOST, deviceID);
 
-        try {
-            Map<String, String> params = new HashMap<>();
-            params.put("screen_lock_state", "1");
-            params.put("screen_lock_type", "4位数字");
-            params.put("screen_lock", password);
+        Map<String, String> params = new HashMap<>();
+        params.put("screen_lock_state", "1");
+        params.put("screen_lock_type", "4位数字");
+        params.put("screen_lock", password);
 
-            HttpUtil.httpPost(urlString, params);
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+        HttpUtil.httpPost(urlString, params);
     }
 
     /**

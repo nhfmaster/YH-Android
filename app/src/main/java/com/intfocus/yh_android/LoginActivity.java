@@ -22,27 +22,25 @@ public class LoginActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        pullToRefreshWebView = (PullToRefreshWebView) findViewById(R.id.webview);
-        initRefreshWebView();
-        setPullToRefreshWebView(false);
-
-        mWebView.requestFocus();
-        mWebView.addJavascriptInterface(new JavaScriptInterface(), "AndroidJSBridge");
-
         /*
-         * 显示加载中...界面
+         *  如果是从触屏界面过来，则直接进入主界面
+         *  不是的话，相当于直接启动应用，则检测是否有设置锁屏
          */
-        urlStringForLoading = String.format("file:///%s/loading/login.html", FileUtil.sharedPath(mContext));
-        mWebView.loadUrl(urlStringForLoading);
+        Intent intent = getIntent();
+        if (intent.hasExtra("from_activity") && intent.getStringExtra("from_activity").contains("ConfirmPassCodeActivity")) {
+            intent = new Intent(LoginActivity.this, MainActivity.class);
+            intent.putExtra("from_activity", this.getClass().toString());
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            LoginActivity.this.startActivity(intent);
 
-        /*
-         *  是否启用锁屏
-         */
-        if (FileUtil.checkIsLocked(mContext)) {
-            Intent intent = new Intent(this, ConfirmPassCodeActivity.class);
+            finish();
+        } else if (FileUtil.checkIsLocked(mContext)) {
+            intent = new Intent(this, ConfirmPassCodeActivity.class);
             intent.putExtra("is_from_login", true);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             this.startActivity(intent);
+
+            finish();
         } else {
             /*
              *  检测版本更新
@@ -51,6 +49,19 @@ public class LoginActivity extends BaseActivity {
              */
             checkUpgrade(false);
         }
+
+        pullToRefreshWebView = (PullToRefreshWebView) findViewById(R.id.webview);
+        initRefreshWebView();
+        setPullToRefreshWebView(false);
+
+        mWebView.requestFocus();
+        mWebView.addJavascriptInterface(new JavaScriptInterface(), "AndroidJSBridge");
+
+        /*
+         * 登录界面
+         */
+        urlStringForLoading = String.format("file:///%s/loading/login.html", FileUtil.sharedPath(mContext));
+        mWebView.loadUrl(urlStringForLoading);
 
         /*
          * 检测登录界面，版本是否升级
@@ -74,7 +85,7 @@ public class LoginActivity extends BaseActivity {
 
                         // 跳转至主界面
                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                        intent.putExtra("fromActivity", this.getClass().toString());
+                        intent.putExtra("from_activity", this.getClass().toString());
                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         LoginActivity.this.startActivity(intent);
 

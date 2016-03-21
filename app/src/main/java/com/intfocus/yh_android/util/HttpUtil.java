@@ -2,29 +2,24 @@ package com.intfocus.yh_android.util;
 
 import android.util.Log;
 
-import org.apache.http.Header;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.BasicResponseHandler;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.protocol.HTTP;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpParams;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.net.URI;
+
+import okhttp3.Headers;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class HttpUtil {
+    public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
     /**
      * ִ执行一个HTTP GET请求，返回请求响应的HTML
@@ -36,46 +31,54 @@ public class HttpUtil {
     public static Map<String, String> httpGet(String urlString, Map<String, String> headers) {
         Log.i("HttpMethod#Get", urlString);
         Map<String, String> retMap = new HashMap<>();
+        OkHttpClient client = new OkHttpClient();
+        Request request;
+        Response response;
+        if (headers.containsKey("ETag") && headers.containsKey("Last-Modified")) {
+            request = new Request.Builder()
+                    .url(urlString)
+                    .addHeader("User-Agent", HttpUtil.webViewUserAgent())
+                    .addHeader("IF-None-Match", headers.get("ETag"))
+                    .addHeader("If-Modified-Since", headers.get("Last-Modified"))
+                    .build();
+        } else if (headers.containsKey("ETag")) {
+            request = new Request.Builder()
+                    .url(urlString)
+                    .addHeader("User-Agent", HttpUtil.webViewUserAgent())
+                    .addHeader("IF-None-Match", headers.get("ETag"))
+                    .build();
+        } else if (headers.containsKey("Last-Modified")) {
+            request = new Request.Builder()
+                    .url(urlString)
+                    .addHeader("User-Agent", HttpUtil.webViewUserAgent())
+                    .addHeader("If-Modified-Since", headers.get("Last-Modified"))
+                    .build();
+        } else {
+            request = new Request.Builder()
+                    .url(urlString)
+                    .addHeader("User-Agent", HttpUtil.webViewUserAgent())
+                    .build();
+        }
 
-        HttpParams httpParameters = new BasicHttpParams();
-        // Set the timeout in milliseconds until a connection is established.
-        // The default value is zero, that means the timeout is not used.
-        int timeoutConnection = 3000;
-        HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
-        // Set the default socket timeout (SO_TIMEOUT)
-        // in milliseconds which is the timeout for waiting for data.
-        int timeoutSocket = 5000;
-        HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
-
-        DefaultHttpClient client = new DefaultHttpClient(httpParameters);
-        HttpGet request = new HttpGet(urlString);
-        HttpResponse response;
         try {
-            request.setHeader("User-Agent", HttpUtil.webViewUserAgent());
 
-            if (headers.containsKey("ETag")) {
-                request.setHeader("IF-None-Match", headers.get("ETag"));
-            }
-            if (headers.containsKey("Last-Modified")) {
-                request.setHeader("If-Modified-Since", headers.get("Last-Modified"));
-            }
+            response = client.newCall(request).execute();
 
-
-            response = client.execute(request);
-
-            Header[] responseHeaders = response.getAllHeaders();
-            for (Header header : responseHeaders) {
-                retMap.put(header.getName(), header.getValue());
-                // Log.i("HEADER", String.format("Key : %s, Value: %s", header.getName(), header.getValue()));
+            Headers responseHeaders = response.headers();
+            int headerSize = responseHeaders.size();
+            for (int i = 0; i < headerSize; i++) {
+                retMap.put(responseHeaders.name(i), responseHeaders.value(i));
+                Log.i("HEADER", String.format("Key : %s, Value: %s", responseHeaders.name(i), responseHeaders.value(i)));
             }
 
-            int code = response.getStatusLine().getStatusCode();
+            int code = response.code();
+            Log.i("CODE", code + "");
             retMap.put("code", String.format("%d", code));
 
             if (code == 200) {
-                ResponseHandler<String> handler = new BasicResponseHandler();
-                String responseBody = handler.handleResponse(response);
+                String responseBody = response.body().string();
                 retMap.put("body", responseBody);
+                Log.i("responseBody", retMap.get("body"));
             }
 
         } catch (Exception e) {
@@ -97,24 +100,14 @@ public class HttpUtil {
      */
     //@throws UnsupportedEncodingException
     //@throws JSONException
-    public static Map<String, String> httpPost(String urlString, Map params) throws UnsupportedEncodingException {
+    public static Map<String, String> httpPost(String urlString, Map params){
         Log.i("HttpMethod#Post", urlString);
-
-        HttpParams httpParameters = new BasicHttpParams();
-        // Set the timeout in milliseconds until a connection is established.
-        // The default value is zero, that means the timeout is not used.
-        int timeoutConnection = 3000;
-        HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
-        // Set the default socket timeout (SO_TIMEOUT)
-        // in milliseconds which is the timeout for waiting for data.
-        int timeoutSocket = 5000;
-        HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
-
-        DefaultHttpClient client = new DefaultHttpClient(httpParameters);
-        HttpPost request = new HttpPost(urlString);
-
         Map<String, String> retMap = new HashMap<>();
-        HttpResponse response;
+        OkHttpClient client = new OkHttpClient();
+        Request request;
+        Response response;
+        Request.Builder requestBuilder = new Request.Builder();
+
         if (params != null) {
             try {
                 Iterator iter = params.entrySet().iterator();
@@ -137,32 +130,36 @@ public class HttpUtil {
                         holder.put(key, pairs.getValue());
                     }
                 }
-
-                StringEntity se = new StringEntity(holder.toString(), HTTP.UTF_8);
-                request.setEntity(se);
+                requestBuilder.post(RequestBody.create(JSON, holder.toString()));
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
         try {
-            request.setHeader("Accept", "application/json");
-            request.setHeader("Content-type", "application/json");
-            request.setHeader("User-Agent", HttpUtil.webViewUserAgent());
-            response = client.execute(request);
+            request = requestBuilder
+                    .url(urlString)
+                    .addHeader("Accept", "application/json")
+                    .addHeader("Content-type", "application/json")
+                    .addHeader("User-Agent", HttpUtil.webViewUserAgent())
+                    .build();
+            response = client.newCall(request).execute();
 
-            Header[] headers = response.getAllHeaders();
-            for (Header header : headers) {
-                retMap.put(header.getName(), header.getValue());
-                // Log.i("HEADER", String.format("Key : %s, Value: %s", header.getName(), header.getValue()));
+            Headers responseHeaders = response.headers();
+            int headerSize = responseHeaders.size();
+            for (int i = 0; i < headerSize; i++) {
+                retMap.put(responseHeaders.name(i), responseHeaders.value(i));
+                Log.i("HEADER", String.format("Key : %s, Value: %s", responseHeaders.name(i), responseHeaders.value(i)));
             }
 
-            int code = response.getStatusLine().getStatusCode();
+            int code = response.code();
+            Log.i("CODE", code + "");
             retMap.put("code", String.format("%d", code));
 
-            ResponseHandler<String> handler = new BasicResponseHandler();
-            String responseBody = handler.handleResponse(response);
+            String responseBody = response.body().string();
             retMap.put("body", responseBody);
-        } catch (Exception e) {
+            Log.i("responseBody", retMap.get("body"));
+
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return retMap;
@@ -175,48 +172,40 @@ public class HttpUtil {
     public static Map<String, String> httpPost(String urlString, JSONObject params) {
         Log.i("HttpMethod#Post2", urlString);
 
-        HttpParams httpParameters = new BasicHttpParams();
-        // Set the timeout in milliseconds until a connection is established.
-        // The default value is zero, that means the timeout is not used.
-        int timeoutConnection = 3000;
-        HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
-        // Set the default socket timeout (SO_TIMEOUT)
-        // in milliseconds which is the timeout for waiting for data.
-        int timeoutSocket = 5000;
-        HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
-
-        DefaultHttpClient client = new DefaultHttpClient(httpParameters);
-        HttpPost request = new HttpPost(urlString);
-
         Map<String, String> retMap = new HashMap<>();
-        HttpResponse response;
+        OkHttpClient client = new OkHttpClient();
+        Request request;
+        Response response;
+        Request.Builder requestBuilder = new Request.Builder();
+
         if (params != null) {
-            try {
-                StringEntity se = new StringEntity(params.toString(), HTTP.UTF_8);
-                request.setEntity(se);
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
+                requestBuilder.post(RequestBody.create(JSON, params.toString()));
         }
         try {
-            request.setHeader("Accept", "application/json");
-            request.setHeader("Content-type", "application/json");
-            request.setHeader("User-Agent", HttpUtil.webViewUserAgent());
-            response = client.execute(request);
+            request = requestBuilder
+                    .url(urlString)
+                    .addHeader("Accept", "application/json")
+                    .addHeader("Content-type", "application/json")
+                    .addHeader("User-Agent", HttpUtil.webViewUserAgent())
+                    .build();
+            response = client.newCall(request).execute();
 
-            Header[] headers = response.getAllHeaders();
-            for (Header header : headers) {
-                retMap.put(header.getName(), header.getValue());
-                // Log.i("HEADER", String.format("Key : %s, Value: %s", header.getName(), header.getValue()));
+            Headers responseHeaders = response.headers();
+            int headerSize = responseHeaders.size();
+            for (int i = 0; i < headerSize; i++) {
+                retMap.put(responseHeaders.name(i), responseHeaders.value(i));
+                Log.i("HEADER", String.format("Key : %s, Value: %s", responseHeaders.name(i), responseHeaders.value(i)));
             }
 
-            int code = response.getStatusLine().getStatusCode();
+            int code = response.code();
+            Log.i("CODE", code + "");
             retMap.put("code", String.format("%d", code));
 
-            ResponseHandler<String> handler = new BasicResponseHandler();
-            String responseBody = handler.handleResponse(response);
+            String responseBody = response.body().string();
             retMap.put("body", responseBody);
-        } catch (Exception e) {
+
+            Log.i("responseBody", retMap.get("body"));
+        } catch (IOException e) {
             e.printStackTrace();
             // 400: Unable to resolve host "yonghui.idata.mobi": No address associated with hostname
 
@@ -246,7 +235,7 @@ public class HttpUtil {
 
     private static String webViewUserAgent() {
         String userAgent = System.getProperty("http.agent");
-        if (userAgent.isEmpty()) {
+        if (userAgent == null) {
             userAgent = "Mozilla/5.0 (Linux; U; Android 4.3; en-us; HTC One - 4.3 - API 18 - 1080x1920 Build/JLS36G) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30 default-by-hand";
         }
 

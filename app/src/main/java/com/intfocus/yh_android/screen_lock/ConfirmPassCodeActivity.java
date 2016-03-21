@@ -16,7 +16,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.intfocus.yh_android.LoginActivity;
-import com.intfocus.yh_android.MainActivity;
 import com.intfocus.yh_android.R;
 import com.intfocus.yh_android.util.ApiHelper;
 import com.intfocus.yh_android.util.FileUtil;
@@ -223,8 +222,8 @@ public class ConfirmPassCodeActivity extends Activity {
                  *
                  */
                 if (is_from_login) {
-                    Intent intent = new Intent(mContext, MainActivity.class);
-                    intent.putExtra("fromActivity", this.getClass().toString());
+                    Intent intent = new Intent(mContext, LoginActivity.class);
+                    intent.putExtra("from_activity", this.getClass().toString());
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     mContext.startActivity(intent);
                 }

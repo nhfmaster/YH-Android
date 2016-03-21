@@ -57,8 +57,8 @@ public class MainActivity extends BaseActivity {
         initColorView(colorViews);
 
         Intent intent = getIntent();
-        if (intent.hasExtra("fromActivity") && intent.getStringExtra("fromActivity").contains("ConfirmPassCodeActivity")) {
-            Log.i("FromActivity", intent.getStringExtra("fromActivity"));
+        if (intent.hasExtra("from_activity") && intent.getStringExtra("from_activity").contains("ConfirmPassCodeActivity")) {
+            Log.i("from_activity", intent.getStringExtra("from_activity"));
 
             checkVersionUpgrade(assetsPath);
             checkUpgrade(false);

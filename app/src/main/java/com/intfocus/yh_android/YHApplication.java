@@ -135,7 +135,7 @@ public class YHApplication extends Application implements Application.ActivityLi
          *  手机待机再激活时发送开屏广播
          */
         registerReceiver(broadcastScreenOnAndOff, new IntentFilter(Intent.ACTION_SCREEN_ON));
-        //registerReceiver(broadcastScreenOnAndOff, new IntentFilter(Intent.ACTION_SCREEN_OFF));
+        // registerReceiver(broadcastScreenOnAndOff, new IntentFilter(Intent.ACTION_SCREEN_OFF));
 
         /*
          *  监测内存泄漏

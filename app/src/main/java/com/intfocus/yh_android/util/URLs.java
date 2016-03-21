@@ -3,6 +3,7 @@ package com.intfocus.yh_android.util;
 import android.content.Context;
 
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
@@ -77,11 +78,11 @@ public class URLs implements Serializable {
      * @param path 路径
      * @return "http://" + URLEncoder.encode(path)
      */
-    private static String formatURL(String path) {
+    private static String formatURL(String path) throws UnsupportedEncodingException {
         if (path.startsWith("http://") || path.startsWith("https://")) {
             return path;
         }
-        return "http://" + URLEncoder.encode(path);
+        return "http://" + URLEncoder.encode(path,"UTF-8");
     }
 
     /**

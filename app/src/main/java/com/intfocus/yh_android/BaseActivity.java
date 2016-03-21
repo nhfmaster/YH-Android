@@ -2,6 +2,7 @@ package com.intfocus.yh_android;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -80,12 +81,19 @@ public class BaseActivity extends Activity {
     @SuppressLint("SetJavaScriptEnabled")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mActivities.add(this);
-        for (Activity a : mActivities) {
-            System.out.println("mActivityName: " + a.toString());
+
+        ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        String runningActivity = activityManager.getRunningTasks(1).get(0).topActivity.getClassName();
+        System.out.println("runningActivity:" + runningActivity);
+        if (!(runningActivity.equalsIgnoreCase("com.intfocus.yh_android.MainActivity"))) {
+                mActivities.add(this);
         }
 
-        finishLoginActivityWhenInMainAcitivty(this);
+        // for (Activity a : mActivities) {
+        //    System.out.println("mActivityName: " + a.toString());
+        // }
+
+        // finishLoginActivityWhenInMainAcitivty(this);
 
         mContext = BaseActivity.this;
         sharedPath = FileUtil.sharedPath(mContext);
@@ -165,23 +173,23 @@ public class BaseActivity extends Activity {
         fixInputMethodManagerLeak(this);
     }
 
-    public static void finishAll() {
-        for (Activity activity : mActivities) {
-            activity.finish();
-        }
-        mActivities.clear();
-    }
+//    public static void finishAll() {
+//        for (Activity activity : mActivities) {
+//            activity.finish();
+//        }
+//        mActivities.clear();
+//    }
 
-    private void finishLoginActivityWhenInMainAcitivty(Activity activity) {
-        if (activity.getClass().toString().contains("MainActivity")) {
-            for (Activity a : mActivities) {
-                if (a.getClass().toString().contains("LoginActivity")) {
-                    a.finish();
-                    Log.i("finishLoginActivity", mActivities.toString());
-                }
-            }
-        }
-    }
+//    void finishLoginActivityWhenInMainAcitivty(Activity activity) {
+//        if (activity.getClass().toString().contains("MainActivity")) {
+//            for (Activity a : mActivities) {
+//                if (a.getClass().toString().contains("LoginActivity")) {
+//                    a.finish();
+//                    Log.i("finishLoginActivity", mActivities.toString());
+//                }
+//            }
+//        }
+//    }
 
     /*
      * ********************
