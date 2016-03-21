@@ -35,10 +35,6 @@ public class ConfirmPassCodeActivity extends Activity {
     private boolean is_from_login;
     private Context mContext;
 
-    private final String TEXT_MAIN_MISTAKE = "请输入密码";
-    private final String TEXT_SUB_MISTAKE = "密码有误";
-
-    private int password;
     private StringBuilder stringBuilder;
     private TextView text_main_pass;
     private TextView text_sub_pass;
@@ -51,8 +47,7 @@ public class ConfirmPassCodeActivity extends Activity {
     private Bitmap bitmapGlay = Bitmap.createBitmap(300, 300, Bitmap.Config.ARGB_8888);
 
     public static Intent createIntent(Context context) {
-        Intent intent = new Intent(context, ConfirmPassCodeActivity.class);
-        return intent;
+        return new Intent(context, ConfirmPassCodeActivity.class);
     }
 
     @Override
@@ -215,7 +210,7 @@ public class ConfirmPassCodeActivity extends Activity {
 
     private void confirmPassword() {
         try {
-            this.password = Integer.parseInt(stringBuilder.toString());
+            int password = Integer.parseInt(stringBuilder.toString());
             Log.i("confirmPassword", "confirmPassword");
 
             String userConfigPath = String.format("%s/%s", FileUtil.basePath(mContext), URLs.USER_CONFIG_FILENAME);
@@ -250,9 +245,7 @@ public class ConfirmPassCodeActivity extends Activity {
                                 userJSON.put("is_login", false);
                                 FileUtil.writeFile(userConfigPath, userJSON.toString());
                             }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        } catch (IOException e) {
+                        } catch (JSONException | IOException e) {
                             e.printStackTrace();
                         }
                     }
@@ -265,7 +258,9 @@ public class ConfirmPassCodeActivity extends Activity {
                 //userJSON.put("use_gesture_password", false);
                 //FileUtil.writeFile(userConfigPath, userJSON.toString());
 
+                String TEXT_MAIN_MISTAKE = "请输入密码";
                 text_main_pass.setText(TEXT_MAIN_MISTAKE);
+                String TEXT_SUB_MISTAKE = "密码有误";
                 text_sub_pass.setText(TEXT_SUB_MISTAKE);
                 password = 0;
                 initStringBuilder();

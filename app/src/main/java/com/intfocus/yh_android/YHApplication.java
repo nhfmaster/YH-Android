@@ -35,7 +35,7 @@ public class YHApplication extends Application implements Application.ActivityLi
     /*
      *  手机待机再激活时发送解屏广播
      */
-    BroadcastReceiver broadcastScreenOnAndOff = new BroadcastReceiver() {
+    private final BroadcastReceiver broadcastScreenOnAndOff = new BroadcastReceiver() {
 
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -89,7 +89,9 @@ public class YHApplication extends Application implements Application.ActivityLi
             String localVersion = "new-installer";
             if ((new File(versionConfigPath)).exists()) {
                 localVersion = FileUtil.readFile(versionConfigPath);
-                if (localVersion.equals(packageInfo.versionName)) { isUpgrade = false; }
+                if (localVersion.equals(packageInfo.versionName)) {
+                    isUpgrade = false;
+                }
             }
 
             if (isUpgrade) {
@@ -98,20 +100,18 @@ public class YHApplication extends Application implements Application.ActivityLi
                 String assetZipPath;
                 File assetZipFile;
                 String[] assetsName = {"assets.zip", "loading.zip", "fonts.zip", "images.zip", "stylesheets.zip", "javascripts.zip"};
-                for(int i = 0, len = assetsName.length; i < len; i ++) {
-                    assetZipPath = String.format("%s/%s", sharedPath, assetsName[i]);
+                for (String string : assetsName) {
+                    assetZipPath = String.format("%s/%s", sharedPath, string);
                     assetZipFile = new File(assetZipPath);
                     if (!assetZipFile.exists()) {
                         assetZipFile.delete();
                     }
-                    FileUtil.copyAssetFile(mContext, assetsName[i], assetZipPath);
+                    FileUtil.copyAssetFile(mContext, string, assetZipPath);
                 }
 
                 FileUtil.writeFile(versionConfigPath, packageInfo.versionName);
             }
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (PackageManager.NameNotFoundException | IOException e) {
             e.printStackTrace();
         }
 

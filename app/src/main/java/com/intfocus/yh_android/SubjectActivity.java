@@ -37,8 +37,6 @@ import java.util.List;
 import static java.lang.String.format;
 
 public class SubjectActivity extends BaseActivity implements OnPageChangeListener {
-    private TextView mTitle;
-    private ImageView mComment;
     private Boolean isInnerLink;
     private String reportID;
     private PDFView mPDFView;
@@ -71,9 +69,9 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
         }
 
         bannerView = (RelativeLayout) findViewById(R.id.actionBar);
-        mTitle = (TextView) findViewById(R.id.title);
+        TextView mTitle = (TextView) findViewById(R.id.title);
         mPDFView = (PDFView) findViewById(R.id.pdfview);
-        mComment = (ImageView) findViewById(R.id.comment);
+        ImageView mComment = (ImageView) findViewById(R.id.comment);
         mComment.setOnClickListener(mOnCommentLister);
         mPDFView.setVisibility(View.INVISIBLE);
 
@@ -114,7 +112,7 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
         checkInterfaceOrientation(this.getResources().getConfiguration());
 
 
-        List<ImageView> colorViews = new ArrayList<ImageView>();
+        List<ImageView> colorViews = new ArrayList<>();
         colorViews.add((ImageView) findViewById(R.id.colorView0));
         colorViews.add((ImageView) findViewById(R.id.colorView1));
         colorViews.add((ImageView) findViewById(R.id.colorView2));
@@ -177,7 +175,7 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
                          */
                         String appendParams = String.format("?userid=%d&timestamp=%s", userID, URLs.TimeStamp);
 
-                        if (urlString.indexOf("?") == -1) {
+                        if (!urlString.contains("?")) {
                             urlString = String.format("%s%s", urlString, appendParams);
                         } else {
                             urlString = urlString.replace("?", appendParams);
@@ -189,7 +187,7 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
             });
         }
     }
-    protected Handler mHandlerForPDF = new Handler() {
+    private final Handler mHandlerForPDF = new Handler() {
         public void handleMessage(Message message) {
 
             //Log.i("PDF", pdfFile.getAbsolutePath());
@@ -214,7 +212,7 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
         Log.i("onPageChanged", String.format("page: %d, count: %d", page, pageCount));
     }
 
-    Runnable mRunnableForPDF = new Runnable() {
+    private final Runnable mRunnableForPDF = new Runnable() {
         @Override
         public void run() {
             String outputPath = String.format("%s/%s/%s.pdf", FileUtil.basePath(mContext), URLs.CACHED_DIRNAME, URLs.MD5(urlString));
@@ -226,7 +224,7 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
         }
     };
 
-    private View.OnClickListener mOnCommentLister = new View.OnClickListener() {
+    private final View.OnClickListener mOnCommentLister = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             Intent intent = new Intent(mContext, CommentActivity.class);
@@ -249,7 +247,7 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
         }
     };
 
-    private View.OnClickListener mOnBackListener = new View.OnClickListener() {
+    private final View.OnClickListener mOnBackListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             SubjectActivity.this.onBackPressed();
@@ -267,7 +265,7 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
             if(isInnerLink) {
                 String urlKey;
                 if (urlString != null && !urlString.isEmpty()) {
-                    urlKey = urlString.indexOf("?") != -1 ? TextUtils.split(urlString, "?")[0] : urlString;
+                    urlKey = urlString.contains("?") ? TextUtils.split(urlString, "?")[0] : urlString;
                     ApiHelper.clearResponseHeader(urlKey, assetsPath);
                 }
                 urlKey = String.format(URLs.API_DATA_PATH, URLs.HOST, groupID, reportID);
@@ -319,9 +317,7 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
                 config.put(pageName, tabIndex);
 
                 FileUtil.writeFile(filePath, config.toString());
-            } catch (JSONException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
+            } catch (JSONException | IOException e) {
                 e.printStackTrace();
             }
         }
