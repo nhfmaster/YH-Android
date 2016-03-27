@@ -13,6 +13,7 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
 import android.text.TextUtils;
@@ -33,6 +34,7 @@ import com.handmark.pulltorefresh.library.PullToRefreshWebView;
 import com.intfocus.yh_android.util.ApiHelper;
 import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.HttpUtil;
+import com.intfocus.yh_android.util.TypedObject;
 import com.intfocus.yh_android.util.URLs;
 import com.pgyersdk.javabean.AppBean;
 import com.pgyersdk.update.PgyUpdateManager;
@@ -121,56 +123,27 @@ public class BaseActivity extends Activity {
         refWatcher.watch(this);
     }
 
-    private static void fixInputMethodManagerLeak(Context context) {
-        if (context == null) {
-            return;
-        }
-        try {
-            // 对 mCurRootView mServedView mNextServedView 进行置空...
-            InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
-            if (imm == null) {
-                return;
-            }
-
-            Object obj_get;
-            Field f_mCurRootView = imm.getClass().getDeclaredField("mCurRootView");
-            Field f_mServedView = imm.getClass().getDeclaredField("mServedView");
-            Field f_mNextServedView = imm.getClass().getDeclaredField("mNextServedView");
-
-            if (!f_mCurRootView.isAccessible()) {
-                f_mCurRootView.setAccessible(true);
-            }
-            obj_get = f_mCurRootView.get(imm);
-            if (obj_get != null) { // 不为null则置为空
-                f_mCurRootView.set(imm, null);
-            }
-
-            if (!f_mServedView.isAccessible()) {
-                f_mServedView.setAccessible(true);
-            }
-            obj_get = f_mServedView.get(imm);
-            if (obj_get != null) { // 不为null则置为空
-                f_mServedView.set(imm, null);
-            }
-
-            if (!f_mNextServedView.isAccessible()) {
-                f_mNextServedView.setAccessible(true);
-            }
-            obj_get = f_mNextServedView.get(imm);
-            if (obj_get != null) { // 不为null则置为空
-                f_mNextServedView.set(imm, null);
-            }
-        } catch (Throwable t) {
-            t.printStackTrace();
-        }
-    }
-
     @Override
     public void onDestroy() {
         mActivities.remove(this);
         System.out.println("activityDestroy: " + this.toString());
+        fixInputMethodManager();
         super.onDestroy();
-        fixInputMethodManagerLeak(this);
+    }
+
+    private void fixInputMethodManager()
+    {
+        final Object imm = getSystemService(Context.INPUT_METHOD_SERVICE);
+
+        final TypedObject windowToken
+                = new TypedObject(getWindow().getDecorView().getWindowToken(), IBinder.class);
+
+        windowToken.invokeMethodExceptionSafe(imm, "windowDismissed", windowToken);
+
+        final TypedObject view
+                = new TypedObject(null, View.class);
+
+        view.invokeMethodExceptionSafe(imm, "startGettingWindowFocus", view);
     }
 
 //    public static void finishAll() {
