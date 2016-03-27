@@ -9,6 +9,7 @@ import android.webkit.JavascriptInterface;
 import android.widget.ImageView;
 
 import com.handmark.pulltorefresh.library.PullToRefreshWebView;
+import com.intfocus.yh_android.util.ApiHelper;
 import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.URLs;
 
@@ -62,6 +63,25 @@ public class MainActivity extends BaseActivity {
 
             checkVersionUpgrade(assetsPath);
             checkUpgrade(false);
+
+
+            new Thread(new Runnable() {
+                @Override
+                public synchronized void run() {
+                    try {
+                        String userConfigPath = String.format("%s/%s", FileUtil.basePath(mContext), URLs.USER_CONFIG_FILENAME);
+                        JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
+
+                        String info = ApiHelper.authentication(mContext, userJSON.getString("user_num"), userJSON.getString("password"));
+                        if (info.equals("用户名或密码不正确")) {
+                            userJSON.put("is_login", false);
+                            FileUtil.writeFile(userConfigPath, userJSON.toString());
+                        }
+                    } catch (JSONException | IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }).start();
         }
 
         /*
