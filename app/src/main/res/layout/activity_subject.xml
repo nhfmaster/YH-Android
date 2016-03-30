@@ -70,6 +70,22 @@
                 style="@style/ColorViewStyle4" />
         </RelativeLayout>
 
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="share"
+            android:id="@+id/share"
+            android:layout_alignBottom="@+id/colorViewLayout"
+            android:layout_toLeftOf="@+id/comment" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="draw"
+            android:id="@+id/draw"
+            android:layout_centerVertical="true"
+            android:layout_toStartOf="@+id/title" />
+
     </RelativeLayout>
 
     <com.handmark.pulltorefresh.library.PullToRefreshWebView

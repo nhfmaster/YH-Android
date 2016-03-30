@@ -3,15 +3,19 @@ package com.intfocus.yh_android;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -24,6 +28,10 @@ import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.URLs;
 import com.joanzapata.pdfview.PDFView;
 import com.joanzapata.pdfview.listener.OnPageChangeListener;
+import com.tencent.connect.share.QQShare;
+import com.tencent.tauth.IUiListener;
+import com.tencent.tauth.Tencent;
+import com.tencent.tauth.UiError;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -36,7 +44,7 @@ import java.util.List;
 
 import static java.lang.String.format;
 
-public class SubjectActivity extends BaseActivity implements OnPageChangeListener {
+public class SubjectActivity extends BaseActivity implements OnPageChangeListener, View.OnTouchListener {
     private Boolean isInnerLink;
     private String reportID;
     private PDFView mPDFView;
@@ -46,12 +54,17 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
     private int objectType;
     private int groupID, userID;
     private RelativeLayout bannerView;
+    private Tencent mTencent;
+    private Paint paint;
+    private Canvas canvas;
 
     @Override
     @SuppressLint("SetJavaScriptEnabled")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_subject);
+
+        mTencent = Tencent.createInstance("********", this.getApplicationContext());
 
         findViewById(R.id.back).setOnClickListener(mOnBackListener);
         findViewById(R.id.back_text).setOnClickListener(mOnBackListener);
@@ -72,6 +85,8 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
         TextView mTitle = (TextView) findViewById(R.id.title);
         mPDFView = (PDFView) findViewById(R.id.pdfview);
         ImageView mComment = (ImageView) findViewById(R.id.comment);
+        Button shareButton = (Button) findViewById(R.id.share);
+        Button drawButton = (Button) findViewById(R.id.draw);
         mComment.setOnClickListener(mOnCommentLister);
         mPDFView.setVisibility(View.INVISIBLE);
 
@@ -94,6 +109,28 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
                 String label = simpleDateFormat.format(System.currentTimeMillis());
                 // 显示最后更新的时间
                 refreshView.getLoadingLayoutProxy().setLastUpdatedLabel(label);
+            }
+        });
+
+//        drawButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+        pullToRefreshWebView.setOnTouchListener(SubjectActivity.this);
+//            }
+//        });
+
+        shareButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ShareListener myListener = new ShareListener();
+
+                final Bundle params = new Bundle();
+                params.putInt(QQShare.SHARE_TO_QQ_KEY_TYPE, QQShare.SHARE_TO_QQ_TYPE_DEFAULT);
+                params.putString(QQShare.SHARE_TO_QQ_TITLE, "要分享的标题");
+                params.putString(QQShare.SHARE_TO_QQ_SUMMARY, "要分享的摘要");
+                params.putString(QQShare.SHARE_TO_QQ_TARGET_URL, "http://www.qq.com/news/1.html");
+                params.putString(QQShare.SHARE_TO_QQ_IMAGE_URL, "https://www.baidu.com/img/bd_logo1.png");
+                mTencent.shareToQQ(SubjectActivity.this, params, myListener);
             }
         });
 
@@ -187,6 +224,7 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
             });
         }
     }
+
     private final Handler mHandlerForPDF = new Handler() {
         public void handleMessage(Message message) {
 
@@ -254,6 +292,44 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
         }
     };
 
+    private float downx = 0;
+    private float downy = 0;
+    private float upx = 0;
+    private float upy = 0;
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        int action = event.getAction();
+        switch (action) {
+            case MotionEvent.ACTION_DOWN:
+                downx = event.getX();
+                downy = event.getY();
+                break;
+            case MotionEvent.ACTION_MOVE:
+                // 路径画板
+                upx = event.getX();
+                upy = event.getY();
+                canvas.drawLine(downx, downy, upx, upy, paint);
+                pullToRefreshWebView.invalidate();
+                downx = upx;
+                downy = upy;
+                break;
+            case MotionEvent.ACTION_UP:
+                // 直线画板
+
+                upx = event.getX();
+                upy = event.getY();
+                canvas.drawLine(downx, downy, upx, upy, paint);
+                pullToRefreshWebView.invalidate();// 刷新
+                break;
+
+            default:
+                break;
+        }
+
+        return true;
+    }
+
     private class pullToRefreshTask extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void... params) {
@@ -262,7 +338,7 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
             /*
              *  下拉浏览器刷新时，删除响应头文件，相当于无缓存刷新
              */
-            if(isInnerLink) {
+            if (isInnerLink) {
                 String urlKey;
                 if (urlString != null && !urlString.isEmpty()) {
                     urlKey = urlString.contains("?") ? TextUtils.split(urlString, "?")[0] : urlString;
@@ -298,6 +374,33 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
             // Call onRefreshComplete when the list has been refreshed. 如果没有下面的函数那么刷新将不会停
             pullToRefreshWebView.onRefreshComplete();
         }
+    }
+
+    private class ShareListener implements IUiListener {
+
+        @Override
+        public void onCancel() {
+            // TODO Auto-generated method stub
+            Log.i("QQMessage", "分享取消");
+        }
+
+        @Override
+        public void onComplete(Object arg0) {
+            // TODO Auto-generated method stub
+            Log.i("QQMessage", "分享成功");
+        }
+
+        @Override
+        public void onError(UiError arg0) {
+            // TODO Auto-generated method stub
+            Log.i("QQMessage", "分享出错");
+        }
+
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        ShareListener myListener = new ShareListener();
+        Tencent.onActivityResultData(requestCode, resultCode, data, myListener);
     }
 
     private class JavaScriptInterface extends JavaScriptBase {
