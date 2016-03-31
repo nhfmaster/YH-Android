@@ -32,6 +32,7 @@ import com.handmark.pulltorefresh.library.ILoadingLayout;
 import com.handmark.pulltorefresh.library.PullToRefreshBase;
 import com.handmark.pulltorefresh.library.PullToRefreshWebView;
 import com.intfocus.yh_android.util.ApiHelper;
+import com.intfocus.yh_android.util.AppManager;
 import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.HttpUtil;
 import com.intfocus.yh_android.util.TypedObject;
@@ -40,6 +41,9 @@ import com.pgyersdk.javabean.AppBean;
 import com.pgyersdk.update.PgyUpdateManager;
 import com.pgyersdk.update.UpdateManagerListener;
 import com.squareup.leakcanary.RefWatcher;
+import com.umeng.message.IUmengRegisterCallback;
+import com.umeng.message.PushAgent;
+import com.umeng.message.UmengRegistrar;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -75,7 +79,7 @@ public class BaseActivity extends Activity {
     String urlStringForLoading;
     JSONObject logParams = new JSONObject();
     private ProgressDialog mProgressDialog;
-    final static ArrayList<Activity> mActivities = new ArrayList<>(3);
+//    final static ArrayList<Activity> mActivities = new ArrayList<>(3);
 
     Context mContext;
 
@@ -84,18 +88,19 @@ public class BaseActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        PushAgent.getInstance(this).onAppStart();
+
         ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         String runningActivity = activityManager.getRunningTasks(1).get(0).topActivity.getClassName();
         System.out.println("runningActivity:" + runningActivity);
-        if (!(runningActivity.equalsIgnoreCase("com.intfocus.yh_android.MainActivity"))) {
-                mActivities.add(this);
-        }
-
+//        mActivities.add(this);
         // for (Activity a : mActivities) {
         //    System.out.println("mActivityName: " + a.toString());
         // }
 
-        // finishLoginActivityWhenInMainAcitivty(this);
+//         finishLoginActivityWhenInMainAcitivty(this);
+
+        PushAgent.getInstance(this).onAppStart();
 
         mContext = BaseActivity.this;
         sharedPath = FileUtil.sharedPath(mContext);
@@ -125,14 +130,13 @@ public class BaseActivity extends Activity {
 
     @Override
     public void onDestroy() {
-        mActivities.remove(this);
+//        mActivities.remove(this);
         System.out.println("activityDestroy: " + this.toString());
         fixInputMethodManager();
         super.onDestroy();
     }
 
-    private void fixInputMethodManager()
-    {
+    private void fixInputMethodManager() {
         final Object imm = getSystemService(Context.INPUT_METHOD_SERVICE);
 
         final TypedObject windowToken
@@ -359,7 +363,7 @@ public class BaseActivity extends Activity {
         }
     };
 
-    final Runnable  mRunnableForLogger = new Runnable() {
+    final Runnable mRunnableForLogger = new Runnable() {
         @Override
         public void run() {
             try {

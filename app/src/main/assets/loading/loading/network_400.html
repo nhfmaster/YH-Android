@@ -1,26 +1,37 @@
 <html lang="zh-CN">
   <head>
-    <meta charset="utf-8" />
-    <meta content="IE=edge" http-equiv="X-UA-Compatible" />
-    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport" />
-    <title>loading</title>
-    <link href="assets/stylesheets/bootstrap.min.css" rel = "stylesheet" />
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <title>网络环境较差</title>
+    <link href="assets/stylesheets/bootstrap.min.css" rel = "stylesheet">
     <style type="text/css">
-      body { background: #f7f7f7; }
-      .container { padding-left:0px;padding-right:0px;}
-      .row, .col-xs-12 { width:100%; padding-left:0px; padding-right:0px;margin-left:0px; margin-right:0px;}
-      #loading img { width: 100%; background: transparent; }
+      .row { margin-left:0px; margin-right:0px;}
+      .container { padding-left:0px;padding-right:0px; padding-top:100px;}
+      #wifi_bad img { width: 100%; background: transparent; opacity: 0.4; }
       #text a, #text { color: #e0e0e0; font-size:12px;}
     </style>
   </head>
   <body>
     <div class="container">
-      <div class="row"  id="loading">
-        <div class="col-xs-12">
-          <img src="assets/images/loading.gif" />
+      <div class="row">
+        <div id="wifi_bad" class="col-xs-6 col-xs-offset-3">
+          <img src="assets/images/network_400.png">
         </div>
       </div>
-    </div> 
+      <div class="row">
+        <div class="col-xs-6 col-xs-offset-3" style="text-align:center">
+          <p class="text-muted" style="font-size: 10px;">
+            当前网络环境较差请重新加载
+          </p>
+        </div>
+      </div>
+      <div id="text" class="row" style="text-align:center;">
+        <div id="refreshBtn" class="col-xs-12">
+          <a class="btn btn-primary" onclick="Refresh.do();">重新加载</a>
+        </div>
+      </div>
+    </div>
 
     <script type="text/javascript">
       (function(){
@@ -32,7 +43,7 @@
             return navigator.userAgent.match(/Android/i);
           }
         }
-        window.Loading = {
+        window.Refresh = {
           connectWebViewJavascriptBridge: function(callback) {
             if(window.WebViewJavascriptBridge) {
               callback(WebViewJavascriptBridge)
@@ -43,12 +54,12 @@
               }, false)
             }
           },
-          refresh: function() {
+          do: function() {
             if(Mobile.isIOS()) {
-              Loading.connectWebViewJavascriptBridge(function(bridge){
+              Refresh.connectWebViewJavascriptBridge(function(bridge){
                 bridge.callHandler('refreshBrowser', {}, function(response) {
                 });
-              })
+              });
             }
             else if(Mobile.isAndroid()) {
               window.AndroidJSBridge.refreshBrowser();
@@ -59,19 +70,7 @@
           }
         }
       }).call(this);
-
-      window.onload = function() {
-        var w = window;
-        var d = document;
-        var e = d.documentElement;
-        var g = d.getElementsByTagName("body")[0];
-        var x =  e.clientHeight || g.clientHeight;
-        var loading = document.getElementById("loading");
-        var bottom = (x-loading.clientHeight)/2;
-
-        loading.style.position = "absolute";
-        loading.style.bottom = bottom + "px";
-      };
     </script>
+
   </body>
 </html>

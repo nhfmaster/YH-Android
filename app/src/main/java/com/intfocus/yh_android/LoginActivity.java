@@ -1,26 +1,36 @@
 package com.intfocus.yh_android;
 
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.webkit.JavascriptInterface;
+import android.webkit.WebChromeClient;
+import android.webkit.WebView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.handmark.pulltorefresh.library.PullToRefreshWebView;
 import com.intfocus.yh_android.screen_lock.ConfirmPassCodeActivity;
 import com.intfocus.yh_android.util.ApiHelper;
+import com.intfocus.yh_android.util.AppManager;
 import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.URLs;
+import com.umeng.message.PushAgent;
 
 import org.json.JSONObject;
 
 public class LoginActivity extends BaseActivity {
+    private ProgressDialog progressDialog = null;
 
     @Override
     @SuppressLint("SetJavaScriptEnabled")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        PushAgent.getInstance(this).onAppStart();
 
         /*
          *  如果是从触屏界面过来，则直接进入主界面
@@ -76,9 +86,14 @@ public class LoginActivity extends BaseActivity {
         @JavascriptInterface
         public void login(final String username, String password) {
             if (username.length() > 0 && password.length() > 0) {
+
                 try {
+                    progressDialog.show(LoginActivity.this, "请稍等...", "获取数据中...", true);
+
                     String info = ApiHelper.authentication(mContext, username, URLs.MD5(password));
+
                     if (info.compareTo("success") == 0) {
+
                         // 检测用户空间，版本是否升级
                         assetsPath = FileUtil.dirPath(mContext, URLs.HTML_DIRNAME);
                         checkVersionUpgrade(assetsPath);
