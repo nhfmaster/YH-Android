@@ -12,6 +12,7 @@ import android.widget.TextView;
 import com.handmark.pulltorefresh.library.PullToRefreshWebView;
 import com.intfocus.yh_android.util.ApiHelper;
 import com.intfocus.yh_android.util.URLs;
+import com.umeng.message.PushAgent;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,6 +34,8 @@ public class CommentActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_comment);
+
+        PushAgent.getInstance(this).onAppStart();
 
         findViewById(R.id.back).setOnClickListener(mOnBackListener);
         findViewById(R.id.back_text).setOnClickListener(mOnBackListener);

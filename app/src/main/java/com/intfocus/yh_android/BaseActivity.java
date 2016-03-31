@@ -40,6 +40,9 @@ import com.pgyersdk.javabean.AppBean;
 import com.pgyersdk.update.PgyUpdateManager;
 import com.pgyersdk.update.UpdateManagerListener;
 import com.squareup.leakcanary.RefWatcher;
+import com.umeng.message.IUmengRegisterCallback;
+import com.umeng.message.PushAgent;
+import com.umeng.message.UmengRegistrar;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -84,6 +87,8 @@ public class BaseActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        PushAgent.getInstance(this).onAppStart();
+
         ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         String runningActivity = activityManager.getRunningTasks(1).get(0).topActivity.getClassName();
         System.out.println("runningActivity:" + runningActivity);
@@ -96,6 +101,8 @@ public class BaseActivity extends Activity {
         // }
 
         // finishLoginActivityWhenInMainAcitivty(this);
+
+        PushAgent.getInstance(this).onAppStart();
 
         mContext = BaseActivity.this;
         sharedPath = FileUtil.sharedPath(mContext);

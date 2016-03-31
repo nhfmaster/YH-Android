@@ -117,6 +117,15 @@
             android:name="PGYER_APPID"
             android:value="c586f556015342bcf89f8300ccfbebc2"></meta-data>
 
+        <meta-data
+            android:name="UMENG_APPKEY"
+            android:value="56fc8cfb67e58ecd6300 262e" >
+        </meta-data>
+        <meta-data
+            android:name="UMENG_MESSAGE_SECRET"
+            android:value="036cfb4b35b540c8cfd93fc138be326a" >
+        </meta-data>
+
     </application>
 
 </manifest>

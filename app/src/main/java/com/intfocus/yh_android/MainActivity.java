@@ -3,6 +3,7 @@ package com.intfocus.yh_android;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.webkit.JavascriptInterface;
@@ -11,6 +12,8 @@ import android.widget.ImageView;
 import com.handmark.pulltorefresh.library.PullToRefreshWebView;
 import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.URLs;
+import com.umeng.message.IUmengRegisterCallback;
+import com.umeng.message.PushAgent;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -29,6 +32,14 @@ public class MainActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        PushAgent mPushAgent = PushAgent.getInstance(MainActivity.this);
+        mPushAgent.onAppStart();
+        mPushAgent.enable(mRegisterCallback);
+        Log.i("mPushAgent", String.valueOf(mPushAgent.isEnabled()));
+        String deviceToken = mPushAgent.getRegistrationId();
+        Log.i("deviceToken",deviceToken);
+
 
         findViewById(R.id.setting).setOnClickListener(mSettingListener);
         pullToRefreshWebView = (PullToRefreshWebView) findViewById(R.id.webview);
@@ -70,6 +81,23 @@ public class MainActivity extends BaseActivity {
         checkAssetsUpdated(true);
         new Thread(mRunnableForDetecting).start();
     }
+
+
+    public Handler handler = new Handler();
+
+    public IUmengRegisterCallback mRegisterCallback = new IUmengRegisterCallback() {
+
+        @Override
+        public void onRegistered(String registrationId) {
+            // TODO Auto-generated method stub
+            handler.post(new Runnable() {
+
+                @Override
+                public void run() {
+                }
+            });
+        }
+    };
 
     @SuppressLint("SetJavaScriptEnabled")
     @JavascriptInterface

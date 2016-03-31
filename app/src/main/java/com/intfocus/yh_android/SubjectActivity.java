@@ -32,6 +32,7 @@ import com.tencent.connect.share.QQShare;
 import com.tencent.tauth.IUiListener;
 import com.tencent.tauth.Tencent;
 import com.tencent.tauth.UiError;
+import com.umeng.message.PushAgent;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -63,6 +64,8 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_subject);
+
+        PushAgent.getInstance(this).onAppStart();
 
         mTencent = Tencent.createInstance("********", this.getApplicationContext());
 
@@ -130,7 +133,7 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
                 params.putString(QQShare.SHARE_TO_QQ_SUMMARY, "要分享的摘要");
                 params.putString(QQShare.SHARE_TO_QQ_TARGET_URL, "http://www.qq.com/news/1.html");
                 params.putString(QQShare.SHARE_TO_QQ_IMAGE_URL, "https://www.baidu.com/img/bd_logo1.png");
-                mTencent.shareToQQ(SubjectActivity.this, params, myListener);
+                mTencent.shareToQQ(SubjectActivity.this, params, (IUiListener) myListener);
             }
         });
 
