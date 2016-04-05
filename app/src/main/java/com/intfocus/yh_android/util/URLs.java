@@ -31,13 +31,12 @@ public class URLs implements Serializable {
     public final static String API_ACTION_LOG_PATH = "%s/api/v1/android/logger";
     public final static String API_ASSETS_PATH = "%s/api/v1/download/%s.zip";
 
-    public final static String LOGIN_PATH = "%s/mobile/login";
-    public final static String KPI_PATH = "%s/mobile/role/%s/group/%s/kpi";
-    public final static String MESSAGE_PATH = "%s/mobile/role/%s/group/%s/user/%s/message";
-    public final static String APPLICATION_PATH = "%s/mobile/role/%s/app";
-    public final static String ANALYSE_PATH = "%s/mobile/role/%s/analyse";
-    public final static String COMMENT_PATH = "%s/mobile/id/%s/type/%s/comment";
-    public final static String RESET_PASSWORD_PATH = "%s/mobile/update_user_password";
+    public final static String KPI_PATH = "%s/mobile/v2/role/%s/group/%s/kpi";
+    public final static String MESSAGE_PATH = "%s/mobile/v2/role/%s/group/%s/user/%s/message";
+    public final static String APPLICATION_PATH = "%s/mobile/v2/role/%s/app";
+    public final static String ANALYSE_PATH = "%s/mobile/v2/role/%s/analyse";
+    public final static String COMMENT_PATH = "%s/mobile/v2/id/%s/type/%s/comment";
+    public final static String RESET_PASSWORD_PATH = "%s/mobile/v2/update_user_password";
 
     public final static String REPORT_DATA_FILENAME = "template_data_group_%s_report_%s.js";
 
