@@ -44,7 +44,8 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
     private String bannerName, link;
     private int objectID;
     private int objectType;
-    private int groupID, userID;
+    private int groupID;
+    private String userNum;
     private RelativeLayout bannerView;
 
     @Override
@@ -61,11 +62,11 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
          */
         try {
             groupID = user.getInt("group_id");
-            userID = user.getInt("user_id");
+            userNum = user.getString("user_num");
         } catch (JSONException e) {
             e.printStackTrace();
-            userID = -2;
             groupID = -2;
+            userNum = "mobile-not-get";
         }
 
         bannerView = (RelativeLayout) findViewById(R.id.actionBar);
@@ -171,9 +172,9 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
                         new Thread(mRunnableForPDF).start();
                     } else {
                         /*
-                         * 外部链接传参: userid, timestamp
+                         * 外部链接传参: userNum, timestamp
                          */
-                        String appendParams = String.format("?userid=%d&timestamp=%s", userID, URLs.TimeStamp);
+                        String appendParams = String.format("?user_num=%d&timestamp=%s", userNum, URLs.TimeStamp);
 
                         if (!urlString.contains("?")) {
                             urlString = String.format("%s%s", urlString, appendParams);

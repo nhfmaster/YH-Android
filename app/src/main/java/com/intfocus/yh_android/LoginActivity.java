@@ -82,6 +82,7 @@ public class LoginActivity extends BaseActivity {
                         // 检测用户空间，版本是否升级
                         assetsPath = FileUtil.dirPath(mContext, URLs.HTML_DIRNAME);
                         checkVersionUpgrade(assetsPath);
+                        mWebView.clearCache(true);
 
                         // 跳转至主界面
                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
