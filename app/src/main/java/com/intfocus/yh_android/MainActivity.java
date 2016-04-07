@@ -83,6 +83,9 @@ public class MainActivity extends BaseActivity {
                 }
             }).start();
         }
+        else {
+            mWebView.clearCache(true);
+        }
 
         /*
          * 检测服务器静态资源是否更新，并下载

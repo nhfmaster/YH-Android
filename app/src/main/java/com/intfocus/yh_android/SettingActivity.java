@@ -124,8 +124,6 @@ public class SettingActivity extends BaseActivity {
                 configJSON.put("is_login", false);
 
                 modifiedUserConfig(configJSON);
-
-                mWebView.clearCache(true);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
