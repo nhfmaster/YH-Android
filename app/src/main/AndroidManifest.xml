@@ -20,7 +20,7 @@
     <uses-permission android:name="android.permission.READ_LOGS" /> <!-- 获取logcat日志 -->
 
     <application
-        android:name=".YHApplication"
+        android:name="com.intfocus.yh_android.YHApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -41,7 +41,7 @@
             android:enabled="false" />
         -->
         <activity
-            android:name=".LoginActivity"
+            android:name="com.intfocus.yh_android.LoginActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:theme="@style/FullscreenTheme" >
@@ -52,32 +52,32 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MainActivity"
+            android:name="com.intfocus.yh_android.MainActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity
-            android:name=".SettingActivity"
+            android:name="com.intfocus.yh_android.SettingActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity
-            android:name=".SubjectActivity"
+            android:name="com.intfocus.yh_android.SubjectActivity"
             android:configChanges="orientation|screenSize"
             android:screenOrientation="fullSensor"
             android:theme="@style/AppTheme" />
         <activity
-            android:name=".CommentActivity"
+            android:name="com.intfocus.yh_android.CommentActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity
-            android:name=".ResetPasswordActivity"
+            android:name="com.intfocus.yh_android.ResetPasswordActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity
-            android:name=".screen_lock.InitPassCodeActivity"
+            android:name="com.intfocus.yh_android.screen_lock.InitPassCodeActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity
-            android:name=".screen_lock.ConfirmPassCodeActivity"
+            android:name="com.intfocus.yh_android.screen_lock.ConfirmPassCodeActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
 
