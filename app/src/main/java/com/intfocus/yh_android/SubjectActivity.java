@@ -174,7 +174,7 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
                         /*
                          * 外部链接传参: userNum, timestamp
                          */
-                        String appendParams = String.format("?user_num=%d&timestamp=%s", userNum, URLs.TimeStamp);
+                        String appendParams = String.format("?user_num=%s&timestamp=%s", userNum, URLs.TimeStamp);
 
                         if (!urlString.contains("?")) {
                             urlString = String.format("%s%s", urlString, appendParams);
