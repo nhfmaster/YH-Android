@@ -1,9 +1,17 @@
 ## 签名
 
-* 签名档: ./yh.key-store
+* 签名档: ./yh_android.key-store
 * 密码: 123456
 * 别名: yh
 * 密码: 123456
+
+---
+
+* 签名档: ./shengyiplus_android.key-store
+* 密码: 123456
+* 别名: shengyiplus
+* 密码: 123456
+
 
 ## 蒲公英
 
@@ -14,6 +22,12 @@
 
 ## 更新日志
 
+
+* 16/04/11
+
+	* add: push data with umeng
+	* fixed: reset user password api
+	* optimized: bigger area <back><setting><edit> button area
 
 * 16/02/23
 
