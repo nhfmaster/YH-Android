@@ -1,1 +1,2 @@
-include ':app', ':lib:pull-to-refresh'
+include ':app', ':lib:pull-to-refresh', ':Pushlib'
+project(':Pushlib').projectDir = new File('lib/Pushlib')

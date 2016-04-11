@@ -17,6 +17,7 @@ import android.widget.Toast;
 import com.intfocus.yh_android.screen_lock.InitPassCodeActivity;
 import com.intfocus.yh_android.util.FileUtil;
 import com.intfocus.yh_android.util.URLs;
+import com.umeng.message.PushAgent;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,6 +31,8 @@ public class SettingActivity extends BaseActivity {
     private TextView mAppName;
     private TextView mAppVersion;
     private TextView mDeviceID;
+    private TextView mAppIdentifier;
+    private TextView mPushState;
     private TextView mApiDomain;
     private Switch mLockSwitch;
     private String screenLockInfo;
@@ -51,6 +54,8 @@ public class SettingActivity extends BaseActivity {
         mAppVersion = (TextView) findViewById(R.id.app_version);
         mDeviceID = (TextView) findViewById(R.id.device_id);
         mApiDomain = (TextView) findViewById(R.id.api_domain);
+        mAppIdentifier = (TextView) findViewById(R.id.app_identifier);
+        mPushState = (TextView) findViewById(R.id.push_state);
         TextView mChangeLock = (TextView) findViewById(R.id.change_lock);
         TextView mCheckAssets = (TextView) findViewById(R.id.check_assets);
         Button mLogout = (Button) findViewById(R.id.logout);
@@ -83,17 +88,20 @@ public class SettingActivity extends BaseActivity {
             mUserID.setText(user.getString("user_name"));
             mRoleID.setText(user.getString("role_name"));
             mGroupID.setText(user.getString("group_name"));
+            // mGroupID.setText(UmengRegistrar.getRegistrationId(mContext));
+            mPushState.setText(PushAgent.getInstance(mContext).isEnabled() ? "开启" : "关闭");
 
             mAppName.setText(getApplicationName(SettingActivity.this));
-            try {
-                PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
-                mAppVersion.setText(packageInfo.versionName);
-            } catch (NameNotFoundException e) {
-                e.printStackTrace();
-            }
+
             mDeviceID.setText(TextUtils.split(android.os.Build.MODEL, " - ")[0]);
-            mApiDomain.setText(URLs.HOST.replace("http://", ""));
+            mApiDomain.setText(URLs.HOST.replace("http://", "").replace("https://", ""));
+
+            PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+            mAppVersion.setText(packageInfo.versionName);
+            mAppIdentifier.setText(packageInfo.packageName);
         } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (NameNotFoundException e) {
             e.printStackTrace();
         }
     }

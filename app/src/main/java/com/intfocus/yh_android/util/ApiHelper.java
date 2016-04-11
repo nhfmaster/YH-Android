@@ -183,8 +183,7 @@ public class ApiHelper {
         Map<String, String> retMap = new HashMap<>();
 
         try {
-            String urlPath = String.format(URLs.API_RESET_PASSWORD_PATH, userID);
-            String urlString = String.format("%s/%s", URLs.HOST, urlPath);
+            String urlString = String.format(URLs.API_RESET_PASSWORD_PATH, URLs.HOST, userID);
 
             Map<String, String> params = new HashMap<>();
             params.put("password", newPassword);

@@ -16,14 +16,15 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_centerInParent="true"
-            android:layout_marginBottom="8dp"
-            android:layout_marginTop="8dp"
-            android:src="@drawable/yonghuilogo" />
+            android:src="@drawable/yonghuilogo"
+            android:id="@+id/imageView" />
 
         <ImageView
             android:id="@+id/setting"
             style="@style/ActionRightButton"
-            android:src="@drawable/setting" />
+            android:src="@drawable/setting"
+            android:layout_alignTop="@+id/imageView"
+            android:layout_alignBottom="@+id/colorViewLayout" />
 
         <RelativeLayout
             android:id="@+id/colorViewLayout"

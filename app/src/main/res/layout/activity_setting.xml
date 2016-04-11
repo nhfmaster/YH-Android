@@ -14,7 +14,8 @@
         <ImageView
             android:id="@+id/back"
             android:layout_width="20dp"
-            android:layout_height="20dp"
+            android:layout_height="fill_parent"
+            android:gravity="fill_vertical"
             android:layout_centerVertical="true"
             android:layout_marginLeft="5dp"
             android:src="@drawable/back" />
@@ -22,10 +23,11 @@
         <TextView
             android:id="@+id/back_text"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="fill_parent"
             android:layout_centerVertical="true"
             android:layout_toRightOf="@id/back"
             android:text="返回"
+            android:gravity="fill_vertical"
             android:textColor="@color/white"
             android:textSize="18sp" />
 
@@ -149,12 +151,42 @@
 
                 <TextView
                     style="@style/SettingKey"
+                    android:text="消息推送" />
+
+                <TextView
+                    android:id="@+id/push_state"
+                    style="@style/SettingValue"
+                    android:layout_marginTop="5dp"
+                    android:textSize="12dp"
+                    android:text="状态" />
+            </RelativeLayout>
+
+            <RelativeLayout style="@style/SettingGroup">
+
+                <TextView
+                    style="@style/SettingKey"
                     android:text="数据接口" />
 
                 <TextView
                     android:id="@+id/api_domain"
                     style="@style/SettingValue"
+                    android:layout_marginTop="5dp"
+                    android:textSize="12dp"
                     android:text="域名" />
+            </RelativeLayout>
+
+            <RelativeLayout style="@style/SettingGroup">
+
+                <TextView
+                    style="@style/SettingKey"
+                    android:text="应用标识" />
+
+                <TextView
+                    android:id="@+id/app_identifier"
+                    style="@style/SettingValue"
+                    android:layout_marginTop="5dp"
+                    android:textSize="12dp"
+                    android:text="标识" />
             </RelativeLayout>
 
             <RelativeLayout style="@style/SettingGroup">

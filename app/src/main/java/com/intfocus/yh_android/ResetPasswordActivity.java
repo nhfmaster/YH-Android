@@ -70,7 +70,7 @@ public class ResetPasswordActivity extends BaseActivity {
                     alertDialog.setTitle("温馨提示");
                     alertDialog.setMessage(responseInfo.getString("info"));
 
-                    if (response.get("code").equals("200")) {
+                    if (response.get("code").equals("200") || response.get("code").equals("201")) {
                         alertDialog.setPositiveButton(
                                 "重新登录",
                                 new DialogInterface.OnClickListener() {

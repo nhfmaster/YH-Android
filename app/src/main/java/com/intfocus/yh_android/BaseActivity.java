@@ -39,6 +39,8 @@ import com.pgyersdk.javabean.AppBean;
 import com.pgyersdk.update.PgyUpdateManager;
 import com.pgyersdk.update.UpdateManagerListener;
 import com.squareup.leakcanary.RefWatcher;
+import com.umeng.message.IUmengRegisterCallback;
+import com.umeng.message.PushAgent;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -119,6 +121,35 @@ public class BaseActivity extends Activity {
 
         RefWatcher refWatcher = YHApplication.getRefWatcher(mContext);
         refWatcher.watch(this);
+
+         /*
+         * 友盟消息推送
+         */
+        PushAgent mPushAgent = PushAgent.getInstance(mContext);
+        //开启推送并设置注册的回调处理
+        mPushAgent.enable(new IUmengRegisterCallback() {
+
+            @Override
+            public void onRegistered(final String registrationId) {
+                new Handler().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            //onRegistered方法的参数registrationId即是device_token
+                            String userConfigPath = String.format("%s/%s", FileUtil.basePath(mContext), URLs.USER_CONFIG_FILENAME);
+                            JSONObject userJSON = FileUtil.readConfigFile(userConfigPath);
+                            userJSON.put("umeng_device_id", registrationId);
+                            FileUtil.writeFile(userConfigPath, userJSON.toString());
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+            }
+        });
+        mPushAgent.onAppStart();
     }
 
     @Override

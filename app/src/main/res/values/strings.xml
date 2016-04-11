@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">永辉生意人</string>
-    <string name="app_name1">生意+</string>
-    <string name="title_activity_main1">生意+</string>
-    <string name="title_activity_main">永辉生意人</string>
+    <string name="app_name1">永辉生意人</string>
+    <string name="app_name">生意+</string>
+    <string name="title_activity_main">生意+</string>
+    <string name="title_activity_main1">永辉生意人</string>
 
     <string name="image_error">错误</string>
     <string name="cansel">取消</string>
