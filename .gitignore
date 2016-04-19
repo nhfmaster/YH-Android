@@ -1,5 +1,5 @@
 .DS_Store
-AndroidManifest.xml
+app/src/main/AndroidManifest.xml
 
 # Android 的 Module 推荐这么写. gitignore 文件
 /build
