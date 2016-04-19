@@ -102,6 +102,8 @@ public class BaseActivity extends Activity {
 
         PushAgent.getInstance(this).onAppStart();
 
+        PushAgent.getInstance(this).onAppStart();
+
         mContext = BaseActivity.this;
         sharedPath = FileUtil.sharedPath(mContext);
         assetsPath = sharedPath;

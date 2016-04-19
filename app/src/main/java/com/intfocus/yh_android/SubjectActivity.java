@@ -64,6 +64,11 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
         setContentView(R.layout.activity_subject);
 
         PushAgent.getInstance(this).onAppStart();
+<<<<<<< HEAD
+=======
+
+        mTencent = Tencent.createInstance("********", this.getApplicationContext());
+>>>>>>> f6aac5b5a7c6dc41c615a4e9c51b60a200c57f5b
 
         findViewById(R.id.back).setOnClickListener(mOnBackListener);
         findViewById(R.id.back_text).setOnClickListener(mOnBackListener);
@@ -109,6 +114,30 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
             }
         });
 
+<<<<<<< HEAD
+=======
+//        drawButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+        pullToRefreshWebView.setOnTouchListener(SubjectActivity.this);
+//            }
+//        });
+
+        shareButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ShareListener myListener = new ShareListener();
+
+                final Bundle params = new Bundle();
+                params.putInt(QQShare.SHARE_TO_QQ_KEY_TYPE, QQShare.SHARE_TO_QQ_TYPE_DEFAULT);
+                params.putString(QQShare.SHARE_TO_QQ_TITLE, "要分享的标题");
+                params.putString(QQShare.SHARE_TO_QQ_SUMMARY, "要分享的摘要");
+                params.putString(QQShare.SHARE_TO_QQ_TARGET_URL, "http://www.qq.com/news/1.html");
+                params.putString(QQShare.SHARE_TO_QQ_IMAGE_URL, "https://www.baidu.com/img/bd_logo1.png");
+                mTencent.shareToQQ(SubjectActivity.this, params, (IUiListener) myListener);
+            }
+        });
+>>>>>>> f6aac5b5a7c6dc41c615a4e9c51b60a200c57f5b
 
         /*
          * Intent Data || JSON Data

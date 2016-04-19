@@ -83,6 +83,10 @@ public class MainActivity extends BaseActivity {
         new Thread(mRunnableForDetecting).start();
     }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> f6aac5b5a7c6dc41c615a4e9c51b60a200c57f5b
     public Handler handler = new Handler();
 
     public IUmengRegisterCallback mRegisterCallback = new IUmengRegisterCallback() {
