@@ -33,7 +33,8 @@ dependencies {
     compile project(':lib:pull-to-refresh')
     compile project(':Pushlib')
     compile fileTree(dir: 'libs', include: ['*.jar'])
-
     debugCompile 'com.squareup.leakcanary:leakcanary-android:1.3'
     releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.3'
+    compile files('/Users/lihao/github/YH-Android/lib/open_sdk_r5509.jar')
+    compile files('/Users/lihao/github/YH-Android/lib/mta-sdk-1.6.2.jar')
 }

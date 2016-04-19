@@ -72,6 +72,25 @@
                 style="@style/ColorViewStyle4" />
         </RelativeLayout>
 
+        <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="share"
+            android:id="@+id/share"
+            android:layout_alignBottom="@+id/colorViewLayout"
+            android:layout_toLeftOf="@+id/comment" />
+
+        <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="draw"
+            android:id="@+id/draw"
+            android:layout_alignTop="@+id/share"
+            android:layout_toRightOf="@+id/back_text"
+            android:layout_toEndOf="@+id/back_text" />
+
     </RelativeLayout>
 
     <com.handmark.pulltorefresh.library.PullToRefreshWebView

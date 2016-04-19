@@ -1,17 +1,27 @@
 package com.intfocus.yh_android;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
+import android.util.AttributeSet;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -21,9 +31,15 @@ import com.handmark.pulltorefresh.library.PullToRefreshBase;
 import com.handmark.pulltorefresh.library.PullToRefreshWebView;
 import com.intfocus.yh_android.util.ApiHelper;
 import com.intfocus.yh_android.util.FileUtil;
+import com.intfocus.yh_android.util.TencentUtil;
 import com.intfocus.yh_android.util.URLs;
 import com.joanzapata.pdfview.PDFView;
 import com.joanzapata.pdfview.listener.OnPageChangeListener;
+import com.tencent.connect.common.Constants;
+import com.tencent.connect.share.QQShare;
+import com.tencent.tauth.IUiListener;
+import com.tencent.tauth.Tencent;
+import com.tencent.tauth.UiError;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -47,6 +63,11 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
     private int groupID;
     private String userNum;
     private RelativeLayout bannerView;
+    private Paint paint;
+    private Canvas canvas;
+    private Button shareButton;
+    private Button drawButton;
+    private int shareType = QQShare.SHARE_TO_QQ_TYPE_IMAGE;
 
     @Override
     @SuppressLint("SetJavaScriptEnabled")
@@ -56,6 +77,12 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
 
         findViewById(R.id.back).setOnClickListener(mOnBackListener);
         findViewById(R.id.back_text).setOnClickListener(mOnBackListener);
+
+//        mPDFView.setOnTouchListener(this);
+//        final Tencent mTencent = Tencent.createInstance("********", this.getApplicationContext());
+
+        shareButton = (Button) findViewById(R.id.share);
+        drawButton = (Button) findViewById(R.id.draw);
 
         /*
          * JSON Data
@@ -98,9 +125,29 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
             }
         });
 
-        /*
-         * Intent Data || JSON Data
-         */
+//        shareButton.setOnClickListener(new View.OnClickListener() {
+//                                           @Override
+//                                           public void onClick(View v) {
+//                                               if (shareType == QQShare.SHARE_TO_QQ_TYPE_IMAGE) {
+//                                                   startPickLocaleImage(SubjectActivity.this);
+//                                               }
+//                                               return;
+//                                           }
+//                                       }
+//        );
+
+        drawButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                DrawView drawView = new DrawView(SubjectActivity.this);
+                setContentView(drawView);
+                addContentView(drawView.btnEraseAll, drawView.params);
+            }
+        });
+
+            /*
+             * Intent Data || JSON Data
+             */
         Intent intent = getIntent();
         link = intent.getStringExtra("link");
 
@@ -110,8 +157,8 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
         isInnerLink = !(link.startsWith("http://") || link.startsWith("https://"));
 
         mTitle.setText(bannerName);
-        checkInterfaceOrientation(this.getResources().getConfiguration());
 
+        checkInterfaceOrientation(this.getResources().getConfiguration());
 
         List<ImageView> colorViews = new ArrayList<>();
         colorViews.add((ImageView) findViewById(R.id.colorView0));
@@ -119,8 +166,66 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
         colorViews.add((ImageView) findViewById(R.id.colorView2));
         colorViews.add((ImageView) findViewById(R.id.colorView3));
         colorViews.add((ImageView) findViewById(R.id.colorView4));
+
         initColorView(colorViews);
     }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        finish();
+    }
+
+    //QQ分享
+    private static final void startPickLocaleImage(Activity activity) {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+
+        if (android.os.Build.VERSION.SDK_INT >= TencentUtil.Build_VERSION_KITKAT) {
+            intent.setAction(TencentUtil.ACTION_OPEN_DOCUMENT);
+        } else {
+            intent.setAction(Intent.ACTION_GET_CONTENT);
+        }
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("image/*");
+        activity.startActivityForResult(
+                Intent.createChooser(intent, activity.getString(R.string.str_image_local)), 0);
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == Constants.REQUEST_QQ_SHARE) {
+            Tencent.onActivityResultData(requestCode, resultCode, data, qqShareListener);
+        } else if (requestCode == 0) {
+            String path = null;
+            if (resultCode == Activity.RESULT_OK) {
+                if (data != null && data.getData() != null) {
+                    // 根据返回的URI获取对应的SQLite信息
+                    Uri uri = data.getData();
+                    path = TencentUtil.getPath(this, uri);
+                }
+            }
+        }
+    }
+
+    IUiListener qqShareListener = new IUiListener() {
+        @Override
+        public void onCancel() {
+            if (shareType != QQShare.SHARE_TO_QQ_TYPE_IMAGE) {
+                TencentUtil.toastMessage(SubjectActivity.this, "onCancel: ");
+            }
+        }
+
+        @Override
+        public void onComplete(Object response) {
+            // TODO Auto-generated method stub
+            TencentUtil.toastMessage(SubjectActivity.this, "onComplete: " + response.toString());
+        }
+
+        @Override
+        public void onError(UiError e) {
+            // TODO Auto-generated method stub
+            TencentUtil.toastMessage(SubjectActivity.this, "onError: " + e.errorMessage, "e");
+        }
+    };
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
@@ -188,6 +293,7 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
             });
         }
     }
+
     private final Handler mHandlerForPDF = new Handler() {
         public void handleMessage(Message message) {
 
@@ -263,7 +369,7 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
             /*
              *  下拉浏览器刷新时，删除响应头文件，相当于无缓存刷新
              */
-            if(isInnerLink) {
+            if (isInnerLink) {
                 String urlKey;
                 if (urlString != null && !urlString.isEmpty()) {
                     urlKey = urlString.contains("?") ? TextUtils.split(urlString, "?")[0] : urlString;

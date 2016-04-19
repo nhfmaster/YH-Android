@@ -26,5 +26,6 @@
     <string name="period">.</string>
     <string name="title_activity_sample1">Sample1Activity</string>
     <string name="title_activity_sample2">Sample2Activity</string>
+    <string name="str_image_local">本地图片</string>
 
 </resources>

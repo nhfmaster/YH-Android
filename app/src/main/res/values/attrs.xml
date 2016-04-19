@@ -19,4 +19,8 @@
         <attr name="src_height" format="dimension" />
     </declare-styleable>
 
+    <declare-styleable name="DrawView">
+        <attr name="backgroundColor" format="color" />
+    </declare-styleable>
+
 </resources>
