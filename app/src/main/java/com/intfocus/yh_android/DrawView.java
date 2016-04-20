@@ -1,44 +1,87 @@
 package com.intfocus.yh_android;
 
 import android.content.Context;
-import android.content.res.Resources;
-import android.content.res.TypedArray;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.drawable.BitmapDrawable;
-import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
-import android.view.WindowManager;
 import android.widget.Button;
 
-import java.io.InputStream;
+import java.util.ArrayList;
 
 public class DrawView extends View {
     private Paint brush = new Paint();
+    private Paint brushBlack = new Paint();
+    private Paint brushRed  = new Paint();
+    private Paint brushBlue = new Paint();
     private Path path = new Path();
     public Button btnEraseAll;
-    public LayoutParams params;
+    public Button btnRed;
+    public Button btnBlue;
+    public LayoutParams btnEraseAllParams;
+    public LayoutParams btnBlueAllParams;
+    public LayoutParams btnRedAllParams;
+    private ArrayList<Path> savePath;
 
     public DrawView(Context context) {
         super(context);
 
-        brush.setAntiAlias(true);
-        brush.setColor(Color.BLUE);
-        brush.setStyle(Paint.Style.STROKE);
-        brush.setStrokeJoin(Paint.Join.ROUND);
-        brush.setStrokeWidth(5f);
+        brushBlack.setAntiAlias(true);
+        brushBlack.setColor(Color.BLACK);
+        brushBlack.setStyle(Paint.Style.STROKE);
+        brushBlack.setStrokeJoin(Paint.Join.ROUND);
+        brushBlack.setStrokeWidth(5f);
+        brush = brushBlack;
 
         btnEraseAll = new Button(context);
-        btnEraseAll.setText("Erase Everything!!");
-        params = new LayoutParams(LayoutParams.MATCH_PARENT,
+        btnBlue = new Button(context);
+        btnRed = new Button(context);
+        btnEraseAll = new Button(context);
+
+        btnBlueAllParams = new LayoutParams(LayoutParams.WRAP_CONTENT,
                 LayoutParams.WRAP_CONTENT);
-        btnEraseAll.setLayoutParams(params);
+        btnBlue.setText("Blue");
+        btnBlue.setWidth(100);
+        btnBlue.setX(600.00F);
+        btnBlue.setLayoutParams(btnBlueAllParams);
+        btnBlue.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                brushBlue.setAntiAlias(true);
+                brushBlue.setColor(Color.BLUE);
+                brushBlue.setStyle(Paint.Style.STROKE);
+                brushBlue.setStrokeJoin(Paint.Join.ROUND);
+                brushBlue.setStrokeWidth(5f);
+                brush = brushBlue;
+            }
+        });
+
+        btnRedAllParams = new LayoutParams(LayoutParams.WRAP_CONTENT,
+                LayoutParams.WRAP_CONTENT);
+        btnRed.setText("Red");
+        btnRed.setWidth(100);
+        btnRed.setLayoutParams(btnRedAllParams);
+        btnRed.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                brushRed.setAntiAlias(true);
+                brushRed.setColor(Color.RED);
+                brushRed.setStyle(Paint.Style.STROKE);
+                brushRed.setStrokeJoin(Paint.Join.ROUND);
+                brushRed.setStrokeWidth(5f);
+                brush = brushRed;
+            }
+        });
+
+        btnEraseAllParams = new LayoutParams(LayoutParams.WRAP_CONTENT,
+                LayoutParams.WRAP_CONTENT);
+        btnEraseAll.setText("Erase");
+        btnEraseAll.setWidth(150);
+        btnEraseAll.setX(300.00F);
+        btnEraseAll.setLayoutParams(btnEraseAllParams);
         btnEraseAll.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -51,43 +94,6 @@ public class DrawView extends View {
             }
         });
     }
-
-//    public DrawView(Context context, AttributeSet attrs) {
-//        super(context, attrs);
-//        initView(context, attrs);
-//    }
-
-//    private void initView(Context context, AttributeSet attributeSet) {
-//        TypedArray a = context.obtainStyledAttributes(attributeSet, R.styleable.DrawView);
-//        int bgColor = a.getColor(R.styleable.DrawView_backgroundColor, Color.TRANSPARENT);
-//
-//        brush.setAntiAlias(true);
-//        brush.setColor(Color.BLUE);
-//        brush.setStyle(Paint.Style.STROKE);
-//        brush.setStrokeJoin(Paint.Join.ROUND);
-//        brush.setStrokeWidth(5f);
-//
-//        btnEraseAll = new Button(context);
-//        btnEraseAll.setText("Erase Everything!!");
-//        params = new LayoutParams(LayoutParams.MATCH_PARENT,
-//                LayoutParams.WRAP_CONTENT);
-//        btnEraseAll.setLayoutParams(params);
-//        btnEraseAll.setOnClickListener(new View.OnClickListener() {
-//
-//            @Override
-//            public void onClick(View view) {
-//                // reset the path
-//                path.reset();
-//                // invalidate the view
-//                postInvalidate();
-//
-//            }
-//        });
-//
-//        a.recycle(); //释放TypedArray 资源
-//
-//        setBackgroundColor(bgColor);
-//    }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -116,12 +122,12 @@ public class DrawView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-        Resources res = getResources();
-
-        Bitmap bmp = BitmapFactory.decodeResource(res, R.drawable.back);
-
-        canvas.drawBitmap(bmp, 0, 0, brush);
-        canvas.drawPath(path, brush);
+        try {
+            super.onDraw(canvas);
+            canvas.drawPath(path, brush);
+            canvas.save();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

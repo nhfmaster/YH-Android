@@ -10,6 +10,10 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.Picture;
+import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -19,10 +23,15 @@ import android.os.Message;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
+import android.view.SurfaceHolder.Callback;
 import android.view.View;
 import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
+import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -43,7 +52,6 @@ import com.tencent.mm.sdk.modelmsg.WXMediaMessage;
 import com.tencent.mm.sdk.openapi.IWXAPI;
 import com.tencent.mm.sdk.openapi.WXAPIFactory;
 
-import org.android.agoo.service.SendMessage;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -111,6 +119,7 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
         initRefreshWebView();
 
         mWebView.requestFocus();
+        mWebView.setDrawingCacheEnabled(true);
         pullToRefreshWebView.setVisibility(View.VISIBLE);
         mWebView.addJavascriptInterface(new JavaScriptInterface(), "AndroidJSBridge");
         mWebView.loadUrl(urlStringForLoading);
@@ -126,6 +135,20 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
                 String label = simpleDateFormat.format(System.currentTimeMillis());
                 // 显示最后更新的时间
                 refreshView.getLoadingLayoutProxy().setLastUpdatedLabel(label);
+            }
+        });
+
+        drawButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Bitmap bitmap = captureWebViewVisibleSize(mWebView);
+                Drawable drawable = new BitmapDrawable(bitmap);
+                DrawView drawView = new DrawView(SubjectActivity.this);
+                drawView.setBackground(drawable);
+                setContentView(drawView);
+                addContentView(drawView.btnEraseAll, drawView.btnEraseAllParams);
+                addContentView(drawView.btnBlue,drawView.btnBlueAllParams);
+                addContentView(drawView.btnRed,drawView.btnRedAllParams);
             }
         });
 
@@ -153,15 +176,6 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
                                        }
         );
 
-        drawButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                DrawView drawView = new DrawView(SubjectActivity.this);
-                setContentView(drawView);
-                addContentView(drawView.btnEraseAll, drawView.params);
-            }
-        });
-
             /*
              * Intent Data || JSON Data
              */
@@ -187,6 +201,11 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
         initColorView(colorViews);
     }
 
+    private Bitmap captureWebViewVisibleSize(WebView webView) {
+        Bitmap bmp = Bitmap.createBitmap(webView.getDrawingCache());
+        return bmp;
+    }
+
     @Override
     protected void onPause() {
         super.onPause();
@@ -195,7 +214,7 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
 
 
     private void regToWx() {
-        wxApi = WXAPIFactory.createWXAPI(this,APP_ID,true);
+        wxApi = WXAPIFactory.createWXAPI(this, APP_ID, true);
         wxApi.registerApp(APP_ID);
     }
 
