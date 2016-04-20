@@ -5,6 +5,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -35,12 +37,13 @@ import com.intfocus.yh_android.util.TencentUtil;
 import com.intfocus.yh_android.util.URLs;
 import com.joanzapata.pdfview.PDFView;
 import com.joanzapata.pdfview.listener.OnPageChangeListener;
-import com.tencent.connect.common.Constants;
-import com.tencent.connect.share.QQShare;
-import com.tencent.tauth.IUiListener;
-import com.tencent.tauth.Tencent;
-import com.tencent.tauth.UiError;
+import com.tencent.mm.sdk.modelmsg.SendMessageToWX;
+import com.tencent.mm.sdk.modelmsg.WXImageObject;
+import com.tencent.mm.sdk.modelmsg.WXMediaMessage;
+import com.tencent.mm.sdk.openapi.IWXAPI;
+import com.tencent.mm.sdk.openapi.WXAPIFactory;
 
+import org.android.agoo.service.SendMessage;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -67,7 +70,9 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
     private Canvas canvas;
     private Button shareButton;
     private Button drawButton;
-    private int shareType = QQShare.SHARE_TO_QQ_TYPE_IMAGE;
+    private static String APP_ID = "WX3333333";
+    private IWXAPI wxApi;
+    private static final int THUMB_SIZE = 150;
 
     @Override
     @SuppressLint("SetJavaScriptEnabled")
@@ -79,7 +84,6 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
         findViewById(R.id.back_text).setOnClickListener(mOnBackListener);
 
 //        mPDFView.setOnTouchListener(this);
-//        final Tencent mTencent = Tencent.createInstance("********", this.getApplicationContext());
 
         shareButton = (Button) findViewById(R.id.share);
         drawButton = (Button) findViewById(R.id.draw);
@@ -125,16 +129,29 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
             }
         });
 
-//        shareButton.setOnClickListener(new View.OnClickListener() {
-//                                           @Override
-//                                           public void onClick(View v) {
-//                                               if (shareType == QQShare.SHARE_TO_QQ_TYPE_IMAGE) {
-//                                                   startPickLocaleImage(SubjectActivity.this);
-//                                               }
-//                                               return;
-//                                           }
-//                                       }
-//        );
+        shareButton.setOnClickListener(new View.OnClickListener() {
+                                           @Override
+                                           public void onClick(View view) {
+                                               regToWx();
+                                               Bitmap bmp = BitmapFactory.decodeResource(getResources(), R.drawable.back);
+
+                                               WXImageObject imgObj = new WXImageObject(bmp);
+                                               WXMediaMessage msg = new WXMediaMessage();
+                                               msg.mediaObject = imgObj;
+
+                                               Bitmap thumbBmp = Bitmap.createScaledBitmap(bmp, THUMB_SIZE, THUMB_SIZE, true);
+                                               bmp.recycle();
+                                               msg.thumbData = TencentUtil.bmpToByteArray(thumbBmp, true);
+
+                                               SendMessageToWX.Req req = new SendMessageToWX.Req();
+                                               req.transaction = buildTransaction("img");
+                                               req.message = msg;
+                                               req.scene =
+                                                       SendMessageToWX.Req.WXSceneTimeline;
+                                               wxApi.sendReq(req);
+                                           }
+                                       }
+        );
 
         drawButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -176,56 +193,11 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
         finish();
     }
 
-    //QQ分享
-    private static final void startPickLocaleImage(Activity activity) {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
 
-        if (android.os.Build.VERSION.SDK_INT >= TencentUtil.Build_VERSION_KITKAT) {
-            intent.setAction(TencentUtil.ACTION_OPEN_DOCUMENT);
-        } else {
-            intent.setAction(Intent.ACTION_GET_CONTENT);
-        }
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.setType("image/*");
-        activity.startActivityForResult(
-                Intent.createChooser(intent, activity.getString(R.string.str_image_local)), 0);
+    private void regToWx() {
+        wxApi = WXAPIFactory.createWXAPI(this,APP_ID,true);
+        wxApi.registerApp(APP_ID);
     }
-
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == Constants.REQUEST_QQ_SHARE) {
-            Tencent.onActivityResultData(requestCode, resultCode, data, qqShareListener);
-        } else if (requestCode == 0) {
-            String path = null;
-            if (resultCode == Activity.RESULT_OK) {
-                if (data != null && data.getData() != null) {
-                    // 根据返回的URI获取对应的SQLite信息
-                    Uri uri = data.getData();
-                    path = TencentUtil.getPath(this, uri);
-                }
-            }
-        }
-    }
-
-    IUiListener qqShareListener = new IUiListener() {
-        @Override
-        public void onCancel() {
-            if (shareType != QQShare.SHARE_TO_QQ_TYPE_IMAGE) {
-                TencentUtil.toastMessage(SubjectActivity.this, "onCancel: ");
-            }
-        }
-
-        @Override
-        public void onComplete(Object response) {
-            // TODO Auto-generated method stub
-            TencentUtil.toastMessage(SubjectActivity.this, "onComplete: " + response.toString());
-        }
-
-        @Override
-        public void onError(UiError e) {
-            // TODO Auto-generated method stub
-            TencentUtil.toastMessage(SubjectActivity.this, "onError: " + e.errorMessage, "e");
-        }
-    };
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
@@ -292,6 +264,10 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
                 }
             });
         }
+    }
+
+    private String buildTransaction(final String type) {
+        return (type == null) ? String.valueOf(System.currentTimeMillis()) : type + System.currentTimeMillis();
     }
 
     private final Handler mHandlerForPDF = new Handler() {
