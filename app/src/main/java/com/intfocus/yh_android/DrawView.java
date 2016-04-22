@@ -11,30 +11,31 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DrawView extends View {
     private Paint brush = new Paint();
-    private Paint brushBlack = new Paint();
-    private Paint brushRed  = new Paint();
-    private Paint brushBlue = new Paint();
-    private Path path = new Path();
+    Path path = new Path();
     public Button btnEraseAll;
     public Button btnRed;
     public Button btnBlue;
     public LayoutParams btnEraseAllParams;
     public LayoutParams btnBlueAllParams;
     public LayoutParams btnRedAllParams;
-    private ArrayList<Path> savePath;
+    private Map<Path, Integer> colorsMap = new HashMap<>();
+    private int selectedColor;
+    ArrayList<Path> savePath = new ArrayList<>();
+    int i = 0;
 
     public DrawView(Context context) {
         super(context);
 
-        brushBlack.setAntiAlias(true);
-        brushBlack.setColor(Color.BLACK);
-        brushBlack.setStyle(Paint.Style.STROKE);
-        brushBlack.setStrokeJoin(Paint.Join.ROUND);
-        brushBlack.setStrokeWidth(5f);
-        brush = brushBlack;
+        brush.setAntiAlias(true);
+        brush.setStyle(Paint.Style.STROKE);
+        brush.setStrokeJoin(Paint.Join.ROUND);
+        brush.setStrokeWidth(5f);
+        selectedColor = Color.BLACK;
 
         btnEraseAll = new Button(context);
         btnBlue = new Button(context);
@@ -50,12 +51,7 @@ public class DrawView extends View {
         btnBlue.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                brushBlue.setAntiAlias(true);
-                brushBlue.setColor(Color.BLUE);
-                brushBlue.setStyle(Paint.Style.STROKE);
-                brushBlue.setStrokeJoin(Paint.Join.ROUND);
-                brushBlue.setStrokeWidth(5f);
-                brush = brushBlue;
+                selectedColor = Color.BLUE;
             }
         });
 
@@ -67,12 +63,7 @@ public class DrawView extends View {
         btnRed.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                brushRed.setAntiAlias(true);
-                brushRed.setColor(Color.RED);
-                brushRed.setStyle(Paint.Style.STROKE);
-                brushRed.setStrokeJoin(Paint.Join.ROUND);
-                brushRed.setStrokeWidth(5f);
-                brush = brushRed;
+                selectedColor = Color.RED;
             }
         });
 
@@ -96,7 +87,18 @@ public class DrawView extends View {
     }
 
     @Override
+    protected void onDraw(Canvas canvas) {
+        for (Path p : savePath) {
+            brush.setColor(colorsMap.get(p));
+            canvas.drawPath(p, brush);
+        }
+        brush.setColor(selectedColor);
+        canvas.drawPath(path, brush);
+    }
+
+    @Override
     public boolean onTouchEvent(MotionEvent event) {
+
         float pointX = event.getX();
         float pointY = event.getY();
 
@@ -110,6 +112,10 @@ public class DrawView extends View {
                 path.lineTo(pointX, pointY);
                 break;
             case MotionEvent.ACTION_UP:
+                savePath.add(path);
+                colorsMap.put(path, selectedColor);
+                path = new Path();
+                invalidate();
                 break;
             default:
                 return false;
@@ -119,15 +125,6 @@ public class DrawView extends View {
         return false;
 
     }
-
-    @Override
-    protected void onDraw(Canvas canvas) {
-        try {
-            super.onDraw(canvas);
-            canvas.drawPath(path, brush);
-            canvas.save();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 }
+
+
