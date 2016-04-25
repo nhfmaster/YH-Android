@@ -9,13 +9,10 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
-import android.os.Environment;
 import android.util.Log;
-import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
-import android.view.WindowManager;
 import android.widget.Button;
 
 import java.io.File;
@@ -33,13 +30,18 @@ public class DrawView extends View {
     public Button btnRed;
     public Button btnBlue;
     public Button btnSave;
+    public Button btnDisplay;
+    public Button btnCancel;
     public LayoutParams btnEraseParams;
     public LayoutParams btnBlueParams;
     public LayoutParams btnRedParams;
     public LayoutParams btnSaveParams;
+    public LayoutParams btnDisplayParams;
+    public LayoutParams btnCancelParams;
     private Map<Path, Integer> colorsMap = new HashMap<>();
     private int selectedColor;
     ArrayList<Path> savePath = new ArrayList<>();
+    int i = 1;
 
     private Intent intent = new Intent();
 
@@ -57,13 +59,16 @@ public class DrawView extends View {
         btnRed = new Button(context);
         btnEraseAll = new Button(context);
         btnSave = new Button(context);
+        btnDisplay = new Button(context);
+        btnCancel = new Button(context);
 
         btnBlueParams = new LayoutParams(LayoutParams.WRAP_CONTENT,
                 LayoutParams.WRAP_CONTENT);
         btnBlue.setBackgroundColor(Color.BLUE);
-        btnBlue.setAlpha(0.5F);
+        btnBlue.setAlpha(0);
         btnBlue.setWidth(100);
-        btnBlue.setX(600.00F);
+        btnBlue.setHeight(40);
+        btnBlue.setX(150);
         btnBlue.setLayoutParams(btnBlueParams);
         btnBlue.setOnClickListener(new OnClickListener() {
             @Override
@@ -75,8 +80,9 @@ public class DrawView extends View {
         btnRedParams = new LayoutParams(LayoutParams.WRAP_CONTENT,
                 LayoutParams.WRAP_CONTENT);
         btnRed.setBackgroundColor(Color.RED);
-        btnRed.setAlpha(0.5F);
+        btnRed.setAlpha(0);
         btnRed.setWidth(100);
+        btnRed.setHeight(40);
         btnRed.setLayoutParams(btnRedParams);
         btnRed.setOnClickListener(new OnClickListener() {
             @Override
@@ -88,8 +94,9 @@ public class DrawView extends View {
         btnEraseParams = new LayoutParams(LayoutParams.WRAP_CONTENT,
                 LayoutParams.WRAP_CONTENT);
         btnEraseAll.setText("Erase");
+        btnEraseAll.setAlpha(0);
         btnEraseAll.setWidth(150);
-        btnEraseAll.setX(300.00F);
+        btnEraseAll.setX(280.00F);
         btnEraseAll.setLayoutParams(btnEraseParams);
         btnEraseAll.setOnClickListener(new View.OnClickListener() {
 
@@ -105,13 +112,27 @@ public class DrawView extends View {
             }
         });
 
+        btnCancelParams = new LayoutParams(LayoutParams.WRAP_CONTENT,
+                LayoutParams.WRAP_CONTENT);
+        btnCancel.setText("Cancel");
+        btnCancel.setAlpha(0);
+        btnCancel.setX(550);
+        btnCancel.setLayoutParams(btnCancelParams);
+        btnCancel.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                intent.setClass(getContext(), MainActivity.class);
+                getContext().startActivity(intent);
+            }
+        });
+
         btnSaveParams = new LayoutParams(LayoutParams.WRAP_CONTENT,
                 LayoutParams.WRAP_CONTENT);
         btnSave.setText("Save");
         btnSave.setWidth(100);
-        btnSave.setX(300.00F);
-        btnSave.setY(1000.00F);
-        btnSave.setLayoutParams(btnRedParams);
+        btnSave.setAlpha(0);
+        btnSave.setX(430.00F);
+        btnSave.setLayoutParams(btnSaveParams);
         btnSave.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -122,6 +143,41 @@ public class DrawView extends View {
                 saveBitmap(shot((Activity) getContext()));
                 intent.setClass(getContext(), MainActivity.class);
                 getContext().startActivity(intent);
+            }
+        });
+
+        btnDisplayParams = new LayoutParams(LayoutParams.WRAP_CONTENT,
+                LayoutParams.WRAP_CONTENT);
+        btnDisplay.setText("Display");
+        btnDisplay.setY(1000);
+        btnDisplay.setLayoutParams(btnDisplayParams);
+        btnDisplay.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (i % 2 == 0) {
+                    btnBlue.setAlpha(0);
+                    btnBlue.setClickable(false);
+                    btnRed.setAlpha(0);
+                    btnRed.setClickable(false);
+                    btnEraseAll.setAlpha(0);
+                    btnEraseAll.setClickable(false);
+                    btnSave.setAlpha(0);
+                    btnSave.setClickable(false);
+                    btnCancel.setAlpha(0);
+                    btnCancel.setClickable(false);
+                } else {
+                    btnBlue.setAlpha(0.5F);
+                    btnBlue.setClickable(true);
+                    btnRed.setAlpha(0.5F);
+                    btnRed.setClickable(true);
+                    btnEraseAll.setAlpha(0.5F);
+                    btnEraseAll.setClickable(true);
+                    btnSave.setAlpha(0.5F);
+                    btnSave.setClickable(true);
+                    btnCancel.setAlpha(0.5F);
+                    btnCancel.setClickable(true);
+                }
+                i++;
             }
         });
 
@@ -183,7 +239,7 @@ public class DrawView extends View {
         // 去掉标题栏
         Bitmap b = Bitmap.createBitmap(b1, 0, statusBarHeight, width, height - statusBarHeight);
         view.destroyDrawingCache();
-            return b;
+        return b;
     }
 
     public void saveBitmap(Bitmap bitmap) {
