@@ -146,9 +146,10 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
                 DrawView drawView = new DrawView(SubjectActivity.this);
                 drawView.setBackground(drawable);
                 setContentView(drawView);
-                addContentView(drawView.btnEraseAll, drawView.btnEraseAllParams);
-                addContentView(drawView.btnBlue,drawView.btnBlueAllParams);
-                addContentView(drawView.btnRed,drawView.btnRedAllParams);
+                addContentView(drawView.btnEraseAll, drawView.btnEraseParams);
+                addContentView(drawView.btnBlue,drawView.btnBlueParams);
+                addContentView(drawView.btnRed,drawView.btnRedParams);
+                addContentView(drawView.btnSave,drawView.btnSaveParams);
             }
         });
 

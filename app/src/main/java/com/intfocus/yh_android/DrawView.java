@@ -1,15 +1,27 @@
 package com.intfocus.yh_android;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Rect;
+import android.os.Environment;
+import android.util.Log;
+import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
+import android.view.WindowManager;
 import android.widget.Button;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,13 +32,16 @@ public class DrawView extends View {
     public Button btnEraseAll;
     public Button btnRed;
     public Button btnBlue;
-    public LayoutParams btnEraseAllParams;
-    public LayoutParams btnBlueAllParams;
-    public LayoutParams btnRedAllParams;
+    public Button btnSave;
+    public LayoutParams btnEraseParams;
+    public LayoutParams btnBlueParams;
+    public LayoutParams btnRedParams;
+    public LayoutParams btnSaveParams;
     private Map<Path, Integer> colorsMap = new HashMap<>();
     private int selectedColor;
     ArrayList<Path> savePath = new ArrayList<>();
-    int i = 0;
+
+    private Intent intent = new Intent();
 
     public DrawView(Context context) {
         super(context);
@@ -41,13 +56,15 @@ public class DrawView extends View {
         btnBlue = new Button(context);
         btnRed = new Button(context);
         btnEraseAll = new Button(context);
+        btnSave = new Button(context);
 
-        btnBlueAllParams = new LayoutParams(LayoutParams.WRAP_CONTENT,
+        btnBlueParams = new LayoutParams(LayoutParams.WRAP_CONTENT,
                 LayoutParams.WRAP_CONTENT);
-        btnBlue.setText("Blue");
+        btnBlue.setBackgroundColor(Color.BLUE);
+        btnBlue.setAlpha(0.5F);
         btnBlue.setWidth(100);
         btnBlue.setX(600.00F);
-        btnBlue.setLayoutParams(btnBlueAllParams);
+        btnBlue.setLayoutParams(btnBlueParams);
         btnBlue.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -55,11 +72,12 @@ public class DrawView extends View {
             }
         });
 
-        btnRedAllParams = new LayoutParams(LayoutParams.WRAP_CONTENT,
+        btnRedParams = new LayoutParams(LayoutParams.WRAP_CONTENT,
                 LayoutParams.WRAP_CONTENT);
-        btnRed.setText("Red");
+        btnRed.setBackgroundColor(Color.RED);
+        btnRed.setAlpha(0.5F);
         btnRed.setWidth(100);
-        btnRed.setLayoutParams(btnRedAllParams);
+        btnRed.setLayoutParams(btnRedParams);
         btnRed.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -67,23 +85,46 @@ public class DrawView extends View {
             }
         });
 
-        btnEraseAllParams = new LayoutParams(LayoutParams.WRAP_CONTENT,
+        btnEraseParams = new LayoutParams(LayoutParams.WRAP_CONTENT,
                 LayoutParams.WRAP_CONTENT);
         btnEraseAll.setText("Erase");
         btnEraseAll.setWidth(150);
         btnEraseAll.setX(300.00F);
-        btnEraseAll.setLayoutParams(btnEraseAllParams);
+        btnEraseAll.setLayoutParams(btnEraseParams);
         btnEraseAll.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View view) {
                 // reset the path
-                path.reset();
+                for (Path p : savePath) {
+                    p.reset();
+                }
                 // invalidate the view
                 postInvalidate();
 
             }
         });
+
+        btnSaveParams = new LayoutParams(LayoutParams.WRAP_CONTENT,
+                LayoutParams.WRAP_CONTENT);
+        btnSave.setText("Save");
+        btnSave.setWidth(100);
+        btnSave.setX(300.00F);
+        btnSave.setY(1000.00F);
+        btnSave.setLayoutParams(btnRedParams);
+        btnSave.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                btnBlue.setAlpha(0);
+                btnRed.setAlpha(0);
+                btnEraseAll.setAlpha(0);
+                btnSave.setAlpha(0);
+                saveBitmap(shot((Activity) getContext()));
+                intent.setClass(getContext(), MainActivity.class);
+                getContext().startActivity(intent);
+            }
+        });
+
     }
 
     @Override
@@ -123,8 +164,52 @@ public class DrawView extends View {
         // Force a view to draw.
         postInvalidate();
         return false;
+    }
+
+    private Bitmap shot(Activity activity) {
+        //View是你需要截图的View
+        View view = activity.getWindow().getDecorView();
+        view.setDrawingCacheEnabled(true);
+        view.buildDrawingCache();
+        Bitmap b1 = view.getDrawingCache();
+        // 获取状态栏高度 /
+        Rect frame = new Rect();
+        activity.getWindow().getDecorView().getWindowVisibleDisplayFrame(frame);
+        int statusBarHeight = frame.top;
+        Log.i("TAG", "" + statusBarHeight);
+        // 获取屏幕长和高
+        int width = activity.getWindowManager().getDefaultDisplay().getWidth();
+        int height = activity.getWindowManager().getDefaultDisplay().getHeight();
+        // 去掉标题栏
+        Bitmap b = Bitmap.createBitmap(b1, 0, statusBarHeight, width, height - statusBarHeight);
+        view.destroyDrawingCache();
+            return b;
+    }
+
+    public void saveBitmap(Bitmap bitmap) {
+        File f = new File("/data/data/com.intfocus.yh_android/cache/", "1.jpg");
+        if (f.exists()) {
+            f.delete();
+        } else {
+            try {
+                f.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        try {
+            FileOutputStream out = new FileOutputStream(f);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
+            out.flush();
+            out.close();
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
     }
+
 }
-
-
