@@ -65,10 +65,11 @@ public class DrawView extends View {
         btnBlueParams = new LayoutParams(LayoutParams.WRAP_CONTENT,
                 LayoutParams.WRAP_CONTENT);
         btnBlue.setBackgroundColor(Color.BLUE);
+        btnBlueParams.width = 50;
+        btnBlueParams.height = 70;
         btnBlue.setAlpha(0);
-        btnBlue.setWidth(100);
-        btnBlue.setHeight(40);
-        btnBlue.setX(150);
+        btnBlue.setX(230);
+        btnBlue.setY(15);
         btnBlue.setLayoutParams(btnBlueParams);
         btnBlue.setOnClickListener(new OnClickListener() {
             @Override
@@ -81,8 +82,10 @@ public class DrawView extends View {
                 LayoutParams.WRAP_CONTENT);
         btnRed.setBackgroundColor(Color.RED);
         btnRed.setAlpha(0);
-        btnRed.setWidth(100);
-        btnRed.setHeight(40);
+        btnRedParams.width = 50;
+        btnRedParams.height = 70;
+        btnRed.setX(170);
+        btnRed.setY(15);
         btnRed.setLayoutParams(btnRedParams);
         btnRed.setOnClickListener(new OnClickListener() {
             @Override
@@ -95,18 +98,15 @@ public class DrawView extends View {
                 LayoutParams.WRAP_CONTENT);
         btnEraseAll.setText("Erase");
         btnEraseAll.setAlpha(0);
-        btnEraseAll.setWidth(150);
         btnEraseAll.setX(280.00F);
         btnEraseAll.setLayoutParams(btnEraseParams);
         btnEraseAll.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View view) {
-                // reset the path
                 for (Path p : savePath) {
                     p.reset();
                 }
-                // invalidate the view
                 postInvalidate();
 
             }
@@ -149,7 +149,7 @@ public class DrawView extends View {
         btnDisplayParams = new LayoutParams(LayoutParams.WRAP_CONTENT,
                 LayoutParams.WRAP_CONTENT);
         btnDisplay.setText("Display");
-        btnDisplay.setY(1000);
+//        btnDisplay.setY(1000);
         btnDisplay.setLayoutParams(btnDisplayParams);
         btnDisplay.setOnClickListener(new OnClickListener() {
             @Override
