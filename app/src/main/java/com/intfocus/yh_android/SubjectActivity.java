@@ -1,33 +1,18 @@
 package com.intfocus.yh_android;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Path;
-import android.graphics.Picture;
-import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
-import android.util.AttributeSet;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.MotionEvent;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
-import android.view.SurfaceHolder.Callback;
 import android.view.View;
 import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
@@ -52,6 +37,7 @@ import com.tencent.mm.sdk.modelmsg.WXMediaMessage;
 import com.tencent.mm.sdk.openapi.IWXAPI;
 import com.tencent.mm.sdk.openapi.WXAPIFactory;
 
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -74,11 +60,6 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
     private int groupID;
     private String userNum;
     private RelativeLayout bannerView;
-    private Paint paint;
-    private Canvas canvas;
-    private Button shareButton;
-    private Button drawButton;
-    private static String APP_ID = "WX3333333";
     private IWXAPI wxApi;
     private static final int THUMB_SIZE = 150;
 
@@ -88,13 +69,17 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_subject);
 
+        String APP_ID = "wx5a37b4326f4dd280";
+        wxApi = WXAPIFactory.createWXAPI(this, APP_ID, true);
+        wxApi.registerApp(APP_ID);
+
         findViewById(R.id.back).setOnClickListener(mOnBackListener);
         findViewById(R.id.back_text).setOnClickListener(mOnBackListener);
 
 //        mPDFView.setOnTouchListener(this);
 
-        shareButton = (Button) findViewById(R.id.share);
-        drawButton = (Button) findViewById(R.id.draw);
+        Button shareButton = (Button) findViewById(R.id.share);
+        Button drawButton = (Button) findViewById(R.id.draw);
 
         /*
          * JSON Data
@@ -148,36 +133,35 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
                 setContentView(drawView);
                 addContentView(drawView.btnEraseAll, drawView.btnEraseParams);
                 addContentView(drawView.btnBlue, drawView.btnBlueParams);
-                addContentView(drawView.btnRed,drawView.btnRedParams);
-                addContentView(drawView.btnSave,drawView.btnSaveParams);
-                addContentView(drawView.btnDisplay,drawView.btnDisplayParams);
-                addContentView(drawView.btnCancel,drawView.btnCancelParams);
+                addContentView(drawView.btnRed, drawView.btnRedParams);
+                addContentView(drawView.btnSave, drawView.btnSaveParams);
+                addContentView(drawView.btnDisplay, drawView.btnDisplayParams);
+                addContentView(drawView.btnCancel, drawView.btnCancelParams);
             }
         });
 
         shareButton.setOnClickListener(new View.OnClickListener() {
-                                           @Override
-                                           public void onClick(View view) {
-                                               regToWx();
-                                               Bitmap bmp = BitmapFactory.decodeResource(getResources(), R.drawable.back);
+            @Override
+            public void onClick(View view) {
+                Bitmap bmp = BitmapFactory.decodeResource(getResources(), R.drawable.back);
 
-                                               WXImageObject imgObj = new WXImageObject(bmp);
-                                               WXMediaMessage msg = new WXMediaMessage();
-                                               msg.mediaObject = imgObj;
+                WXImageObject imgObj = new WXImageObject(bmp);
+                WXMediaMessage msg = new WXMediaMessage();
+                msg.mediaObject = imgObj;
 
-                                               Bitmap thumbBmp = Bitmap.createScaledBitmap(bmp, THUMB_SIZE, THUMB_SIZE, true);
-                                               bmp.recycle();
-                                               msg.thumbData = TencentUtil.bmpToByteArray(thumbBmp, true);
+                Bitmap thumbBmp = Bitmap.createScaledBitmap(bmp, THUMB_SIZE, THUMB_SIZE, true);
+                bmp.recycle();
+                msg.thumbData = TencentUtil.bmpToByteArray(thumbBmp, true);
 
-                                               SendMessageToWX.Req req = new SendMessageToWX.Req();
-                                               req.transaction = buildTransaction("img");
-                                               req.message = msg;
-                                               req.scene =
-                                                       SendMessageToWX.Req.WXSceneTimeline;
-                                               wxApi.sendReq(req);
-                                           }
-                                       }
-        );
+                SendMessageToWX.Req req = new SendMessageToWX.Req();
+                req.transaction = buildTransaction("img");
+                req.message = msg;
+                req.scene = SendMessageToWX.Req.WXSceneSession;
+                wxApi.sendReq(req);
+            }
+        });
+
+//        wxApi.handleIntent(getIntent(), this);
 
             /*
              * Intent Data || JSON Data
@@ -213,12 +197,6 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
     protected void onPause() {
         super.onPause();
         finish();
-    }
-
-
-    private void regToWx() {
-        wxApi = WXAPIFactory.createWXAPI(this, APP_ID, true);
-        wxApi.registerApp(APP_ID);
     }
 
     @Override
