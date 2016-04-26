@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -14,6 +15,13 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
+
+import com.intfocus.yh_android.util.TencentUtil;
+import com.tencent.mm.sdk.modelmsg.SendMessageToWX;
+import com.tencent.mm.sdk.modelmsg.WXImageObject;
+import com.tencent.mm.sdk.modelmsg.WXMediaMessage;
+import com.tencent.mm.sdk.openapi.IWXAPI;
+import com.tencent.mm.sdk.openapi.WXAPIFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -42,11 +50,17 @@ public class DrawView extends View {
     private int selectedColor;
     ArrayList<Path> savePath = new ArrayList<>();
     int i = 1;
+    private IWXAPI wxApi;
+    private static final int THUMB_SIZE = 150;
 
     private Intent intent = new Intent();
 
     public DrawView(Context context) {
         super(context);
+
+        String APP_ID = "wx5a37b4326f4dd280";
+        wxApi = WXAPIFactory.createWXAPI(getContext(), APP_ID, false);
+        wxApi.registerApp(APP_ID);
 
         brush.setAntiAlias(true);
         brush.setStyle(Paint.Style.STROKE);
@@ -140,9 +154,26 @@ public class DrawView extends View {
                 btnRed.setAlpha(0);
                 btnEraseAll.setAlpha(0);
                 btnSave.setAlpha(0);
+                btnDisplay.setAlpha(0);
+                btnCancel.setAlpha(0);
                 saveBitmap(shot((Activity) getContext()));
-                intent.setClass(getContext(), MainActivity.class);
-                getContext().startActivity(intent);
+                Bitmap bmp = shot((Activity) getContext());
+
+                WXImageObject imgObj = new WXImageObject(bmp);
+                WXMediaMessage msg = new WXMediaMessage();
+                msg.mediaObject = imgObj;
+
+                Bitmap thumbBmp = Bitmap.createScaledBitmap(bmp, THUMB_SIZE, THUMB_SIZE, true);
+                bmp.recycle();
+                msg.thumbData = TencentUtil.bmpToByteArray(thumbBmp, true);
+
+                SendMessageToWX.Req req = new SendMessageToWX.Req();
+                req.transaction = buildTransaction("img");
+                req.message = msg;
+                req.scene = SendMessageToWX.Req.WXSceneSession;
+                wxApi.sendReq(req);
+//                intent.setClass(getContext(), MainActivity.class);
+//                getContext().startActivity(intent);
             }
         });
 
@@ -181,6 +212,10 @@ public class DrawView extends View {
             }
         });
 
+    }
+
+    private String buildTransaction(final String type) {
+        return (type == null) ? String.valueOf(System.currentTimeMillis()) : type + System.currentTimeMillis();
     }
 
     @Override

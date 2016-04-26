@@ -70,7 +70,7 @@ public class SubjectActivity extends BaseActivity implements OnPageChangeListene
         setContentView(R.layout.activity_subject);
 
         String APP_ID = "wx5a37b4326f4dd280";
-        wxApi = WXAPIFactory.createWXAPI(this, APP_ID, true);
+        wxApi = WXAPIFactory.createWXAPI(this, APP_ID, false);
         wxApi.registerApp(APP_ID);
 
         findViewById(R.id.back).setOnClickListener(mOnBackListener);
